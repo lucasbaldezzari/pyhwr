@@ -1,0 +1,7 @@
+numpy
+matplotlib
+pandas
+pylsl
+PyQt5
+pyxdf
+keyboard
