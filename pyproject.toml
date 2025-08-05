@@ -1,0 +1,29 @@
+[project]
+name = "hwr"
+version = "0.0.1"
+description = "Librería para reconocimiento de escritura a mano alzada usando EEG"
+authors = [{name = "Lucas Baldezzari", email = "lmbaldezzari@gmail.com"}]
+maintainers = [{name = "Lucas Baldezzari", email = "lmbaldezzari@gmail.com"}]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+
+dependencies = [
+  "numpy >=1.24",
+  "matplotlib >=3.7",
+  "pandas >=2.0",
+  "pylsl >=1.16",
+  "PyQt5 >=5.15",
+  "keyboard >=0.13",
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: Microsoft :: Windows :: Windows 10",
+  "Operating System :: Microsoft :: Windows :: Windows 11",
+  "Operating System :: Unix",
+]
+
+[build-system]
+requires = ["setuptools>=77", "wheel", "toml", "packaging>=23.2"]
+build-backend = "setuptools.build_meta"
