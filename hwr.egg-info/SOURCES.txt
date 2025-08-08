@@ -9,6 +9,7 @@ hwr.egg-info/dependency_links.txt
 hwr.egg-info/requires.txt
 hwr.egg-info/top_level.txt
 hwr/managers/SessionManager.py
+hwr/managers/TabletMessenger.py
 hwr/managers/__init__.py
 hwr/utils/SesionInfo.py
 hwr/utils/__init__.py
