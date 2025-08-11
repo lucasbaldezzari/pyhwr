@@ -10,7 +10,7 @@ def readme():
         return f.read()
 
 setup(
-    name='hwr',
+    name='pyhwr',
     version='0.0.1',  # <-- Fijá la versión directamente acá
     packages=find_packages(),
     install_requires=getRequirements(),
@@ -19,7 +19,7 @@ setup(
     description='Librería para llevar a cabo experimentos de reconocimiento de escritura a mano alzada usando EEG',
     long_description=readme(),
     long_description_content_type='text/markdown',
-    url='https://github.com/lucasbaldezzari/hwr',
+    url='https://github.com/lucasbaldezzari/pyhwr',
     license='MIT',
     python_requires='>=3.10',
     classifiers=[
