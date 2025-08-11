@@ -111,7 +111,7 @@ class TabletMessenger:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     tablet_messenger = TabletMessenger(serial="R52W70ATD1W")
-    mensaje = {"sesionStatus": "on",
+    mensaje = {"sesionStatus": "off",
                "trialInfo": {"trialStatus": "off", "letter": "i", "duration": 2.0}}
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     import time
     time.sleep(8)
     
-    tablet_messenger.leer_logcat(tag="LaptopLucas")
-    print(tablet_messenger.get_history())
-    # msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
-    # print(msgs)
+    # tablet_messenger.leer_logcat(tag="LaptopLucas")
+    # print(tablet_messenger.get_history())
+    msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
+    print(msgs)
