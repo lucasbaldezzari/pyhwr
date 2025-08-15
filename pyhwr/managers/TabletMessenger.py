@@ -4,6 +4,7 @@ from collections import deque
 from pathlib import Path
 import re
 import logging
+import time
 
 class TabletMessenger:
     def __init__(self, max_messages=200, serial="R52W70ATD1W"):
@@ -15,7 +16,8 @@ class TabletMessenger:
     def send_message(self, message: dict, tabletID: str):
         """Envía un mensaje a la tablet usando ADB broadcast."""
         json_str = json.dumps(message)
-        cmd = f'adb shell am broadcast -a {tabletID} --es payload \'{json_str}\''
+        # cmd = f'adb shell am broadcast -a {tabletID} --es payload \'{json_str}\''
+        cmd = f'adb -s {self.serial} shell am broadcast -a {tabletID} --es payload \'{json_str}\''
         logging.info("Enviando mensaje a la tablet: %s", cmd)
         try:
             subprocess.run(cmd, shell=True, check=True)
@@ -34,7 +36,7 @@ class TabletMessenger:
         self._proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                     text=True, bufsize=1)
 
-        json_re = re.compile(r'\{.*\}')
+        json_re = re.compile(r'\{.*?\}')
         try:
             for line in self._proc.stdout:
                 if not line:
@@ -63,7 +65,7 @@ class TabletMessenger:
         cmd = ["adb"]
         if self.serial:
             cmd += ["-s", self.serial]
-        cmd += ["logcat", f"{tag}:{level}", "*:S", "-v", "time", "-d"]  # <- -d = dump & exit
+        cmd += ["logcat", f"{tag}:{level}", "*:S", "-v", "time", "-m", "1"]
         out = subprocess.check_output(cmd, text=True)
         rx = re.compile(r'\{.*\}')
         msgs = []
@@ -111,16 +113,27 @@ class TabletMessenger:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     tablet_messenger = TabletMessenger(serial="R52W70ATD1W")
-    mensaje = {"sesionStatus": "off",
-               "trialInfo": {"trialStatus": "off", "letter": "i", "duration": 2.0}}
+
+    trialPhase = "start"
+    mensaje = {"sesionStatus": "on",
+               "sessionid": 1,
+               "runid": 1,
+               "subjectid": "testsubject",
+               "trialInfo": {"trialID": 1,
+                             "trialPhase": trialPhase, 
+                             "letter": "e", 
+                             "duration": 4.0}}
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
 
-    ##agrego un delay para que el mensaje llegue
-    import time
-    time.sleep(8)
-    
+    # if trialPhase == "requestInfo":
+    #     time.sleep(0.5)
+    #     msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
+    #     print(msgs)
+        # tablet_messenger.leer_logcat(tag="LaptopLucas")
+        # print(tablet_messenger.get_history())
+
     # tablet_messenger.leer_logcat(tag="LaptopLucas")
     # print(tablet_messenger.get_history())
-    msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
-    print(msgs)
+    # msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
+    # print(msgs)

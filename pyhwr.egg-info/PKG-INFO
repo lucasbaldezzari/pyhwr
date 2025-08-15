@@ -1,0 +1,40 @@
+Metadata-Version: 2.4
+Name: pyhwr
+Version: 0.0.1
+Summary: Librería para reconocimiento de escritura a mano alzada usando EEG
+Home-page: https://github.com/lucasbaldezzari/pyhwr
+Author: Lucas Baldezzari
+Author-email: Lucas Baldezzari <lmbaldezzari@gmail.com>
+Maintainer-email: Lucas Baldezzari <lmbaldezzari@gmail.com>
+License-Expression: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Microsoft :: Windows :: Windows 10
+Classifier: Operating System :: Microsoft :: Windows :: Windows 11
+Classifier: Operating System :: Unix
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.24
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: pandas>=2.0
+Requires-Dist: pylsl>=1.16
+Requires-Dist: PyQt5>=5.15
+Requires-Dist: keyboard>=0.13
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# Handwriting Project (Python)
+
+Proyecto para estudiar la factibilidad de decodificación del trazo continuo de letras del alfabeto español a partir del electroencefalograma.
+
+Este repositorio contiene los script en Python para generar, gestionar y almacenar eventos. Enviar mensajes hacia la tablet donde se presentan los estímulos, recibir mensajes de la tablet, entre otras tareas.
+
+La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
+
+## Cominucación USB
+
+En este proyeco, para poder conectar la PC o Laptop a la tablet es necesario contar con *Android Debug Bridge (adb)*.
+
+Para instalar *adb* se debe ingresar a la página oficial de Android Developers y descargar la versión adecuada desde [acá](https://developer.android.com/tools/releases/platform-tools). Una vez descargado, descomprimir y agregar la carpeta a las Variables de Entorno de Windows, de esta manera, se podrá ejecutar *adb* desde consola.
+
+NOTA: Podes encontrar la versión utilizada en este proyecto dentro de la carpeta [adb]() de este repositorio.
