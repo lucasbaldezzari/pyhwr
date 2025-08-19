@@ -140,13 +140,13 @@ if __name__ == "__main__":
 
     trialPhase = "savetrialinfo"
 
-    mensaje = {"sesionStatus": "on",
+    mensaje = {"sesionStatus": "off",
                "sessionid": 1,
                "runid": 1,
                "subjectid": "testsubject",
-               "trialInfo": {"trialID": 11,
+               "trialInfo": {"trialID": 1,
                              "trialPhase": trialPhase, 
-                             "letter": "m", 
+                             "letter": "r", 
                              "duration": 4.0}}
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
@@ -158,4 +158,4 @@ if __name__ == "__main__":
     #      linestyle='-',   # línea sólida
     #      marker=None)      # sin puntos
     # plt.show()
-    # tablet_messenger.pull_trial_json("testsubject", "1", "1", 2)
+    tablet_messenger.pull_trial_json("testsubject", "1", "1", 1, local_dir="test")
