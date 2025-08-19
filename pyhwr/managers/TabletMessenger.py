@@ -8,132 +8,154 @@ import time
 
 class TabletMessenger:
     def __init__(self, max_messages=200, serial="R52W70ATD1W"):
+        """Constructor de la clase"""
         self.buffer = None
         self.history = deque(maxlen=max_messages)
         self.max_messages = max_messages
         self.serial = serial
 
+        ##configurando logging
+        self.logger = logging.getLogger("TabletMessenger")
+        # self.logger.setLevel(logging.DEBUG) ##acepto todo y filtro con el handler
+        # Agregar handler solo si no existe
+        if not self.logger.handlers:
+            log_consola = logging.StreamHandler()
+            formatter = logging.Formatter("[%(name)s] %(levelname)s: %(message)s")
+            log_consola.setFormatter(formatter)
+            self.logger.addHandler(log_consola)
+
     def send_message(self, message: dict, tabletID: str):
         """Envía un mensaje a la tablet usando ADB broadcast."""
         json_str = json.dumps(message)
-        # cmd = f'adb shell am broadcast -a {tabletID} --es payload \'{json_str}\''
         cmd = f'adb -s {self.serial} shell am broadcast -a {tabletID} --es payload \'{json_str}\''
-        logging.info("Enviando mensaje a la tablet: %s", cmd)
+        self.logger.info("Enviando mensaje a la tablet: %s", cmd)
         try:
             subprocess.run(cmd, shell=True, check=True)
-            logging.info("Mensaje enviado correctamente.")
+            self.logger.info("Mensaje enviado correctamente.")
         except subprocess.CalledProcessError as e:
-            logging.error("Error al enviar mensaje: %s", e)
+            self.logger.error("Error al enviar mensaje: %s", e)
     
-    def leer_logcat(self, tag="LaptopLucas", level="V"):
-        # subprocess.run(f'adb -s {self.serial} logcat -c', shell=True)
+    def _device_docs_path(self, subject: str, session: str, run: str, trial_id: int|None=None) -> str:
+        base = f"/storage/emulated/0/Documents/{subject}/{session}/{run}"
+        return f"{base}/trial_{trial_id}.json" if trial_id is not None else base
+    
+    def _exists_on_device(self, device_path: str) -> bool:
         cmd = ["adb"]
         if self.serial:
             cmd += ["-s", self.serial]
-        cmd += ["logcat", f"{tag}:{level}", "*:S", "-v", "time"]
-
-        logging.info("Iniciando logcat: %s", " ".join(cmd))
-        self._proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    text=True, bufsize=1)
-
-        json_re = re.compile(r'\{.*?\}')
+        # 'test -f' devuelve 0 si existe archivo
+        cmd += ["shell", "test", "-f", device_path, "&&", "echo", "EXISTS"]
         try:
-            for line in self._proc.stdout:
-                if not line:
-                    continue
-                line = line.strip()
-                # DEBUG: ver lo que llega si no matchea
-                m = json_re.search(line)
-                if not m:
-                    # logging.debug("No JSON en línea: %s", line)
-                    continue
-                raw = m.group(0)
-                try:
-                    data = json.loads(raw)
-                    self.history.append(data)
-                    logging.info("Mensaje recibido: %s", data)
-                except json.JSONDecodeError as e:
-                    logging.info("No es JSON válido (%s): %s", e, raw)
-        except Exception as e:
-            logging.error("Fallo leyendo logcat: %s", e)
-        finally:
-            logging.info("Finalizando lector de logcat")
+            out = subprocess.check_output(cmd, text=True).strip()
+            return out == "EXISTS"
+        except subprocess.CalledProcessError:
+            return False
 
-        subprocess.run(f'adb -s {self.serial} logcat -c', shell=True)
+    def _choose_existing_device_path(self, subject: str, session: str, run: str, trial_id: int) -> str | None:
+        """Devuelve la primera ruta existente para el trial, probando pública y sandbox."""
+        cand_pub = self._device_docs_path(subject, session, run, trial_id)
+        if self._exists_on_device(cand_pub):
+            return cand_pub
+        cand_app = self._device_app_docs_path(subject, session, run, trial_id)
+        if self._exists_on_device(cand_app):
+            return cand_app
+        return None
+    
+    def read_trial_json(self, subject: str, session: str, run: str, trial_id: int) -> dict:
+        # 1) Ruta pública Documents
+        path_pub = self._device_docs_path(subject, session, run, trial_id)
+        # 2) Fallback: sandbox de la app (getExternalFilesDir(DIRECTORY_DOCUMENTS))
+        path_app = self._device_app_docs_path(subject, session, run, trial_id)
 
-    def dump_logcat(self, tag="LaptopLucas", level="V"):
+        if self._exists_on_device(path_pub):
+            cmd = ["adb"]
+            if self.serial:
+                cmd += ["-s", self.serial]
+            cmd += ["shell", "cat", path_pub]
+            out = subprocess.check_output(cmd, text=True)
+            return json.loads(out)
+
+        logger.error("No se encontró el JSON del trial %d.", trial_id)
+        return None
+
+    def pull_trial_json(self, subject: str, session: str, run: str, trial_id: int, local_dir: str | Path = "./") -> Path:
+        """Descarga (adb pull) el archivo del trial a la PC y devuelve la ruta local."""
+        device_path = self._choose_existing_device_path(subject, session, run, trial_id)
+        if not device_path:
+            available = self.list_trials(subject, session, run)
+            self.logger.error("No se encontró trial_%s.json para pull. Trials disponibles: %s", trial_id, available)
+            raise FileNotFoundError(f"trial_{trial_id}.json no encontrado. Disponibles: {available}")
+
+        local_dir = Path(local_dir)
+        local_dir.mkdir(parents=True, exist_ok=True)
+        local_path = local_dir / f"trial_{trial_id}.json"
+
         cmd = ["adb"]
         if self.serial:
             cmd += ["-s", self.serial]
-        cmd += ["logcat", f"{tag}:{level}", "*:S", "-v", "time", "-m", "1"]
-        out = subprocess.check_output(cmd, text=True)
-        rx = re.compile(r'\{.*\}')
-        msgs = []
-        for line in out.splitlines():
-            m = rx.search(line)
-            if m:
-                try:
-                    msgs.append(json.loads(m.group(0)))
-                except json.JSONDecodeError:
-                    pass
-        self.history.extend(msgs)
-        subprocess.run(f'adb -s {self.serial} logcat -c', shell=True)
-        return msgs
+        cmd += ["pull", device_path, str(local_path)]
 
-    def get_history(self):
-        return list(self.history)
+        subprocess.run(cmd, check=True)
+        return local_path
 
-    def save_to_json(self, path: str, append: bool = False):
-        """Guarda historial en un archivo JSON, nuevo o agregando al final."""
-        path = Path(path)
-        data_to_save = self.get_history_dict()
+    def list_trials(self, subject: str, session: str, run: str) -> list[int]:
+        """
+        Lista los trial IDs existentes en la carpeta:
+        /storage/emulated/0/Documents/<subject>/<session>/<run>/
+        Devuelve una lista de enteros [IDs] en base a archivos trial_*.json
+        """
+        folder = self._device_docs_path(subject, session, run, trial_id=None)
+        cmd = ["adb"]
+        if self.serial:
+            cmd += ["-s", self.serial]
+        cmd += ["shell", "ls", "-1", folder]
 
-        if append and path.exists():
-            try:
-                with path.open('r', encoding='utf-8') as f:
-                    existing_data = json.load(f)
-                if isinstance(existing_data, dict):
-                    last_index = max(map(int, existing_data.keys()), default=-1)
-                    for i, msg in data_to_save.items():
-                        existing_data[str(last_index + 1 + i)] = msg
-                    data_to_save = existing_data
-            except Exception as e:
-                print(f"Error al leer archivo existente: {e}")
+        try:
+            out = subprocess.check_output(cmd, text=True)
+        except subprocess.CalledProcessError:
+            return []
 
-        with path.open('w', encoding='utf-8') as f:
-            json.dump(data_to_save, f, indent=2, ensure_ascii=False)
-        print(f"Historial guardado en {path}")
+        ids = []
+        for name in out.splitlines():
+            name = name.strip()
+            if name.startswith("trial_") and name.endswith(".json"):
+                num = name[len("trial_"):-len(".json")]
+                if num.isdigit():
+                    ids.append(int(num))
+        return sorted(ids)
 
-    def set_history_limit(self, new_limit: int):
-        """Cambia el límite de historial."""
-        old = list(self.history)
-        self.history = deque(old[-new_limit:], maxlen=new_limit)
-        self.max_messages = new_limit
+    def enable_logging(self, enabled = True):
+        """Habilita o deshabilita el logging de mensajes."""
+        if enabled and self.log_consola not in self.logger.handlers:
+            self.logger.addHandler(self.log_consola)
+        elif not enabled and self.log_consola in self.logger.handlers:
+            self.logger.removeHandler(self.log_consola)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    import numpy as np
+    import matplotlib.pyplot as plt
     tablet_messenger = TabletMessenger(serial="R52W70ATD1W")
+    logger = logging.getLogger("TabletMessenger")
+    logger.setLevel(logging.INFO)
 
-    trialPhase = "start"
+    trialPhase = "savetrialinfo"
+
     mensaje = {"sesionStatus": "on",
                "sessionid": 1,
                "runid": 1,
                "subjectid": "testsubject",
-               "trialInfo": {"trialID": 1,
+               "trialInfo": {"trialID": 11,
                              "trialPhase": trialPhase, 
-                             "letter": "e", 
+                             "letter": "m", 
                              "duration": 4.0}}
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
 
-    # if trialPhase == "requestInfo":
-    #     time.sleep(0.5)
-    #     msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
-    #     print(msgs)
-        # tablet_messenger.leer_logcat(tag="LaptopLucas")
-        # print(tablet_messenger.get_history())
-
-    # tablet_messenger.leer_logcat(tag="LaptopLucas")
-    # print(tablet_messenger.get_history())
-    # msgs = tablet_messenger.dump_logcat(tag="LaptopLucas")
-    # print(msgs)
+    # trial_data = tablet_messenger.read_trial_json("testsubject", "1", "1", 11)
+    # print(trial_data)
+    # coordenadas = np.array(trial_data["coordinates"])
+    # plt.plot(coordenadas[:, 0], -coordenadas[:, 1], 
+    #      linestyle='-',   # línea sólida
+    #      marker=None)      # sin puntos
+    # plt.show()
+    # tablet_messenger.pull_trial_json("testsubject", "1", "1", 2)
