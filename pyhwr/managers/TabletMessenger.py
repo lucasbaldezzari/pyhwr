@@ -15,14 +15,27 @@ class TabletMessenger:
         self.serial = serial
 
         ##configurando logging
+
         self.logger = logging.getLogger("TabletMessenger")
-        # self.logger.setLevel(logging.DEBUG) ##acepto todo y filtro con el handler
-        # Agregar handler solo si no existe
         if not self.logger.handlers:
-            log_consola = logging.StreamHandler()
+            self.log_consola = logging.StreamHandler()
             formatter = logging.Formatter("[%(name)s] %(levelname)s: %(message)s")
-            log_consola.setFormatter(formatter)
-            self.logger.addHandler(log_consola)
+            self.log_consola.setFormatter(formatter)
+            self.logger.addHandler(self.log_consola)
+            self.logger.propagate = False    # <-- evita que el root lo vuelva a imprimir
+
+    def make_message(self, sesionStatus, sesion_id, run_id, subject_id,
+                     trialID, trialPhase, letter, duration):
+
+        return {"sesionStatus": sesionStatus,
+                "session_id": sesion_id,
+                "run_id": run_id,
+                "subject_id": subject_id,
+                "trialInfo": {"trialID": trialID,
+                              "trialPhase": trialPhase,
+                              "letter": letter,
+                              "duration": duration
+                              }}
 
     def send_message(self, message: dict, tabletID: str):
         """Envía un mensaje a la tablet usando ADB broadcast."""
@@ -56,9 +69,6 @@ class TabletMessenger:
         cand_pub = self._device_docs_path(subject, session, run, trial_id)
         if self._exists_on_device(cand_pub):
             return cand_pub
-        cand_app = self._device_app_docs_path(subject, session, run, trial_id)
-        if self._exists_on_device(cand_app):
-            return cand_app
         return None
     
     def read_trial_json(self, subject: str, session: str, run: str, trial_id: int) -> dict:
@@ -138,15 +148,15 @@ if __name__ == "__main__":
     logger = logging.getLogger("TabletMessenger")
     logger.setLevel(logging.INFO)
 
-    trialPhase = "savetrialinfo"
+    trialPhase = "trialInfo"
 
-    mensaje = {"sesionStatus": "off",
-               "sessionid": 1,
-               "runid": 1,
-               "subjectid": "testsubject",
+    mensaje = {"sesionStatus": "on",
+               "session_id": 1,
+               "run_id": 1,
+               "subject_id": "test_subject",
                "trialInfo": {"trialID": 1,
                              "trialPhase": trialPhase, 
-                             "letter": "r", 
+                             "letter": "l", 
                              "duration": 4.0}}
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
@@ -158,4 +168,4 @@ if __name__ == "__main__":
     #      linestyle='-',   # línea sólida
     #      marker=None)      # sin puntos
     # plt.show()
-    tablet_messenger.pull_trial_json("testsubject", "1", "1", 1, local_dir="test")
+    # tablet_messenger.pull_trial_json("testsubject", "1", "1", 1, local_dir="test")
