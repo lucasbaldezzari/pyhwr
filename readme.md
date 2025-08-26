@@ -1,5 +1,7 @@
 # Handwriting Project (Python)
 
+<img align="right" src="neuroialogo.png" alt="Neuro-IA Lab" width="210">
+
 Proyecto para estudiar la factibilidad de decodificación del trazo continuo de letras del alfabeto español a partir del electroencefalograma.
 
 Este repositorio contiene los script en Python para generar, gestionar y almacenar eventos. Enviar mensajes hacia la tablet donde se presentan los estímulos, recibir mensajes de la tablet, entre otras tareas.

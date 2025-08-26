@@ -1,12 +1,10 @@
 import time
 import numpy as np
-import keyboard
 import logging
 from pylsl import local_clock
 from pyhwr.managers import TabletMessenger
 from pyhwr.utils import SesionInfo
 from pyhwr.widgets import SquareWidget
-from functools import partial
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtCore import QTimer, Qt
 import sys
