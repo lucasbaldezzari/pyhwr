@@ -15,14 +15,13 @@ class TabletMessenger:
         self.serial = serial
 
         ##configurando logging
-
         self.logger = logging.getLogger("TabletMessenger")
         if not self.logger.handlers:
             self.log_consola = logging.StreamHandler()
             formatter = logging.Formatter("[%(name)s] %(levelname)s: %(message)s")
             self.log_consola.setFormatter(formatter)
             self.logger.addHandler(self.log_consola)
-            self.logger.propagate = False    # <-- evita que el root lo vuelva a imprimir
+            self.logger.propagate = False 
 
     def make_message(self, sesionStatus, sesion_id, run_id, subject_id,
                      trialID, trialPhase, letter, duration):
@@ -74,19 +73,19 @@ class TabletMessenger:
     def read_trial_json(self, subject: str, session: str, run: str, trial_id: int) -> dict:
         # 1) Ruta pública Documents
         path_pub = self._device_docs_path(subject, session, run, trial_id)
-        # 2) Fallback: sandbox de la app (getExternalFilesDir(DIRECTORY_DOCUMENTS))
-        path_app = self._device_app_docs_path(subject, session, run, trial_id)
 
-        if self._exists_on_device(path_pub):
-            cmd = ["adb"]
-            if self.serial:
-                cmd += ["-s", self.serial]
-            cmd += ["shell", "cat", path_pub]
-            out = subprocess.check_output(cmd, text=True)
-            return json.loads(out)
-
-        logger.error("No se encontró el JSON del trial %d.", trial_id)
-        return None
+        try:
+            if self._exists_on_device(path_pub):
+                cmd = ["adb"]
+                if self.serial:
+                    cmd += ["-s", self.serial]
+                cmd += ["shell", "cat", path_pub]
+                out = subprocess.check_output(cmd, text=True)
+                return json.loads(out)
+            return []
+        except Exception as e:
+            logger.error("No se encontró el JSON del trial %d. Error: %s", trial_id, e)
+            return []
 
     def pull_trial_json(self, subject: str, session: str, run: str, trial_id: int, local_dir: str | Path = "./") -> Path:
         """Descarga (adb pull) el archivo del trial a la PC y devuelve la ruta local."""
@@ -94,7 +93,7 @@ class TabletMessenger:
         if not device_path:
             available = self.list_trials(subject, session, run)
             self.logger.error("No se encontró trial_%s.json para pull. Trials disponibles: %s", trial_id, available)
-            raise FileNotFoundError(f"trial_{trial_id}.json no encontrado. Disponibles: {available}")
+            return None
 
         local_dir = Path(local_dir)
         local_dir.mkdir(parents=True, exist_ok=True)
@@ -161,11 +160,11 @@ if __name__ == "__main__":
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
 
-    # trial_data = tablet_messenger.read_trial_json("testsubject", "1", "1", 11)
-    # print(trial_data)
-    # coordenadas = np.array(trial_data["coordinates"])
-    # plt.plot(coordenadas[:, 0], -coordenadas[:, 1], 
-    #      linestyle='-',   # línea sólida
-    #      marker=None)      # sin puntos
-    # plt.show()
-    # tablet_messenger.pull_trial_json("testsubject", "1", "1", 1, local_dir="test")
+    trial_data= tablet_messenger.read_trial_json("test_subject", 1, 3, 1)
+    print(trial_data)
+    coordenadas = np.array(trial_data["coordinates"])
+    plt.scatter(coordenadas[:, 0], -coordenadas[:, 1], 
+         linestyle='-',   # línea sólida
+         marker="x")      # sin puntos
+    plt.show()
+    # tablet_messenger.pull_trial_json("test_subject", "1", "1", 1, local_dir="test")

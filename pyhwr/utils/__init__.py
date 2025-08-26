@@ -1,1 +1,1 @@
-from .SesionInfo import SesionInfo
+from .SessionInfo import SessionInfo

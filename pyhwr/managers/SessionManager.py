@@ -2,8 +2,8 @@ import time
 import numpy as np
 import logging
 from pylsl import local_clock
-from pyhwr.managers import TabletMessenger
-from pyhwr.utils import SesionInfo
+from pyhwr.managers import TabletMessenger, MarkerManager
+from pyhwr.utils import SessionInfo
 from pyhwr.widgets import SquareWidget
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtCore import QTimer, Qt
@@ -11,7 +11,7 @@ import sys
 
 class SessionManager(QWidget):
 
-    def __init__(self, sesioninfo, mainTimerDuration=5,
+    def __init__(self, sessioninfo, mainTimerDuration=5,
                  tabid="com.handwriting.ACTION_MSG",
                  runs_per_session=1,
                  letters=None,
@@ -26,13 +26,14 @@ class SessionManager(QWidget):
                         "cue": {"next": "fadeout", "duration": 5.0},
                         "fadeout": {"next": "rest", "duration": 1.0},
                         "rest": {"next": "trialInfo", "duration": 3.0},
-                        "trialInfo": {"next": "start", "duration": 0.1}, #probar luego tiempos más cortos
+                        "trialInfo": {"next": "sendMarkers", "duration": 0.1},
+                        "sendMarkers": {"next": "start", "duration": 0.1}
                     }
 
         self.in_phase = list(self.phases.keys())[0]
         self.last_phase = ""
         self.session_status = "standby"
-        self.sesioninfo = sesioninfo
+        self.sessioninfo = sessioninfo
         self.next_transition = -1
 
         # --- NUEVO: configuración de sesión/runs/trials/letras ---
@@ -61,6 +62,15 @@ class SessionManager(QWidget):
         self.creation_time = local_clock()
         self.accumulated_time = 0
         self._last_phase_time = self.creation_time
+
+        # --------------------------------------------------------
+        # Marcadores de eventos de tablet
+        self.tablet_markers = MarkerManager(stream_name="Tablet_Markers",
+                                            stream_type="Tablet_Events",
+                                            source_id="Tablet",
+                                            channel_count=1,
+                                            channel_format="string",
+                                            nominal_srate=0)
 
         self.initUI()
 
@@ -103,9 +113,9 @@ class SessionManager(QWidget):
         try:
             mensaje = self.tabmanager.make_message(
                 "off",
-                self.sesioninfo.session_id,       # usa tu session_id
+                self.sessioninfo.session_id,       # usa tu session_id
                 self.current_run + 1,
-                self.sesioninfo.subject_id,
+                self.sessioninfo.subject_id,
                 self.current_trial + 1 if self.current_trial >= 0 else 0,
                 "end", "fin", 0.0)
             self.tabmanager.send_message(mensaje, self.tabid)
@@ -149,9 +159,9 @@ class SessionManager(QWidget):
         logging.info(f"Fase actual: {self.in_phase}")
         mensaje = self.tabmanager.make_message(
                 "on",
-                self.sesioninfo.session_id,
+                self.sessioninfo.session_id,
                 self.current_run + 1,
-                self.sesioninfo.subject_id,
+                self.sessioninfo.subject_id,
                 self.current_trial + 1,
                 self.in_phase,
                 self.current_letter or "",
@@ -185,6 +195,17 @@ class SessionManager(QWidget):
         
         if self.in_phase == "trialInfo":
             logging.debug("Fase trialInfo")
+            return
+
+        if self.in_phase == "sendMarkers":
+            logging.debug("Fase sendMarkers")
+            tab_trial_data = self.tabmanager.read_trial_json(subject = self.sessioninfo.subject_id,
+                                                            session=self.sessioninfo.session_id,
+                                                            run=self.current_run + 1,
+                                                            trial_id=self.current_trial + 1)
+            logging.debug("Mensaje a enviar por LSL")
+            logging.debug(tab_trial_data)
+            self.tablet_markers.sendMarker(tab_trial_data)
             has_next = self._prepare_next_trial()
             if not has_next:
                 self._finish_session()
@@ -258,25 +279,22 @@ class SessionManager(QWidget):
             return base
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)  # Configuración básica del logger
+    logging.basicConfig(level=logging.INFO)
 
     app = QApplication(sys.argv)
 
-    # Ejemplo de uso
-
-    sesion_info = SesionInfo(
+    session_info = SessionInfo(
         session_id="1",
-        run_id="1",
         subject_id="test_subject",
         session_name="Test Session",
         session_date=time.strftime("%Y-%m-%d"),)
 
     manager = SessionManager(
-    sesion_info,
-    runs_per_session=2,
-    letters=['e'],
-    randomize_per_run=True,  # o False si querés siempre el mismo orden
-    seed=42)                 # fija el shuffle por reproducibilidad
+    session_info,
+    runs_per_session=1,
+    letters=['h','a','e','o'],
+    randomize_per_run=False,  # False para siempre el mismo orden o True caso contrario
+    seed=42)                 # fijo el shuffle para reproducibilidad
 
     exit_code = app.exec_()
     sys.exit(exit_code)
