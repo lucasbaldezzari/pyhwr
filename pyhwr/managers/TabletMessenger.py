@@ -160,11 +160,12 @@ if __name__ == "__main__":
     tablet_id = "com.handwriting.ACTION_MSG"
     tablet_messenger.send_message(mensaje, tablet_id)
 
-    trial_data= tablet_messenger.read_trial_json("test_subject", 1, 3, 1)
+    trial_data= tablet_messenger.read_trial_json("test_subject", 1, "end", 1)
     print(trial_data)
-    coordenadas = np.array(trial_data["coordinates"])
-    plt.scatter(coordenadas[:, 0], -coordenadas[:, 1], 
-         linestyle='-',   # línea sólida
-         marker="x")      # sin puntos
-    plt.show()
+    tablet_messenger.list_trials("test_subject", 1, "end")
+    # coordenadas = np.array(trial_data["coordinates"])
+    # plt.scatter(coordenadas[:, 0], -coordenadas[:, 1], 
+    #      linestyle='-',   # línea sólida
+    #      marker="x")      # sin puntos
+    # plt.show()
     # tablet_messenger.pull_trial_json("test_subject", "1", "1", 1, local_dir="test")

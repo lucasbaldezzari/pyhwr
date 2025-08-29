@@ -113,10 +113,10 @@ class SessionManager(QWidget):
         try:
             mensaje = self.tabmanager.make_message(
                 "off",
-                self.sessioninfo.session_id,       # usa tu session_id
-                self.current_run + 1,
+                self.sessioninfo.session_id,
+                "end",
                 self.sessioninfo.subject_id,
-                self.current_trial + 1 if self.current_trial >= 0 else 0,
+                0,
                 "end", "fin", 0.0)
             self.tabmanager.send_message(mensaje, self.tabid)
         except Exception:
@@ -279,7 +279,7 @@ class SessionManager(QWidget):
             return base
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.ERROR)
 
     app = QApplication(sys.argv)
 
@@ -292,8 +292,8 @@ if __name__ == "__main__":
     manager = SessionManager(
     session_info,
     runs_per_session=1,
-    letters=['h','a','e','o'],
-    randomize_per_run=False,  # False para siempre el mismo orden o True caso contrario
+    letters=['h'],
+    randomize_per_run=True,  # False para siempre el mismo orden o True caso contrario
     seed=42)                 # fijo el shuffle para reproducibilidad
 
     exit_code = app.exec_()
