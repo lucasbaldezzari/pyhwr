@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import logging
+import json
 from pylsl import local_clock
 from pyhwr.managers import TabletMessenger, MarkerManager
 from pyhwr.utils import SessionInfo
@@ -50,23 +51,50 @@ class SessionManager(QWidget):
         # orden por cada run
         
         self.run_orders = [self._make_run_order() for _ in range(self.runs_per_session)]
-        # ----------------------------------------------------------
 
+        # ----------------------------------------------------------
+        # Objeto para enviar mensajes a la tablet
         self.tabmanager = TabletMessenger(serial="R52W70ATD1W")
         self.tabid = tabid
 
+        # ----------------------------------------------------------
+        # Atributos para control del main
         self.mainTimer = QTimer(self)
         self.mainTimer.setInterval(mainTimerDuration)
         self.mainTimer.timeout.connect(self.update)
 
+        # ----------------------------------------------------------
+        # Atributos temporales
         self.creation_time = local_clock()
         self.accumulated_time = 0
         self._last_phase_time = self.creation_time
+        self.sessionStartTime = None #variable para guardar el tiempo que comienza la sesión
+        self.trialStartTime = None #varibale para guardar el momento en que inicia el trial
+        self.fadeInTime = None #variable para indicar el momento en que inicia el FadeIn
+        self.trialCueTime = None #variable para indicar el inicio del cue
+        self.trialFadeOutTime = None #variable para indicar el momento en que inicia el FadeLOut
+        self.trialRestTime = None #variable para indicar el momento en que inicia el período rest
+        self.sessionFinalTime = None #variable para guardar el momento en que finaliza la sessión
+
+        # --------------------------------------------------------
+        # Marcadores de eventos de tablet
+        self.laptop_markers = MarkerManager(stream_name="Laptop_Markers",
+                                            stream_type="Markers",
+                                            source_id="Laptop",
+                                            channel_count=1,
+                                            channel_format="string",
+                                            nominal_srate=0)
+        
+        self.laptop_markers_dict = dict(trialID="", letter="", runID="",
+                                   sessionStartTime=0.0, trialStartTime=0.0,
+                                   trialFadeInTime=0.0, trialCueTime=0.0,
+                                   trialFadeOutTime=0.0, trialRestTime=0.0,
+                                   sessionFinalTime=0.0,)
 
         # --------------------------------------------------------
         # Marcadores de eventos de tablet
         self.tablet_markers = MarkerManager(stream_name="Tablet_Markers",
-                                            stream_type="Tablet_Events",
+                                            stream_type="Markers",
                                             source_id="Tablet",
                                             channel_count=1,
                                             channel_format="string",
@@ -107,21 +135,7 @@ class SessionManager(QWidget):
         self.current_trial += 1
         self.current_letter = self.run_orders[self.current_run][self.current_trial]
         return True
-    
-    def _finish_session(self):
-        logging.info("Sesión completada. Cerrando.")
-        try:
-            mensaje = self.tabmanager.make_message(
-                "off",
-                self.sessioninfo.session_id,
-                "end",
-                self.sessioninfo.subject_id,
-                0,
-                "end", "fin", 0.0)
-            self.tabmanager.send_message(mensaje, self.tabid)
-        except Exception:
-            pass
-        self.stop()
+
     
     def update(self):
         """
@@ -168,27 +182,35 @@ class SessionManager(QWidget):
                 self.phases[self.in_phase]["duration"])
         self.tabmanager.send_message(mensaje, self.tabid)
 
+        # ----------------------------------------------
+        self.laptop_markers_dict["runID"] = self.current_run + 1
+        self.laptop_markers_dict["trialID"] = self.current_trial + 1
+        self.laptop_markers_dict["letter"] = self.current_letter
+
         if self.in_phase == "start":
-            self.marcador_inicio.change_color("#ffffff")
+            self.laptop_markers_dict["trialStartTime"] = local_clock()
             self.marcador_cue.change_color("#000000")
-            self.marcador_inicio.change_text("")
             self.marcador_cue.change_text(f"Trial:{self.current_trial}\nLetra:{self.current_letter}"
                                           or "")
             return
         
         if self.in_phase == "fadein":
+            self.laptop_markers_dict["trialFadeInTime"] = local_clock()
             self.marcador_cue.change_color("#000000")
             return
         
         if self.in_phase == "cue":
+            self.laptop_markers_dict["trialCueTime"] =  local_clock()
             self.marcador_cue.change_color("#ffffff")
             return
         
         if self.in_phase == "fadeout":
+            self.laptop_markers_dict["trialFadeOutTime"] = local_clock()
             self.marcador_cue.change_color("#000000")
             return
         
         if self.in_phase == "rest":
+            self.laptop_markers_dict["trialRestTime"] = local_clock()
             self.marcador_cue.change_color("#000000")
             logging.debug("Fase rest")
             return
@@ -203,9 +225,16 @@ class SessionManager(QWidget):
                                                             session=self.sessioninfo.session_id,
                                                             run=self.current_run + 1,
                                                             trial_id=self.current_trial + 1)
-            logging.debug("Mensaje a enviar por LSL")
+            logging.debug("Marcadores de Tablet")
             logging.debug(tab_trial_data)
             self.tablet_markers.sendMarker(tab_trial_data)
+
+            logging.debug("Marcadores de Laptop")
+            lpatop_markers_msg = json.dumps(self.laptop_markers_dict)
+            logging.debug(self.laptop_markers_dict)
+
+            self.laptop_markers.sendMarker(lpatop_markers_msg)
+
             has_next = self._prepare_next_trial()
             if not has_next:
                 self._finish_session()
@@ -236,7 +265,7 @@ class SessionManager(QWidget):
         layout_vertical.addWidget(label)
 
         # Widgets de marcadores
-        self.marcador_inicio = SquareWidget(x=200, y=200, size=150, color="black",
+        self.startingSession_marker = SquareWidget(x=200, y=200, size=150, color="black",
                                             text="Inicio Sesión", text_color="white")
         self.marcador_cue = SquareWidget(x=400, y=200, size=150, color="black",
                                         text="Cue", text_color="white")
@@ -258,6 +287,9 @@ class SessionManager(QWidget):
             app.quit()
 
     def startSession(self):
+        self.laptop_markers_dict["sessionStartTime"] = local_clock()
+        self.startingSession_marker.change_color("#ffffff")
+        self.startingSession_marker.change_text("")
         logging.info("Sesión iniciada")
         if not self._prepare_next_trial():
             self._finish_session()
@@ -266,6 +298,35 @@ class SessionManager(QWidget):
         self._advance_phase()          # entra a "start"
         self.handle_phase_transition() # envía "start" 1 sola vez
         self.mainTimer.start()
+
+    def _finish_session(self):
+        self.laptop_markers_dict["sessionFinalTime"] = local_clock()
+        self.laptop_markers_dict["letter"] = "fin" #se replica lo que se hace en la tablet
+        self.laptop_markers_dict["trialID"] = "fin"
+        logging.info("Sesión completada. Cerrando.")
+
+        # Mensaje a labrecorder con los marcadores de laptop
+        laptop_markers_msg = json.dumps(self.laptop_markers_dict)
+        self.laptop_markers.sendMarker(laptop_markers_msg)
+
+        try:
+            #envío mensaje a la tablet para avisar el final de la sesión
+            #la tablet recibe y guarda el tiempo en que cierra la app
+            mensaje = self.tabmanager.make_message(
+                "off",
+                self.sessioninfo.session_id,
+                "end",
+                self.sessioninfo.subject_id,
+                0,
+                "end", "fin", 0.0)
+            self.tabmanager.send_message(mensaje, self.tabid)
+            # time.sleep(0.5)
+            # leer el último trial guardado en la tablet y enviarlo por lsl
+            
+        except Exception:
+            logging.error("No se pudo enviar mensaje de final de sesión")
+
+        self.stop()
 
     def stop(self):
         self.mainTimer.stop()
@@ -292,7 +353,7 @@ if __name__ == "__main__":
     manager = SessionManager(
     session_info,
     runs_per_session=1,
-    letters=['h'],
+    letters=['h','e','b'],
     randomize_per_run=True,  # False para siempre el mismo orden o True caso contrario
     seed=42)                 # fijo el shuffle para reproducibilidad
 

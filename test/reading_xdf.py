@@ -20,7 +20,7 @@ file = "sub-P001_ses-S001_task-Default_run-001_marcadores.xdf"
 
 data,header = pyxdf.load_xdf(path + "\\" + file)
 
-trial_data = data[0]["time_series"][0][0]
+trial_data = data[0]["time_series"][2][0]
 parsed_trial_data = parse_trial_message(trial_data)
 # print(parsed_trial_data.keys())
 sessionStartTime = parsed_trial_data["sessionStartTime"]
