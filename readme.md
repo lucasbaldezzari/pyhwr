@@ -8,6 +8,12 @@ Este repositorio contiene los script en Python para generar, gestionar y almacen
 
 La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
 
+#### Versión 0.0.1
+
+- Comunicación bidireccional entre PC y Tablet.
+- Envío de eventos por LSL.
+- Generación de interfaz gráfica para usarlo con sensores ópticos de trigbox de gtec.
+
 ## Cominucación USB
 
 En este proyeco, para poder conectar la PC o Laptop a la tablet es necesario contar con *Android Debug Bridge (adb)*.

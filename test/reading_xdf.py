@@ -15,15 +15,18 @@ def parse_trial_message(raw):
     # 4) Parseo JSON → dict
     return json.loads(raw)
 
-path="C:\\Users\\corre\\OneDrive\\Desktop\\test_lab\\sub-P001\\ses-S001\\marcadores"
-file = "sub-P001_ses-S001_task-Default_run-001_marcadores.xdf"
+path="C:\\Users\\corre\\OneDrive\\Desktop\\test_lab\\sub-full_setup\\ses-S006\\full_setup"
+file = "sub-full_setup_ses-S006_task-Default_run-001_full_setup.xdf"
 
 data,header = pyxdf.load_xdf(path + "\\" + file)
 
-trial_data = data[0]["time_series"][2][0]
+trial_data = data[1]["time_series"][0][0]
 parsed_trial_data = parse_trial_message(trial_data)
 # print(parsed_trial_data.keys())
 sessionStartTime = parsed_trial_data["sessionStartTime"]
+sessionFinalTime = parsed_trial_data["sessionFinalTime"]
+trialStartTime = parsed_trial_data["trialStartTime"]
+print(trialStartTime)
 coordenadas = np.array(parsed_trial_data["coordinates"])
 letra = parsed_trial_data["letter"]
 pendown = np.array(parsed_trial_data["penDownMarkers"])

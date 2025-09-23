@@ -24,10 +24,10 @@ class SessionManager(QWidget):
                         "first_jump": {"next": "start", "duration": 0.01},
                         "start": {"next": "fadein", "duration": 3.0},
                         "fadein": {"next": "cue", "duration": 1.0},
-                        "cue": {"next": "fadeout", "duration": 5.0},
-                        "fadeout": {"next": "rest", "duration": 1.0},
+                        "cue": {"next": "fadeoff", "duration": 5.0},
+                        "fadeoff": {"next": "rest", "duration": 1.0},
                         "rest": {"next": "trialInfo", "duration": 3.0},
-                        "trialInfo": {"next": "sendMarkers", "duration": 0.1},
+                        "trialInfo": {"next": "sendMarkers", "duration": 0.3},
                         "sendMarkers": {"next": "start", "duration": 0.1}
                     }
 
@@ -43,9 +43,9 @@ class SessionManager(QWidget):
         self.runs_per_session = runs_per_session
         self.randomize_per_run = randomize_per_run
         self.rng = np.random.default_rng(seed)
-        # estado
-        self.current_run = 0            # 0-based
-        self.current_trial = -1         # -1 para que al preparar pase a 0
+
+        self.current_run = 0
+        self.current_trial = -1
         self.current_letter = None
         self.session_finished = False
         # orden por cada run
@@ -65,14 +65,14 @@ class SessionManager(QWidget):
 
         # ----------------------------------------------------------
         # Atributos temporales
-        self.creation_time = local_clock()
+        self.creation_time = time.time()*1000
         self.accumulated_time = 0
         self._last_phase_time = self.creation_time
         self.sessionStartTime = None #variable para guardar el tiempo que comienza la sesión
         self.trialStartTime = None #varibale para guardar el momento en que inicia el trial
         self.fadeInTime = None #variable para indicar el momento en que inicia el FadeIn
         self.trialCueTime = None #variable para indicar el inicio del cue
-        self.trialFadeOutTime = None #variable para indicar el momento en que inicia el FadeLOut
+        self.trialFadeOffTime = None #variable para indicar el momento en que inicia el FadeLOut
         self.trialRestTime = None #variable para indicar el momento en que inicia el período rest
         self.sessionFinalTime = None #variable para guardar el momento en que finaliza la sessión
 
@@ -88,7 +88,7 @@ class SessionManager(QWidget):
         self.laptop_markers_dict = dict(trialID="", letter="", runID="",
                                    sessionStartTime=0.0, trialStartTime=0.0,
                                    trialFadeInTime=0.0, trialCueTime=0.0,
-                                   trialFadeOutTime=0.0, trialRestTime=0.0,
+                                   trialFadeOffTime=0.0, trialRestTime=0.0,
                                    sessionFinalTime=0.0,)
 
         # --------------------------------------------------------
@@ -161,8 +161,8 @@ class SessionManager(QWidget):
         """
         if phase_name in self.phases:
             self.in_phase = phase_name
-            self.next_transition = local_clock() + self.phases[phase_name]["duration"]
             self._last_phase_time = local_clock()
+            self.next_transition = local_clock() + self.phases[phase_name]["duration"]
         else:
             logging.error(f"Fase '{phase_name}' no encontrada en las fases definidas.")
 
@@ -188,29 +188,31 @@ class SessionManager(QWidget):
         self.laptop_markers_dict["letter"] = self.current_letter
 
         if self.in_phase == "start":
-            self.laptop_markers_dict["trialStartTime"] = local_clock()
+            self.laptop_markers_dict["trialStartTime"] = time.time()*1000
             self.marcador_cue.change_color("#000000")
-            self.marcador_cue.change_text(f"Trial:{self.current_trial}\nLetra:{self.current_letter}"
-                                          or "")
+            texto = f"run:{self.current_run+1} de {self.runs_per_session}\
+                \ntrial:{self.current_trial+1} de {self.trials_per_run}\
+                \nletter:{self.current_letter}\n"
+            self.startingSession_marker.change_text(texto)
             return
         
         if self.in_phase == "fadein":
-            self.laptop_markers_dict["trialFadeInTime"] = local_clock()
+            self.laptop_markers_dict["trialFadeInTime"] = time.time()*1000
             self.marcador_cue.change_color("#000000")
             return
         
         if self.in_phase == "cue":
-            self.laptop_markers_dict["trialCueTime"] =  local_clock()
+            self.laptop_markers_dict["trialCueTime"] =  time.time()*1000
             self.marcador_cue.change_color("#ffffff")
             return
         
-        if self.in_phase == "fadeout":
-            self.laptop_markers_dict["trialFadeOutTime"] = local_clock()
+        if self.in_phase == "fadeoff":
+            self.laptop_markers_dict["trialFadeOffTime"] = time.time()*1000
             self.marcador_cue.change_color("#000000")
             return
         
         if self.in_phase == "rest":
-            self.laptop_markers_dict["trialRestTime"] = local_clock()
+            self.laptop_markers_dict["trialRestTime"] = time.time()*1000
             self.marcador_cue.change_color("#000000")
             logging.debug("Fase rest")
             return
@@ -265,11 +267,11 @@ class SessionManager(QWidget):
         layout_vertical.addWidget(label)
 
         # Widgets de marcadores
-        self.startingSession_marker = SquareWidget(x=200, y=200, size=150, color="black",
-                                            text="Inicio Sesión", text_color="white")
-        self.marcador_cue = SquareWidget(x=400, y=200, size=150, color="black",
+        self.startingSession_marker = SquareWidget(x=200, y=200, size=250, color="black",
+                                            text="Inicio\nSesión", text_color="white")
+        self.marcador_cue = SquareWidget(x=600, y=200, size=250, color="black",
                                         text="Cue", text_color="white")
-        self.marcador_calibration = SquareWidget(x=800, y=200, size=150, color="white",
+        self.marcador_calibration = SquareWidget(x=1000, y=200, size=250, color="white",
                                                 text="Para calibrar\nsensores", text_color="black")
         
         # Agregar widgets al layout horizontal        # Aplicar layout
@@ -287,9 +289,10 @@ class SessionManager(QWidget):
             app.quit()
 
     def startSession(self):
-        self.laptop_markers_dict["sessionStartTime"] = local_clock()
+        self.laptop_markers_dict["sessionStartTime"] = time.time()*1000
         self.startingSession_marker.change_color("#ffffff")
         self.startingSession_marker.change_text("")
+        self.startingSession_marker.change_text_color("#000000")
         logging.info("Sesión iniciada")
         if not self._prepare_next_trial():
             self._finish_session()
@@ -300,7 +303,10 @@ class SessionManager(QWidget):
         self.mainTimer.start()
 
     def _finish_session(self):
-        self.laptop_markers_dict["sessionFinalTime"] = local_clock()
+        """
+        Función para finalizar la sesión.
+        """
+        self.laptop_markers_dict["sessionFinalTime"] = time.time()*1000
         self.laptop_markers_dict["letter"] = "fin" #se replica lo que se hace en la tablet
         self.laptop_markers_dict["trialID"] = "fin"
         logging.info("Sesión completada. Cerrando.")
@@ -313,20 +319,51 @@ class SessionManager(QWidget):
             #envío mensaje a la tablet para avisar el final de la sesión
             #la tablet recibe y guarda el tiempo en que cierra la app
             mensaje = self.tabmanager.make_message(
-                "off",
+                "final",
                 self.sessioninfo.session_id,
-                "end",
+                "final",
                 self.sessioninfo.subject_id,
                 0,
-                "end", "fin", 0.0)
+                "final", "fin", 0.0)
             self.tabmanager.send_message(mensaje, self.tabid)
-            # time.sleep(0.5)
-            # leer el último trial guardado en la tablet y enviarlo por lsl
-            
         except Exception:
             logging.error("No se pudo enviar mensaje de final de sesión")
+            
+        final_json = self._read_final_with_retry(
+            subject=self.sessioninfo.subject_id,
+            session=self.sessioninfo.session_id,
+            timeout=5.0,
+            interval=0.5)
+
+        if final_json is None:
+            logging.error("No se pudo leer el JSON final desde la tablet dentro del timeout.")
+        else:
+            # reenviá por LSL el JSON final de tablet
+            logging.debug("JSON final de la tablet:")
+            logging.debug(final_json)
+            self.tablet_markers.sendMarker(final_json)
 
         self.stop()
+
+    def _read_final_with_retry(self, subject, session, timeout=3.0, interval=0.1):
+        """
+        Para intentar leer el último json guardado por la tablet
+        """
+        import time
+        t0 = time.time()
+        wait = interval
+        while time.time() - t0 < timeout:
+            try:
+                return self.tabmanager.read_trial_json(
+                    subject=subject,
+                    session=session,
+                    run="final",
+                    trial_id=0)
+            
+            except Exception as e:
+                time.sleep(wait)
+                wait = min(wait * 1.5, 0.5)
+        return None
 
     def stop(self):
         self.mainTimer.stop()
@@ -346,16 +383,16 @@ if __name__ == "__main__":
 
     session_info = SessionInfo(
         session_id="1",
-        subject_id="test_subject",
-        session_name="Test Session",
+        subject_id="testeo_timestamp",
+        session_name="testeo_timestamp",
         session_date=time.strftime("%Y-%m-%d"),)
 
     manager = SessionManager(
     session_info,
-    runs_per_session=1,
-    letters=['h','e','b'],
-    randomize_per_run=True,  # False para siempre el mismo orden o True caso contrario
-    seed=42)                 # fijo el shuffle para reproducibilidad
+    runs_per_session = 1,
+    letters = None,  #['h','e','l'],
+    randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
+    seed = 42)                 # fijo el shuffle para reproducibilidad
 
     exit_code = app.exec_()
     sys.exit(exit_code)
