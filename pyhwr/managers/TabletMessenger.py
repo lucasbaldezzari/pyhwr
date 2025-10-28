@@ -24,17 +24,25 @@ class TabletMessenger:
             self.logger.propagate = False 
 
     def make_message(self, sesionStatus, sesion_id, run_id, subject_id,
-                     trialID, trialPhase, letter, duration):
+                     trialID, trialPhase, letter, duration, **extra) -> dict:
 
-        return {"sesionStatus": sesionStatus,
-                "session_id": sesion_id,
-                "run_id": run_id,
-                "subject_id": subject_id,
-                "trialInfo": {"trialID": trialID,
-                              "trialPhase": trialPhase,
-                              "letter": letter,
-                              "duration": duration
-                              }}
+        message = {"sesionStatus": sesionStatus,
+                   "session_id": sesion_id,
+                   "run_id": run_id,
+                   "subject_id": subject_id,
+                   "trialInfo": {"trialID": trialID,
+                                 "trialPhase": trialPhase,
+                                 "letter": letter,
+                                 "duration": duration
+                                 }}
+        if extra:
+            message.update(extra)
+        return message
+                # "trialInfo": {"trialID": trialID,
+                #               "trialPhase": trialPhase,
+                #               "letter": letter,
+                #               "duration": duration
+                #               }}
 
     def send_message(self, message: dict, tabletID: str):
         """Envía un mensaje a la tablet usando ADB broadcast."""

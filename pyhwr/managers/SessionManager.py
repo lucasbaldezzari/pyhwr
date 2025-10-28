@@ -48,7 +48,6 @@ class SessionManager(QWidget):
         self.current_trial = -1
         self.current_letter = None
         self.session_finished = False
-        # orden por cada run
         
         self.run_orders = [self._make_run_order() for _ in range(self.runs_per_session)]
 
@@ -289,7 +288,8 @@ class SessionManager(QWidget):
             app.quit()
 
     def startSession(self):
-        self.laptop_markers_dict["sessionStartTime"] = time.time()*1000
+        t0_abs = time.time()*1000
+        self.laptop_markers_dict["sessionStartTime"] = t0_abs
         self.startingSession_marker.change_color("#ffffff")
         self.startingSession_marker.change_text("")
         self.startingSession_marker.change_text_color("#000000")
@@ -297,6 +297,22 @@ class SessionManager(QWidget):
         if not self._prepare_next_trial():
             self._finish_session()
             return
+        ##envío mensaje a la tablet para avisar el inicio de la sesión
+
+        mensaje = self.tabmanager.make_message(
+                "on",
+                self.sessioninfo.session_id,
+                self.current_run + 1,
+                self.sessioninfo.subject_id,
+                self.current_trial + 1,
+                self.in_phase,
+                self.current_letter or "",
+                self.phases[self.in_phase]["duration"],
+                sessionStartTime = t0_abs
+                )
+        
+        self.tabmanager.send_message(mensaje, self.tabid)
+
         # salto de  first_jump a start
         self._advance_phase()          # entra a "start"
         self.handle_phase_transition() # envía "start" 1 sola vez
@@ -383,16 +399,16 @@ if __name__ == "__main__":
 
     session_info = SessionInfo(
         session_id="1",
-        subject_id="testeo_timestamp",
-        session_name="testeo_timestamp",
+        subject_id="testin",
+        session_name="testin",
         session_date=time.strftime("%Y-%m-%d"),)
 
     manager = SessionManager(
     session_info,
     runs_per_session = 1,
-    letters = None,  #['h','e','l'],
+    letters = ["l","t","rn","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
-    seed = 42)                 # fijo el shuffle para reproducibilidad
+    seed = 30)                 # fijo el shuffle para reproducibilidad
 
     exit_code = app.exec_()
     sys.exit(exit_code)
