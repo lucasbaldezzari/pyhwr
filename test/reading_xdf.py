@@ -15,8 +15,8 @@ def parse_trial_message(raw):
     # 4) Parseo JSON -> dict
     return json.loads(raw)
 
-path="C:\\Users\\corre\\OneDrive\\Desktop\\test_lab\\sub-test_pilin\\ses-S002\\test_pilin"
-file = "sub-test_pilin_ses-S002_task-Default_run-001_test_pilin.xdf"
+path="test\\data\\sub-test_pilin\\ses-S001\\test_pilin"
+file = "sub-test_pilin_ses-S001_task-Default_run-001_test_pilin.xdf"
 
 data,header = pyxdf.load_xdf(path + "\\" + file)
 trial = 5

@@ -3,6 +3,8 @@ import h5py
 import json
 import numpy as np
 from datetime import datetime, timezone, timedelta
+import pandas as pd
+import xml.etree.ElementTree as ET
 
 class GHiampDataManager():
     """
@@ -14,10 +16,11 @@ class GHiampDataManager():
         self.filename = filename
         self.sfreq = sfreq
         self.normalize_time = normalize_time
-        self.raw_data = self._read_data(self.filename)
+        self.file_data = self._read_data(self.filename)
         self.markers_info = self._get_markers_info()
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
-        ##faltaría sacar información de los canales, sus posiciones, sus nombres, etc.
+        self.raw_data = self._get_samples() ##muestras del g.H
+        self.channels_info = self._get_channels_info()
         ##Revisar qué otra información es relevante del archivo hdf5
         
     def _read_data(self, filename):
@@ -25,10 +28,90 @@ class GHiampDataManager():
     
     def _get_channels_info(self):
         """
-        Función para obtener nombres, posiciones (montage)
-        y todo lo referente a los canales usados
+        Obtiene:
+        - df_used: canales usados (AcquisitionTaskDescription)
+        - df_device: canales disponibles (DAQDeviceCapabilities)
+        - df_match: unión de ambos para ver correspondencia
         """
-        pass
+        used_xml = self.file_data["RawData"]["AcquisitionTaskDescription"][0]
+        device_xml = self.file_data["RawData"]["DAQDeviceCapabilities"][0]
+
+        df_used = self._resume_channels_from_xml(used_xml)
+        df_device = self._resume_channels_from_xml(device_xml)
+
+        # df_match = pd.merge(
+        #     df_used,
+        #     df_device,
+        #     on="PhysicalChannelNumber",
+        #     how="left",
+        #     suffixes=("_used", "_device")
+        # )
+
+        return {
+            "used_channels": df_used,
+            "device_capabilities": df_device,
+            # "matched": df_match
+        }
+
+    def _resume_channels_from_xml(self, xml_bytes, root_tag="ChannelProperties"):
+        """
+        Parsea un XML con estructura de canales (ya sea AcquisitionTaskDescription o DAQDeviceCapabilities)
+        y retorna un DataFrame con toda la información.
+        """
+        xml_str = xml_bytes.decode("utf-8")
+        root = ET.fromstring(xml_str)
+
+        # Diferentes estructuras según tipo de XML
+        if root.tag == "AcquisitionTaskDescription":
+            path = ".//ChannelProperties/ChannelProperties"
+        elif root.tag == "DAQDeviceCapabilities":
+            path = ".//AnalogChannelProperties/ChannelProperties"
+        else:
+            path = f".//{root_tag}"
+
+        channels = []
+        for ch in root.findall(path):
+            ch_dict = {}
+            for elem in ch:
+                if len(elem) > 0:
+                    for sub in elem:
+                        ch_dict[sub.tag] = sub.text
+                else:
+                    ch_dict[elem.tag] = elem.text
+            channels.append(ch_dict)
+
+        df = pd.DataFrame(channels)
+
+        # Conversión de tipos
+        numeric_cols = [
+            "BipolarPhysicalChannelNumber", "SensitivityLowValue", "SensitivityHighValue",
+            "SampleRate", "Offset", "NotchFilter", "HighpassFilter", "LowpassFilter",
+            "DeviceNumber", "LogicalChannelNumber", "PhysicalChannelNumber"
+        ]
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        bool_cols = ["IsBipolar", "IsTriggerChannel"]
+        for col in bool_cols:
+            if col in df.columns:
+                df[col] = df[col].map({"true": True, "false": False})
+
+        return df
+
+    def _get_samples(self):
+        """
+        Función para obtener los datos de EEG con self.file_data["RawData"]["Samples"][:]
+        """
+        return self.file_data["RawData"]["Samples"][:]
+    
+    def _get_triggers_info(self):
+        """
+        .file_data["AsynchronData"]["AsynchronSignalTypes"][0]
+        """
+
+        trigger_info_xml = self.file_data["AsynchronData"]["AsynchronSignalTypes"][0]
+
 
     def _get_markers_info(self):
         """Función para obtener los marcadores del experimento.
@@ -37,11 +120,11 @@ class GHiampDataManager():
         un diccionario con los keys siendo cada id enviado por el ghiamp y el
         valor sería el nombre. Por defecto es el mismo que envía el ampli"""
         markers_info = {}
-        list_ids = self.raw_data["AsynchronData"]["TypeID"][:].reshape(-1)
+        list_ids = self.file_data["AsynchronData"]["TypeID"][:].reshape(-1)
         list_ids -= list_ids.min()
         list_ids += 1
         ids = np.array(sorted(list(set(list_ids))))
-        times = np.astype(self.raw_data["AsynchronData"]["Time"][:][:].reshape(-1), float)
+        times = np.astype(self.file_data["AsynchronData"]["Time"][:][:].reshape(-1), float)
 
         for marker_id in ids:
             filter = np.where(list_ids==marker_id)
@@ -62,8 +145,17 @@ class GHiampDataManager():
                 self.markers_info[new_name] = self.markers_info.pop(marker_id)
 
     def _get_datetime(self):
+        """
+        Función para obtener la fecha y hora de registro del archivo hdf5.
+        Retorna un objeto datetime y el timestamp correspondiente.
+        1. Extraer el string de fecha del archivo hdf5
+        2. Parsear el string de fecha
+        3. Convertir a zona horaria UTC-3
+        4. Timestamp en esa zona horaria
+        5. Retornar ambos valores
+        """
 
-        data = self.raw_data["RawData"]["AcquisitionTaskDescription"][0].split()
+        data = self.file_data["RawData"]["AcquisitionTaskDescription"][0].split()
         #Busco el string que contiene la fecha
         target = next((item for item in data if b"<RecordingDateBegin>" in item), None)
 
@@ -75,7 +167,6 @@ class GHiampDataManager():
             start_tag = "<RecordingDateBegin>"
             end_tag = "</RecordingDateBegin>"
             date_str = target_str.split(start_tag)[1].split(end_tag)[0]
-
 
             # 3. Parsear el string de fecha
             # Cortamos a 6 decimales porque datetime soporta hasta microsegundos
@@ -193,7 +284,6 @@ class LSLDataManager():
         except Exception:
             return None, None
         
-
     def _get_first_timestamp(self):
         """
         Función para obtener el primer timestamp registrado en el archivo xdf.
@@ -213,9 +303,9 @@ class LSLDataManager():
           lsl_manager["streamer", "trialID", 0:20]
         """
         if not isinstance(key, tuple) or len(key) != 3:
-            raise KeyError("Formato de índice no válido. Usa ('streamer','trialID',slice).")
+            raise KeyError("Formato de índice no válido. Usa ('streamer_name','label',slice).")
 
-        streamer, trialID, idx = key
+        streamer, label, idx = key
 
         # Validación de streamer
         if streamer not in self.time_series:
@@ -226,8 +316,8 @@ class LSLDataManager():
         # Filtrar por trialID
         filtered = []
         for t in trials:
-            if isinstance(t, dict) and trialID in t:
-                filtered.append(t[trialID])
+            if isinstance(t, dict) and label in t:
+                filtered.append(t[label])
 
         if not filtered:
             return None
@@ -243,7 +333,7 @@ if __name__ == "__main__":
     np.set_printoptions(suppress=True)
 
     sfreq = 256.
-    filename = "test\\markers_test_data\\gtec_recordings\\full_setup_9.hdf5"
+    filename = "test\\data\\gtec_recordings\\full_setup_9.hdf5"
     ghiamp_manager = GHiampDataManager(filename, normalize_time=True, sfreq=sfreq)
 
     ghiamp_manager.changeMarkersNames({1: "inicioSesión", 2: "trialLaptop", 3: "trialTablet", 4: "penDown"})
@@ -251,9 +341,12 @@ if __name__ == "__main__":
     print(len(ghiamp_manager["trialTablet", :]))
     print(ghiamp_manager.fecha_registro, ghiamp_manager.timestamp_registro)
 
-    ghiamp_manager.raw_data["AsynchronData"]["Time"][0]
+    ghiamp_manager.file_data["AsynchronData"]["AsynchronSignalTypes"][0]#.keys()#["Time"]
 
-    lsl_filename = "test\\markers_test_data\\sub-full_setup\\ses-S009\\full_setup\\sub-full_setup_ses-S009_task-Default_run-001_full_setup.xdf"
+    path="test\\data\\sub-test_pilin\\ses-S001\\test_pilin"
+    file = "sub-test_pilin_ses-S001_task-Default_run-001_test_pilin.xdf"
+
+    lsl_filename = path + "\\" + file
     lsl_manager = LSLDataManager(lsl_filename)
 
     print(lsl_manager.streamers_names)
@@ -265,5 +358,27 @@ if __name__ == "__main__":
     print(lsl_manager.fecha_registro, lsl_manager.timestamp_registro)
 
     lsl_laptop_first_timestamp = lsl_manager.first_timestamp["Laptop_Markers"]
-
     lsl_laptop_start - lsl_laptop_first_timestamp
+    print(np.diff(np.array(lsl_manager["Tablet_Markers", "coordinates", :][2])[:,2]).mean())
+
+    ##obtengo las coordenadas y tiempo de cada trazo
+    coordenadas = lsl_manager["Tablet_Markers", "coordinates", :][:]
+
+    info = ghiamp_manager._get_channels_info()
+
+    print(info["used_channels"].head())#["ChannelName"]
+    print(info["used_channels"].columns)
+
+    print(info["device_capabilities"].head())
+    print(info["device_capabilities"].columns)
+
+    print(info["matched"].head())
+    print(info["matched"].columns)
+    
+    # used_channels_colums = ["ChannelName","ChannelType",
+    #                         "SampleRate","HighpassFilter","LowpassFilter","NotchFilter","Offset",
+    #                         "IsBipolar","SensitivityHighValue","SensitivityHighValue"]
+    
+    # used_channels_colums = ["ChannelName","ChannelType",
+    #                         "SampleRate","HighpassFilter","LowpassFilter","NotchFilter","Offset",
+    #                         "IsBipolar","SensitivityHighValue","SensitivityHighValue"]
