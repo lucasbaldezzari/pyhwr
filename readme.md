@@ -8,6 +8,11 @@ Este repositorio contiene los script en Python para generar, gestionar y almacen
 
 La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
 
+#### Versión 0.0.3
+
+- Corrección de bugs menores.
+- Se generan clases para poder manejar los datos registrados por el g.HIAMP que se almacenan en archivos _hdf5_ y los datos de los archivos _xdf_ de Lab Streaming Layer. 
+
 #### Versión 0.0.1
 
 - Comunicación bidireccional entre PC y Tablet.
