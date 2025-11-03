@@ -446,8 +446,8 @@ if __name__ == "__main__":
 
     ## ****** DATOS DE LSL *********
 
-    path="test\\data\\sub-test_pilin\\ses-S001\\test_pilin"
-    file = "sub-test_pilin_ses-S001_task-Default_run-001_test_pilin.xdf"
+    path="test\\data\\sueltos\\"
+    file = "sub-P1_ses-S1_task-Default_run-001_test_v0.04.xdf"
 
     lsl_filename = path + "\\" + file
     lsl_manager = LSLDataManager(lsl_filename)
@@ -465,6 +465,17 @@ if __name__ == "__main__":
     print(np.diff(np.array(lsl_manager["Tablet_Markers", "coordinates", :][2])[:,2]).mean())
 
     ##obtengo las coordenadas y tiempo de cada trazo
-    coordenadas = lsl_manager["Tablet_Markers", "coordinates", :][:]
+    coordenadas = np.array(lsl_manager["Tablet_Markers", "coordinates", :][0])
+    # x, y, t = coordenadas[:, 0], coordenadas[:, 1], coordenadas[:, 2]
+    # coordenadas = lsl_manager["Tablet_Markers", "coordinates", :][:]
+    # plt.figure(figsize=(12, 6))
+    # plt.plot(x, y, color="#9d1212", linewidth = 10, zorder=1)   # Une los puntos en orden
+    # plt.scatter(x, y, color="#ffffff", s=20, zorder = 2)  # Opcional: puntos de muestreo
+    # plt.title(f"Trazo registrado")
+    # plt.xlabel("X")
+    # plt.ylabel("Y")
+    # plt.gca().invert_yaxis()  # Si la tableta tiene origen en la esquina superior izquierda
+    # plt.axis("equal")
+    # plt.show()
 
     lsl_manager["Laptop_Markers", "letter", :]

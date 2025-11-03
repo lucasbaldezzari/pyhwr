@@ -4,7 +4,7 @@ Este módulo proporciona herramientas para gestionar y analizar datos provenient
 - **Amplificadores g.HIAMP** (`.hdf5`)
 - **Streams de LSL (Lab Streaming Layer)** (`.xdf`)
 
-Incluye clases y métodos para extraer, procesar y representar información relevante de los registros de EEG y eventos asociados.
+Incluye clases y métodos para extraer, procesar y representar información relevante de los registros de EEG y eventos asociados  en el marco del proyecto de doctorado del *[MSc Bioingeniero BALDEZZARI Lucas](https://www.linkedin.com/in/lucasbaldezzari/)*.
 
 ---
 
@@ -145,7 +145,7 @@ print(ghiamp["start", :])
 
 ---
 
-## 🌐 `LSLDataManager`
+## `LSLDataManager`
 
 Clase para gestionar los datos provenientes de **Lab Streaming Layer** (archivos `.xdf`).
 
@@ -252,7 +252,7 @@ print(f"Trials: {len(times)} | Letras: {letters}")
 
 ---
 
-## 🧩 Ejemplo completo
+## Ejemplo completo
 
 ```python
 from DataManagers import GHiampDataManager, LSLDataManager
@@ -287,3 +287,12 @@ pip install pyxdf h5py numpy pandas
 **Módulos estándar utilizados:**
 - `datetime`, `json`, `xml.etree.ElementTree`
 - `matplotlib` (solo para pruebas)
+
+**Desarrollado por:**  
+Equipo de Investigación — *Interfaces Cerebro-Computadora (BCI)*  
+Laboratorio de Neurotecnología Aplicada
+
+---
+
+📅 **Última actualización:** 2025-11-03  
+🧩 **Versión compatible:** Python 3.9+

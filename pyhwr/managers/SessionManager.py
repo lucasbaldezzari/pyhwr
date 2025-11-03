@@ -12,6 +12,17 @@ import sys
 
 class SessionManager(QWidget):
 
+    PHASES = {
+        "first_jump": {"next": "start", "duration": 0.01},
+        "start": {"next": "fadein", "duration": 3.0},
+        "fadein": {"next": "cue", "duration": 1.0},
+        "cue": {"next": "fadeoff", "duration": 5.0},
+        "fadeoff": {"next": "rest", "duration": 1.0},
+        "rest": {"next": "trialInfo", "duration": 3.0},
+        "trialInfo": {"next": "sendMarkers", "duration": 0.3},
+        "sendMarkers": {"next": "start", "duration": 0.1},
+    }
+
     def __init__(self, sessioninfo, mainTimerDuration=5,
                  tabid="com.handwriting.ACTION_MSG",
                  runs_per_session=1,
@@ -20,16 +31,7 @@ class SessionManager(QWidget):
                  seed=None):
         super().__init__()
 
-        self.phases = {
-                        "first_jump": {"next": "start", "duration": 0.01},
-                        "start": {"next": "fadein", "duration": 3.0},
-                        "fadein": {"next": "cue", "duration": 1.0},
-                        "cue": {"next": "fadeoff", "duration": 5.0},
-                        "fadeoff": {"next": "rest", "duration": 1.0},
-                        "rest": {"next": "trialInfo", "duration": 3.0},
-                        "trialInfo": {"next": "sendMarkers", "duration": 0.3},
-                        "sendMarkers": {"next": "start", "duration": 0.1}
-                    }
+        self.phases = self.PHASES.copy()
 
         self.in_phase = list(self.phases.keys())[0]
         self.last_phase = ""
@@ -135,7 +137,6 @@ class SessionManager(QWidget):
         self.current_letter = self.run_orders[self.current_run][self.current_trial]
         return True
 
-    
     def update(self):
         """
         Método para avanzar de fase solamente cuando se superen los tiempos de cada una.
@@ -166,80 +167,88 @@ class SessionManager(QWidget):
             logging.error(f"Fase '{phase_name}' no encontrada en las fases definidas.")
 
     def handle_phase_transition(self):
-        """
-        Aquí podés definir qué hacer en cada fase.
-        """
         logging.info(f"Fase actual: {self.in_phase}")
+
+        # --- Enviar mensaje a tablet ---
         mensaje = self.tabmanager.make_message(
-                "on",
-                self.sessioninfo.session_id,
-                self.current_run + 1,
-                self.sessioninfo.subject_id,
-                self.current_trial + 1,
-                self.in_phase,
-                self.current_letter or "",
-                self.phases[self.in_phase]["duration"])
+            "on",
+            self.sessioninfo.session_id,
+            self.current_run + 1,
+            self.sessioninfo.subject_id,
+            self.current_trial + 1,
+            self.in_phase,
+            self.current_letter or "",
+            self.phases[self.in_phase]["duration"])
         self.tabmanager.send_message(mensaje, self.tabid)
 
-        # ----------------------------------------------
-        self.laptop_markers_dict["runID"] = self.current_run + 1
-        self.laptop_markers_dict["trialID"] = self.current_trial + 1
-        self.laptop_markers_dict["letter"] = self.current_letter
+        # --- Actualizar información común ---
+        self.laptop_markers_dict.update({
+            "runID": self.current_run + 1,
+            "trialID": self.current_trial + 1,
+            "letter": self.current_letter
+        })
 
-        if self.in_phase == "start":
-            self.laptop_markers_dict["trialStartTime"] = time.time()*1000
-            self.marcador_cue.change_color("#000000")
-            texto = f"run:{self.current_run+1} de {self.runs_per_session}\
-                \ntrial:{self.current_trial+1} de {self.trials_per_run}\
-                \nletter:{self.current_letter}\n"
-            self.startingSession_marker.change_text(texto)
-            return
-        
-        if self.in_phase == "fadein":
-            self.laptop_markers_dict["trialFadeInTime"] = time.time()*1000
-            self.marcador_cue.change_color("#000000")
-            return
-        
-        if self.in_phase == "cue":
-            self.laptop_markers_dict["trialCueTime"] =  time.time()*1000
-            self.marcador_cue.change_color("#ffffff")
-            return
-        
-        if self.in_phase == "fadeoff":
-            self.laptop_markers_dict["trialFadeOffTime"] = time.time()*1000
-            self.marcador_cue.change_color("#000000")
-            return
-        
-        if self.in_phase == "rest":
-            self.laptop_markers_dict["trialRestTime"] = time.time()*1000
-            self.marcador_cue.change_color("#000000")
-            logging.debug("Fase rest")
-            return
-        
-        if self.in_phase == "trialInfo":
-            logging.debug("Fase trialInfo")
-            return
+        # --- Acciones por fase ---
+        phase_actions = {
+            "start": lambda: self._on_phase("trialStartTime", "#000000", self._update_label),
+            "fadein": lambda: self._on_phase("trialFadeInTime", "#000000"),
+            "cue": lambda: self._on_phase("trialCueTime", "#ffffff"),
+            "fadeoff": lambda: self._on_phase("trialFadeOffTime", "#000000"),
+            "rest": lambda: self._on_phase("trialRestTime", "#000000", log="Fase rest"),
+            "trialInfo": lambda: logging.debug("Fase trialInfo"),
+            "sendMarkers": self._send_markers_phase
+        }
 
-        if self.in_phase == "sendMarkers":
-            logging.debug("Fase sendMarkers")
-            tab_trial_data = self.tabmanager.read_trial_json(subject = self.sessioninfo.subject_id,
-                                                            session=self.sessioninfo.session_id,
-                                                            run=self.current_run + 1,
-                                                            trial_id=self.current_trial + 1)
-            logging.debug("Marcadores de Tablet")
+        action = phase_actions.get(self.in_phase)
+        if action:
+            action()
+
+    def _on_phase(self, time_key, color, extra_action=None, log=None):
+        """Aplica color, guarda tiempo y ejecuta acción opcional."""
+        self.laptop_markers_dict[time_key] = time.time() * 1000
+        self.marcador_cue.change_color(color)
+        if log:
+            logging.debug(log)
+        if extra_action:
+            extra_action()
+
+    def _update_label(self):
+        texto = (f"run:{self.current_run+1} de {self.runs_per_session}\n"
+                f"trial:{self.current_trial+1} de {self.trials_per_run}\n"
+                f"letter:{self.current_letter}\n")
+        self.startingSession_marker.change_text(texto)
+
+    def _send_markers_phase(self):
+        """Maneja la fase 'sendMarkers': envía marcadores a tablet y laptop."""
+        logging.debug("Fase sendMarkers")
+
+        # --- Leer datos del trial desde la tablet ---
+        try:
+            tab_trial_data = self.tabmanager.read_trial_json(
+                subject=self.sessioninfo.subject_id,
+                session=self.sessioninfo.session_id,
+                run=self.current_run + 1,
+                trial_id=self.current_trial + 1
+            )
+            logging.debug("Marcadores de Tablet:")
             logging.debug(tab_trial_data)
             self.tablet_markers.sendMarker(tab_trial_data)
+        except Exception as e:
+            logging.error(f"Error al leer marcadores de la tablet: {e}")
 
-            logging.debug("Marcadores de Laptop")
-            lpatop_markers_msg = json.dumps(self.laptop_markers_dict)
+        # --- Enviar marcadores de laptop ---
+        try:
+            laptop_markers_msg = json.dumps(self.laptop_markers_dict)
+            logging.debug("Marcadores de Laptop:")
             logging.debug(self.laptop_markers_dict)
+            self.laptop_markers.sendMarker(laptop_markers_msg)
+        except Exception as e:
+            logging.error(f"Error al enviar marcadores de laptop: {e}")
 
-            self.laptop_markers.sendMarker(lpatop_markers_msg)
-
-            has_next = self._prepare_next_trial()
-            if not has_next:
-                self._finish_session()
-                return
+        # --- Preparar el siguiente trial ---
+        has_next = self._prepare_next_trial()
+        if not has_next:
+            self._finish_session()
 
     def get_elapsed_time(self):
         return local_clock() - self.creation_time
@@ -278,14 +287,14 @@ class SessionManager(QWidget):
         self.show()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+        """Maneja las teclas Enter (inicia) y Escape (detiene la sesión)."""
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             logging.info("Iniciando...")
             self.startSession()
-        ##si se presiona Escape, se detiene el test
         elif event.key() == Qt.Key_Escape:
             logging.info("Deteniendo...")
             self.stop()
-            app.quit()
+            QApplication.quit()
 
     def startSession(self):
         t0_abs = time.time()*1000
@@ -362,21 +371,14 @@ class SessionManager(QWidget):
         self.stop()
 
     def _read_final_with_retry(self, subject, session, timeout=3.0, interval=0.1):
-        """
-        Para intentar leer el último json guardado por la tablet
-        """
-        import time
+        """Intenta leer el último JSON de la tablet con reintentos exponenciales."""
         t0 = time.time()
         wait = interval
         while time.time() - t0 < timeout:
             try:
                 return self.tabmanager.read_trial_json(
-                    subject=subject,
-                    session=session,
-                    run="final",
-                    trial_id=0)
-            
-            except Exception as e:
+                    subject=subject, session=session, run="final", trial_id=0)
+            except Exception:
                 time.sleep(wait)
                 wait = min(wait * 1.5, 0.5)
         return None
@@ -399,14 +401,14 @@ if __name__ == "__main__":
 
     session_info = SessionInfo(
         session_id="1",
-        subject_id="testin",
-        session_name="testin",
+        subject_id="test_v0.04",
+        session_name="test_v0.04",
         session_date=time.strftime("%Y-%m-%d"),)
 
     manager = SessionManager(
     session_info,
     runs_per_session = 1,
-    letters = ["l","t","rn","ta"],#None,
+    letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = 30)                 # fijo el shuffle para reproducibilidad
 

@@ -1,6 +1,6 @@
 [project]
 name = "pyhwr"
-version = "0.0.3"
+version = "0.0.4"
 description = "Librería para reconocimiento de escritura a mano alzada usando EEG"
 authors = [{name = "Lucas Baldezzari", email = "lmbaldezzari@gmail.com"}]
 maintainers = [{name = "Lucas Baldezzari", email = "lmbaldezzari@gmail.com"}]
