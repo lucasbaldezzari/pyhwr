@@ -12,22 +12,31 @@ class GHiampDataManager():
     El archivo es un .hdf5 que contiene toda la información.
     """
 
-    def __init__(self, filename, normalize_time=True, sfreq=256.):
+    def __init__(self, filename, subject="Test", normalize_time=True):
+        """
+        Parámetros
+        ----------
+        filename: str.  Ruta al archivo .hdf5 con los datos.
+        normalize_time: bool. Si es True, los tiempos de los marcadores se normalizan a segundos.
+        """
         self.filename = filename
-        self.sfreq = sfreq
-        self.normalize_time = normalize_time
+        self.subject = subject
         self.file_data = self._read_data(self.filename)
-        self.markers_info = self._get_markers_info()
+        self.normalize_time = normalize_time
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
         self.raw_data = self._get_samples() ##muestras del g.H
         self.channels_info = self._get_channels_info()
-        ##Revisar qué otra información es relevante del archivo hdf5
+        self.sample_rate = self.channels_info["used_channels"]["SampleRate"][0]
+        self.markers_info = self._get_markers_info()
+        self.times = self._get_times()
         
     def _read_data(self, filename):
         return h5py.File(filename, "r")
-    
+
     def _get_channels_info(self):
         """
+        Función para obtener información de los canales usados y disponibles.
+
         Obtiene:
         - df_used: canales usados (AcquisitionTaskDescription)
         - df_device: canales disponibles (DAQDeviceCapabilities)
@@ -38,6 +47,14 @@ class GHiampDataManager():
 
         df_used = self._resume_channels_from_xml(used_xml)
         df_device = self._resume_channels_from_xml(device_xml)
+
+        columnas_interes = ["ChannelName","PhysicalChannelNumber","ChannelType",
+                            "SampleRate","HighpassFilter","LowpassFilter",
+                            "NotchFilter","Offset",
+                            "IsBipolar","SensitivityHighValue","SensitivityHighValue"]
+        
+        df_used = df_used[columnas_interes + ["PhysicalChannelNumber"]]
+        df_device = df_device[columnas_interes + ["PhysicalChannelNumber"]]
 
         # df_match = pd.merge(
         #     df_used,
@@ -55,8 +72,8 @@ class GHiampDataManager():
 
     def _resume_channels_from_xml(self, xml_bytes, root_tag="ChannelProperties"):
         """
-        Parsea un XML con estructura de canales (ya sea AcquisitionTaskDescription o DAQDeviceCapabilities)
-        y retorna un DataFrame con toda la información.
+        Parsea un XML con estructura de canales (ya sea AcquisitionTaskDescription
+        o DAQDeviceCapabilities) y retorna un DataFrame con toda la información.
         """
         xml_str = xml_bytes.decode("utf-8")
         root = ET.fromstring(xml_str)
@@ -105,13 +122,21 @@ class GHiampDataManager():
         """
         return self.file_data["RawData"]["Samples"][:]
     
-    def _get_triggers_info(self):
+    def _get_times(self, tinit = 0, tend = None):
         """
-        .file_data["AsynchronData"]["AsynchronSignalTypes"][0]
+        Función para obtener los tiempos de las muestras a partir de la
+        frecuencia de muestreo. Por defecto retorna en segundos y desde t=0
         """
+        n_samples = self.raw_data.shape[0]
+        if tend is None:
+            tend = n_samples / self.sample_rate
 
-        trigger_info_xml = self.file_data["AsynchronData"]["AsynchronSignalTypes"][0]
+        times = np.linspace(0, n_samples / self.sample_rate, n_samples, endpoint=False)
 
+        if self.normalize_time:
+            return times.tolist()
+        else:
+            return (times * self.sample_rate).tolist()
 
     def _get_markers_info(self):
         """Función para obtener los marcadores del experimento.
@@ -129,7 +154,7 @@ class GHiampDataManager():
         for marker_id in ids:
             filter = np.where(list_ids==marker_id)
             if self.normalize_time:
-                markers_info[marker_id] = (times[filter]/self.sfreq).tolist()
+                markers_info[marker_id] = (times[filter]/self.sample_rate).tolist()
             else:
                 markers_info[marker_id] = times[filter].tolist()
 
@@ -199,6 +224,29 @@ class GHiampDataManager():
             return None
 
         return self.markers_info[time_mark][idx]
+    
+    def __str__(self):
+        # Contar canales usados por tipo
+        if "ChannelType" in self.channels_info["used_channels"].columns:
+            canales_por_tipo = self.channels_info["used_channels"]["ChannelType"].value_counts().to_dict()
+        else:
+            canales_por_tipo = {"Desconocido": len(self.channels_info["used_channels"])}
+
+        info = (
+            f"GHiampDataManager\n"
+            f"  • Archivo: {self.filename}\n"
+            f"  • Sujeto: {self.subject}\n"
+            f"  • Fecha registro: {self.fecha_registro}\n"
+            f"  • Frecuencia de muestreo: {self.sample_rate:.2f} Hz\n"
+            f"  • Total de canales usados: {len(self.channels_info['used_channels'])}\n"
+            f"  • Canales por tipo: {canales_por_tipo}\n"
+            f"  • Cantidad de eventos: {sum(len(v) for v in self.markers_info.values())}\n"
+            f"  • IDs de marcadores: {list(self.markers_info.keys())}"
+        )
+        return info
+
+    def __repr__(self):
+        return self.__str__()
 
 class LSLDataManager():
     """
@@ -214,11 +262,12 @@ class LSLDataManager():
         self.time_series = self._get_timeseries()
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
         self.first_timestamp = self._get_first_timestamp() #esta en tiempo interno de LSL
-
-        ##faltaría sacar información de los canales, sus posiciones, sus nombres, etc.
         ##Revisar qué otra información es relevante del archivo xdf
 
     def _read_data(self, filename):
+        """
+        Lee los datos del archivo .xdf y retorna el contenido crudo y el encabezado.
+        """
         return pyxdf.load_xdf(filename)
     
     def _get_streamers_names(self):
@@ -255,6 +304,10 @@ class LSLDataManager():
         return timeseries_dict
 
     def _parse_trial_message(self, raw):
+        """
+        Función para parsear el mensaje JSON de cada trial.
+        Retorna un diccionario con la información del trial.
+        """
         # 1) Si viene como bytes (a veces pasa con sockets/LSL)
         if isinstance(raw, (bytes, bytearray)):
             raw = raw.decode("utf-8", errors="replace")
@@ -327,6 +380,49 @@ class LSLDataManager():
             return filtered[idx]
         except Exception:
             return None
+        
+    def __str__(self):
+        resumen_streams = []
+        for streamer, trials in self.time_series.items():
+            num_markers = sum(len(trial.keys()) for trial in trials if isinstance(trial, dict))
+            resumen_streams.append(f"    - {streamer}: {num_markers} marcadores")
+
+        # Agregar detalle de trials
+        resumen_trials = []
+        for streamer in self.streamers_names:
+            try:
+                # Intentamos obtener las letras de este streamer
+                letras = self[streamer, "letter", :]
+                if letras:
+                    letras = list(letras)
+                    resumen_trials.append(
+                        f"    - {streamer}: {len(letras)} trials / Letras → {letras}"
+                    )
+                else:
+                    resumen_trials.append(
+                        f"    - {streamer}: Sin información de 'letter'"
+                    )
+            except Exception:
+                resumen_trials.append(
+                    f"    - {streamer}: No se pudo acceder a 'letter'"
+                )
+            
+
+        info = (
+            f"🧩 LSLDataManager\n"
+            f"  • Archivo: {self.filename}\n"
+            f"  • Fecha de registro: {self.fecha_registro}\n"
+            f"  • Timestamp inicio: {min(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
+            f"  • Timestamp fin: {max(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
+            f"  • Streamers detectados ({len(self.streamers_names)}):\n" +
+            "\n".join(resumen_streams) +
+            "\n  • Trials por streamer:\n" +
+            "\n".join(resumen_trials)
+        )
+        return info
+
+    def __repr__(self):
+        return self.__str__()
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
@@ -334,14 +430,21 @@ if __name__ == "__main__":
 
     sfreq = 256.
     filename = "test\\data\\gtec_recordings\\full_setup_9.hdf5"
-    ghiamp_manager = GHiampDataManager(filename, normalize_time=True, sfreq=sfreq)
+    ghiamp_manager = GHiampDataManager(filename, normalize_time=True)
 
-    ghiamp_manager.changeMarkersNames({1: "inicioSesión", 2: "trialLaptop", 3: "trialTablet", 4: "penDown"})
+    ghiamp_manager.changeMarkersNames({1: "sessionStarted", 2: "trialLaptop", 3: "trialTablet", 4: "penDown"})
+    print(ghiamp_manager["sessionStarted", :])
     print(len(ghiamp_manager["trialLaptop", :]))
     print(len(ghiamp_manager["trialTablet", :]))
     print(ghiamp_manager.fecha_registro, ghiamp_manager.timestamp_registro)
 
-    ghiamp_manager.file_data["AsynchronData"]["AsynchronSignalTypes"][0]#.keys()#["Time"]
+    channels_info = ghiamp_manager.channels_info
+    print(channels_info["used_channels"].head())#["ChannelName"]
+    print(channels_info["used_channels"].columns)
+    print(channels_info["device_capabilities"].head())
+    print(channels_info["device_capabilities"].columns)
+
+    ## ****** DATOS DE LSL *********
 
     path="test\\data\\sub-test_pilin\\ses-S001\\test_pilin"
     file = "sub-test_pilin_ses-S001_task-Default_run-001_test_pilin.xdf"
@@ -364,21 +467,4 @@ if __name__ == "__main__":
     ##obtengo las coordenadas y tiempo de cada trazo
     coordenadas = lsl_manager["Tablet_Markers", "coordinates", :][:]
 
-    info = ghiamp_manager._get_channels_info()
-
-    print(info["used_channels"].head())#["ChannelName"]
-    print(info["used_channels"].columns)
-
-    print(info["device_capabilities"].head())
-    print(info["device_capabilities"].columns)
-
-    print(info["matched"].head())
-    print(info["matched"].columns)
-    
-    # used_channels_colums = ["ChannelName","ChannelType",
-    #                         "SampleRate","HighpassFilter","LowpassFilter","NotchFilter","Offset",
-    #                         "IsBipolar","SensitivityHighValue","SensitivityHighValue"]
-    
-    # used_channels_colums = ["ChannelName","ChannelType",
-    #                         "SampleRate","HighpassFilter","LowpassFilter","NotchFilter","Offset",
-    #                         "IsBipolar","SensitivityHighValue","SensitivityHighValue"]
+    lsl_manager["Laptop_Markers", "letter", :]
