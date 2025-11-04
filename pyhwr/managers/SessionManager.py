@@ -14,8 +14,8 @@ class SessionManager(QWidget):
 
     PHASES = {
         "first_jump": {"next": "start", "duration": 0.01},
-        "start": {"next": "fadein", "duration": 3.0},
-        "fadein": {"next": "cue", "duration": 1.0},
+        "start": {"next": "precue", "duration": 3.0},
+        "precue": {"next": "cue", "duration": 1.0},
         "cue": {"next": "fadeoff", "duration": 5.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
@@ -71,7 +71,7 @@ class SessionManager(QWidget):
         self._last_phase_time = self.creation_time
         self.sessionStartTime = None #variable para guardar el tiempo que comienza la sesión
         self.trialStartTime = None #varibale para guardar el momento en que inicia el trial
-        self.fadeInTime = None #variable para indicar el momento en que inicia el FadeIn
+        self.precueTime = None #variable para indicar el momento en que inicia el precue
         self.trialCueTime = None #variable para indicar el inicio del cue
         self.trialFadeOffTime = None #variable para indicar el momento en que inicia el FadeLOut
         self.trialRestTime = None #variable para indicar el momento en que inicia el período rest
@@ -88,7 +88,7 @@ class SessionManager(QWidget):
         
         self.laptop_markers_dict = dict(trialID="", letter="", runID="",
                                    sessionStartTime=0.0, trialStartTime=0.0,
-                                   trialFadeInTime=0.0, trialCueTime=0.0,
+                                   trialPrecueTime=0.0, trialCueTime=0.0,
                                    trialFadeOffTime=0.0, trialRestTime=0.0,
                                    sessionFinalTime=0.0,)
 
@@ -191,7 +191,7 @@ class SessionManager(QWidget):
         # --- Acciones por fase ---
         phase_actions = {
             "start": lambda: self._on_phase("trialStartTime", "#000000", self._update_label),
-            "fadein": lambda: self._on_phase("trialFadeInTime", "#000000"),
+            "precue": lambda: self._on_phase("trialPrecueTime", "#000000"),
             "cue": lambda: self._on_phase("trialCueTime", "#ffffff"),
             "fadeoff": lambda: self._on_phase("trialFadeOffTime", "#000000"),
             "rest": lambda: self._on_phase("trialRestTime", "#000000", log="Fase rest"),
@@ -401,8 +401,8 @@ if __name__ == "__main__":
 
     session_info = SessionInfo(
         session_id="1",
-        subject_id="test_v0.04",
-        session_name="test_v0.04",
+        subject_id="test_v0.0.5",
+        session_name="test_v0.0.5",
         session_date=time.strftime("%Y-%m-%d"),)
 
     manager = SessionManager(
