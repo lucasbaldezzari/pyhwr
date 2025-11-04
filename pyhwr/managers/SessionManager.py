@@ -28,7 +28,10 @@ class SessionManager(QWidget):
                  runs_per_session=1,
                  letters=None,
                  randomize_per_run=True,
-                 seed=None):
+                 seed=None,
+                 cue_base_duration=6.0,
+                 cue_tmin=1.0,
+                 cue_tmax=2.5):
         super().__init__()
 
         self.phases = self.PHASES.copy()
@@ -52,6 +55,11 @@ class SessionManager(QWidget):
         self.session_finished = False
         
         self.run_orders = [self._make_run_order() for _ in range(self.runs_per_session)]
+
+        self.cue_base_duration = cue_base_duration
+        self.cue_tmin = cue_tmin
+        self.cue_tmax = cue_tmax
+        self._set_random_cue_duration()
 
         # ----------------------------------------------------------
         # Objeto para enviar mensajes a la tablet
@@ -136,6 +144,16 @@ class SessionManager(QWidget):
         self.current_trial += 1
         self.current_letter = self.run_orders[self.current_run][self.current_trial]
         return True
+    
+    def _set_random_cue_duration(self):
+        """Asigna una duración aleatoria entre 5 y 6 segundos al cue."""
+        # base = 5.0
+        #chequeo que tmin y tmax sean válidos
+        if self.cue_tmin < 0 or self.cue_tmax < 0 or self.cue_tmin >= self.cue_tmax:
+            raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del cue.")
+        extra = np.random.uniform(self.cue_tmin, self.cue_tmax)
+        self.phases["cue"]["duration"] = self.cue_base_duration + extra
+        logging.info(f"Nueva duración del CUE: {self.phases['cue']['duration']:.2f} s")
 
     def update(self):
         """
@@ -168,6 +186,8 @@ class SessionManager(QWidget):
 
     def handle_phase_transition(self):
         logging.info(f"Fase actual: {self.in_phase}")
+        if self.in_phase == "cue":
+            self._set_random_cue_duration()
 
         # --- Enviar mensaje a tablet ---
         mensaje = self.tabmanager.make_message(
@@ -410,7 +430,7 @@ if __name__ == "__main__":
     runs_per_session = 1,
     letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
-    seed = 30)                 # fijo el shuffle para reproducibilidad
+    seed = None)                 # fijo el shuffle para reproducibilidad
 
     exit_code = app.exec_()
     sys.exit(exit_code)
