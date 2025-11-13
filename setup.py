@@ -11,7 +11,7 @@ def readme():
 
 setup(
     name='pyhwr',
-    version='0.0.5',  # <-- Fijá la versión directamente acá
+    version='0.0.6',  # <-- Fijá la versión directamente acá
     packages=find_packages(),
     install_requires=getRequirements(),
     author='Lucas Baldezzari',

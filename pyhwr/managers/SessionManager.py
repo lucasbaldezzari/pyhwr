@@ -3,8 +3,8 @@ import numpy as np
 import logging
 import json
 from pylsl import local_clock
-from pyhwr.managers import TabletMessenger, MarkerManager
-from pyhwr.utils import SessionInfo
+from pyhwr.managers.TabletMessenger import TabletMessenger
+from pyhwr.managers.MarkerManager import MarkerManager
 from pyhwr.widgets import SquareWidget
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtCore import QTimer, Qt
@@ -16,7 +16,7 @@ class SessionManager(QWidget):
         "first_jump": {"next": "start", "duration": 0.01},
         "start": {"next": "precue", "duration": 3.0},
         "precue": {"next": "cue", "duration": 1.0},
-        "cue": {"next": "fadeoff", "duration": 5.0},
+        "cue": {"next": "fadeoff", "duration": 6.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
         "trialInfo": {"next": "sendMarkers", "duration": 0.3},
@@ -30,8 +30,25 @@ class SessionManager(QWidget):
                  randomize_per_run=True,
                  seed=None,
                  cue_base_duration=6.0,
-                 cue_tmin=1.0,
-                 cue_tmax=2.5):
+                 cue_tmin_random=1.0,
+                 cue_tmax_random=2.5,
+                 randomize_cue_duration=True):
+        """
+        Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
+        
+        Parámetros:
+        - sessioninfo: Objeto SessionInfo con detalles de la sesión.
+        - mainTimerDuration: Intervalo del timer principal en ms.
+        - tabid: ID de la aplicación de la tablet para mensajes.
+        - runs_per_session: Número de runs en la sesión.
+        - letters: Lista de letras para trials. Si es None, se usa una lista por defecto.
+        - randomize_per_run: Si es True, se randomiza el orden de letras por run.
+        - seed: Semilla para el generador de números aleatorios (reproducibilidad).
+        - cue_base_duration: Duración base del cue en segundos.
+        - cue_tmin: Duración mínima del cue en segundos. Se suma a cue_base_duration.
+        - cue_tmax: Duración máxima del cue en segundos. Se suma a cue_base_duration.
+        - randomize_cue_duration: Si es True, se randomiza la duración del cue entre cue_tmin y cue_tmax.
+        """
         super().__init__()
 
         self.phases = self.PHASES.copy()
@@ -47,19 +64,23 @@ class SessionManager(QWidget):
         self.trials_per_run = len(self.letters)
         self.runs_per_session = runs_per_session
         self.randomize_per_run = randomize_per_run
-        self.rng = np.random.default_rng(seed)
 
         self.current_run = 0
         self.current_trial = -1
         self.current_letter = None
         self.session_finished = False
-        
+
+        self.rng = np.random.default_rng(seed) # para reproducibilidad
         self.run_orders = [self._make_run_order() for _ in range(self.runs_per_session)]
 
         self.cue_base_duration = cue_base_duration
-        self.cue_tmin = cue_tmin
-        self.cue_tmax = cue_tmax
-        self._set_random_cue_duration()
+        self.cue_tmin_random = cue_tmin_random
+        self.cue_tmax_random = cue_tmax_random
+        self.randomize_cue_duration = randomize_cue_duration
+        if self.randomize_cue_duration:
+            self._set_random_cue_duration()
+        else:
+            self.phases["cue"]["duration"] = self.cue_base_duration
 
         # ----------------------------------------------------------
         # Objeto para enviar mensajes a la tablet
@@ -149,9 +170,9 @@ class SessionManager(QWidget):
         """Asigna una duración aleatoria entre 5 y 6 segundos al cue."""
         # base = 5.0
         #chequeo que tmin y tmax sean válidos
-        if self.cue_tmin < 0 or self.cue_tmax < 0 or self.cue_tmin >= self.cue_tmax:
+        if self.cue_tmin_random < 0 or self.cue_tmax_random < 0 or self.cue_tmin_random >= self.cue_tmax_random:
             raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del cue.")
-        extra = np.random.uniform(self.cue_tmin, self.cue_tmax)
+        extra = np.random.uniform(self.cue_tmin_random, self.cue_tmax_random)
         self.phases["cue"]["duration"] = self.cue_base_duration + extra
         logging.info(f"Nueva duración del CUE: {self.phases['cue']['duration']:.2f} s")
 
@@ -186,7 +207,7 @@ class SessionManager(QWidget):
 
     def handle_phase_transition(self):
         logging.info(f"Fase actual: {self.in_phase}")
-        if self.in_phase == "cue":
+        if self.randomize_cue_duration and self.in_phase == "cue":
             self._set_random_cue_duration()
 
         # --- Enviar mensaje a tablet ---
@@ -415,6 +436,7 @@ class SessionManager(QWidget):
             return base
 
 if __name__ == "__main__":
+    from pyhwr.utils import SessionInfo
     logging.basicConfig(level=logging.ERROR)
 
     app = QApplication(sys.argv)
@@ -430,7 +452,12 @@ if __name__ == "__main__":
     runs_per_session = 1,
     letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
-    seed = None)                 # fijo el shuffle para reproducibilidad
+    seed = None, # fijo el seed para reproducibilidad
+    cue_base_duration = 6.,
+    cue_tmin_random = 1.0,
+    cue_tmax_random = 2.5,
+    randomize_cue_duration = True,
+    )                 
 
     exit_code = app.exec_()
     sys.exit(exit_code)
