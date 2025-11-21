@@ -234,14 +234,14 @@ class GHiampDataManager():
 
         info = (
             f"GHiampDataManager\n"
-            f"  • Archivo: {self.filename}\n"
-            f"  • Sujeto: {self.subject}\n"
-            f"  • Fecha registro: {self.fecha_registro}\n"
-            f"  • Frecuencia de muestreo: {self.sample_rate:.2f} Hz\n"
-            f"  • Total de canales usados: {len(self.channels_info['used_channels'])}\n"
-            f"  • Canales por tipo: {canales_por_tipo}\n"
-            f"  • Cantidad de eventos: {sum(len(v) for v in self.markers_info.values())}\n"
-            f"  • IDs de marcadores: {list(self.markers_info.keys())}"
+            f"Archivo: {self.filename}\n"
+            f"Sujeto: {self.subject}\n"
+            f"Fecha registro: {self.fecha_registro}\n"
+            f"Frecuencia de muestreo: {self.sample_rate:.2f} Hz\n"
+            f"Total de canales usados: {len(self.channels_info['used_channels'])}\n"
+            f"Canales por tipo: {canales_por_tipo}\n"
+            f"Cantidad de eventos: {sum(len(v) for v in self.markers_info.values())}\n"
+            f"IDs de marcadores: {list(self.markers_info.keys())}"
         )
         return info
 
@@ -255,6 +255,7 @@ class LSLDataManager():
     def __init__(self, filename):
         """
         filename: str.  Ruta al archivo .xdf con los datos."""
+        ##agregar chequeos de que hay al menos un trial con datos por streamer sino arrojar error.
         self.filename = filename
         self.raw_data, self.header = self._read_data(self.filename)
         self.streamers_names = self._get_streamers_names()
@@ -262,7 +263,10 @@ class LSLDataManager():
         self.time_series = self._get_timeseries()
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
         self.first_timestamp = self._get_first_timestamp() #esta en tiempo interno de LSL
-        ##Revisar qué otra información es relevante del archivo xdf
+        self.trials_info = self._get_trials_info()
+        ##agregar método para obtener tiempo promedio entre triasl, duración total de la sesión,
+        ##tiempo promedio entre cues y otras cosas relevantes.
+        
 
     def _read_data(self, filename):
         """
@@ -341,7 +345,6 @@ class LSLDataManager():
         """
         Función para obtener el primer timestamp registrado en el archivo xdf.
         """
-        # lsl_manager.raw_data[0]["footer"]["info"]["first_timestamp"]
         first_timestamp = {}
         for data in self.raw_data:
             streamer_name = data["info"]["name"][0]
@@ -349,11 +352,27 @@ class LSLDataManager():
 
         return first_timestamp
 
+    def _get_trials_info(self):
+        """
+        Función para exrtaer toda la información de los trials registrados por cada streamer.
+        La función retorna un diccionario con los keys siendo los nombres de los streamers. Cada key es otro
+        diccionario con los keys siendo los IDs de los trials y los values siendo listas con los datos de cada trial.
+        """
+        trials_info = {}
+        for streamer in self.streamers_names:
+            keys = self.streamers_keys[streamer]
+            trials_data = self.time_series[streamer]
+            trials_info[streamer] = {i+1: dict(zip(keys, trials_data[i].values()) if isinstance(trials_data[i], dict)
+                                               else trials_data[i])
+                                               for i in range(len(trials_data))}
+        
+        return trials_info
+
     def __getitem__(self, key):
         """
         Permite acceso tipo:
           lsl_manager["streamer", "trialID", :]
-          lsl_manager["streamer", "trialID", 0:20]
+          lsl_manager["streamer", "trialID", 0:5]
         """
         if not isinstance(key, tuple) or len(key) != 3:
             raise KeyError("Formato de índice no válido. Usa ('streamer_name','label',slice).")
@@ -409,14 +428,14 @@ class LSLDataManager():
             
 
         info = (
-            f"🧩 LSLDataManager\n"
-            f"  • Archivo: {self.filename}\n"
-            f"  • Fecha de registro: {self.fecha_registro}\n"
-            f"  • Timestamp inicio: {min(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
-            f"  • Timestamp fin: {max(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
-            f"  • Streamers detectados ({len(self.streamers_names)}):\n" +
+            f"LSLDataManager\n"
+            f" Archivo: {self.filename}\n"
+            f" Fecha de registro: {self.fecha_registro}\n"
+            f"Timestamp inicio: {min(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
+            f"Timestamp fin: {max(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
+            f"Streamers detectados ({len(self.streamers_names)}):\n" +
             "\n".join(resumen_streams) +
-            "\n  • Trials por streamer:\n" +
+            "\n  Trials por streamer:\n" +
             "\n".join(resumen_trials)
         )
         return info

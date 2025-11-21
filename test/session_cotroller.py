@@ -5,15 +5,17 @@ import sys
 import time
 from PyQt5.QtWidgets import QApplication
 ## Configuro el logger para que solo muestre mensajes de error
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 ##variables/atributos globales
-tipo_session = "entrenamiento" #baseline, entrenamiento, ejecutada, imaginada
-letters = ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd', 't']
-runs_per_session = 10
-session_id = "piloto"
-subject_id = "piloto_00.1"
-cue_base_duration = 6.0  # duración base del cue en segundos
+tipo_session = "ejecutada" #baseline, entrenamiento, ejecutada, imaginada
+session_number = 1
+session_run = 1
+letters = ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd']
+n_runs = 4
+session_id = f"{tipo_session}_s{session_number}_r{session_run}_noSignals"
+subject_id = "testing"
+cue_base_duration = 4.5  # duración base del cue en segundos
 cue_tmin = 1.0
 cue_tmax = 2.5
 randomize_cue_duration = True
@@ -23,12 +25,12 @@ seed = None
 ##variables/atributos propios de cada sesión
 if tipo_session == "baseline":
     cue_base_duration = 60. #cambio la duración del cue para baseline
-    letters = ["mira"]
-    runs_per_session = 1
+    letters = ["ta"]
+    n_runs = 1
     randomize_per_run = False
     randomize_cue_duration = False
 elif tipo_session == "entrenamiento":
-    runs_per_session = 1
+    n_runs = 1
     randomize_per_run = False
 
 app = QApplication(sys.argv)
@@ -41,7 +43,7 @@ session_info = SessionInfo(
 
 manager = SessionManager(
 session_info,
-runs_per_session = runs_per_session,
+n_runs = n_runs,
 letters = letters,
 randomize_per_run = randomize_per_run,
 seed = seed,

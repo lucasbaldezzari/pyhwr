@@ -16,7 +16,7 @@ class SessionManager(QWidget):
         "first_jump": {"next": "start", "duration": 0.01},
         "start": {"next": "precue", "duration": 3.0},
         "precue": {"next": "cue", "duration": 1.0},
-        "cue": {"next": "fadeoff", "duration": 6.0},
+        "cue": {"next": "fadeoff", "duration": 4.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
         "trialInfo": {"next": "sendMarkers", "duration": 0.3},
@@ -25,13 +25,13 @@ class SessionManager(QWidget):
 
     def __init__(self, sessioninfo, mainTimerDuration=5,
                  tabid="com.handwriting.ACTION_MSG",
-                 runs_per_session=1,
+                 n_runs=1,
                  letters=None,
                  randomize_per_run=True,
                  seed=None,
                  cue_base_duration=6.0,
                  cue_tmin_random=1.0,
-                 cue_tmax_random=2.5,
+                 cue_tmax_random=2.0,
                  randomize_cue_duration=True):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
@@ -40,7 +40,7 @@ class SessionManager(QWidget):
         - sessioninfo: Objeto SessionInfo con detalles de la sesión.
         - mainTimerDuration: Intervalo del timer principal en ms.
         - tabid: ID de la aplicación de la tablet para mensajes.
-        - runs_per_session: Número de runs en la sesión.
+        - n_runs: Número de runs en la sesión.
         - letters: Lista de letras para trials. Si es None, se usa una lista por defecto.
         - randomize_per_run: Si es True, se randomiza el orden de letras por run.
         - seed: Semilla para el generador de números aleatorios (reproducibilidad).
@@ -60,9 +60,9 @@ class SessionManager(QWidget):
         self.next_transition = -1
 
         # --- NUEVO: configuración de sesión/runs/trials/letras ---
-        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd', 't']
+        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd']
         self.trials_per_run = len(self.letters)
-        self.runs_per_session = runs_per_session
+        self.n_runs = n_runs
         self.randomize_per_run = randomize_per_run
 
         self.current_run = 0
@@ -71,7 +71,7 @@ class SessionManager(QWidget):
         self.session_finished = False
 
         self.rng = np.random.default_rng(seed) # para reproducibilidad
-        self.run_orders = [self._make_run_order() for _ in range(self.runs_per_session)]
+        self.run_orders = [self._make_run_order() for _ in range(self.n_runs)]
 
         self.cue_base_duration = cue_base_duration
         self.cue_tmin_random = cue_tmin_random
@@ -154,7 +154,7 @@ class SessionManager(QWidget):
         # ¿Final del trial?
         if self.current_trial + 1 >= self.trials_per_run:
             # pasar al siguiente run
-            if self.current_run + 1 >= self.runs_per_session:
+            if self.current_run + 1 >= self.n_runs:
                 # no hay más runs -> terminamos
                 self.session_finished = True
                 return False
@@ -254,7 +254,7 @@ class SessionManager(QWidget):
             extra_action()
 
     def _update_label(self):
-        texto = (f"run:{self.current_run+1} de {self.runs_per_session}\n"
+        texto = (f"run:{self.current_run+1} de {self.n_runs}\n"
                 f"trial:{self.current_trial+1} de {self.trials_per_run}\n"
                 f"letter:{self.current_letter}\n")
         self.startingSession_marker.change_text(texto)
@@ -449,7 +449,7 @@ if __name__ == "__main__":
 
     manager = SessionManager(
     session_info,
-    runs_per_session = 1,
+    n_runs = 1,
     letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad
