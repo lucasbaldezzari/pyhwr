@@ -8,11 +8,14 @@ pyhwr.egg-info/SOURCES.txt
 pyhwr.egg-info/dependency_links.txt
 pyhwr.egg-info/requires.txt
 pyhwr.egg-info/top_level.txt
+pyhwr/managers/DataManagers.py
+pyhwr/managers/MarkerManager.py
 pyhwr/managers/SessionManager.py
 pyhwr/managers/TabletMessenger.py
 pyhwr/managers/__init__.py
-pyhwr/utils/SesionInfo.py
+pyhwr/utils/SessionInfo.py
 pyhwr/utils/__init__.py
 pyhwr/utils/decorators.py
 pyhwr/widgets/SquareWidget.py
 pyhwr/widgets/__init__.py
+test/test_sueltos.py

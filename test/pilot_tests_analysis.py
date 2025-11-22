@@ -12,7 +12,22 @@ lsl_filename = "sub-subject_0_ses-1_task-Default_run-001_no_signals.xdf"
 lsl_manager = LSLDataManager(path + "\\" + lsl_filename)
 print("Nombre de los marcadores:", lsl_manager.streamers_names)
 print("Nombre de los keys por streamer:", lsl_manager.streamers_keys)
-lsl_manager.trials_info["Laptop_Markers"][1].keys()
+trial = 3
+lsl_manager.trials_info["Laptop_Markers"][trial].keys()
+letra = lsl_manager.trials_info["Tablet_Markers"][trial]["letter"]
+coordenadas = np.array(lsl_manager.trials_info["Tablet_Markers"][trial]["coordinates"])
+x,y,t = coordenadas[:,0], coordenadas[:,1], coordenadas[:,2]
+t = t - t[0]  # Normalizar tiempo al inicio
+##ploteo
+plt.figure(figsize=(12, 6))
+plt.plot(x, y, color="#35129d", linewidth = 10, zorder=1)   # Une los puntos en orden
+plt.scatter(x, y, color="#11aa30", s=20, zorder = 2)  # Opcional: puntos de muestreo
+plt.title(f"Coordenadas de la letra: {letra}")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.gca().invert_yaxis()  # Si la tableta tiene origen en la esquina superior izquierda
+plt.axis("equal")
+plt.show()
 
 ghiamp_manager = GHiampDataManager(path + "\\" + gtec_filename, normalize_time=True)
 ##cambio nombre de los marcadores
