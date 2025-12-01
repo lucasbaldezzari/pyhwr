@@ -6,7 +6,7 @@ from pyhwr.managers import LSLDataManager, GHiampDataManager
 import pandas as pd
 
 path = "test\\data\\gtec_recordings\\pilot_tests\\subject_0\\no_signals"
-gtec_filename = "subject_0_noSignals2025.11.20_18.59.32.hdf5"
+gtec_filename = "subject_0_s1_r1.hdf5"
 lsl_filename = "sub-subject_0_ses-1_task-Default_run-001_no_signals.xdf"
 
 lsl_manager = LSLDataManager(path + "\\" + lsl_filename)

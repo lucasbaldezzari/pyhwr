@@ -13,13 +13,13 @@ import sys
 class SessionManager(QWidget):
 
     PHASES = {
-        "first_jump": {"next": "start", "duration": 0.01},
+        "first_jump": {"next": "start", "duration": 0.1},
         "start": {"next": "precue", "duration": 3.0},
         "precue": {"next": "cue", "duration": 1.0},
         "cue": {"next": "fadeoff", "duration": 4.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
-        "trialInfo": {"next": "sendMarkers", "duration": 0.3},
+        "trialInfo": {"next": "sendMarkers", "duration": 0.5},
         "sendMarkers": {"next": "start", "duration": 0.1},
     }
 
@@ -29,7 +29,7 @@ class SessionManager(QWidget):
                  letters=None,
                  randomize_per_run=True,
                  seed=None,
-                 cue_base_duration=6.0,
+                 cue_base_duration=4.5,
                  cue_tmin_random=1.0,
                  cue_tmax_random=2.0,
                  randomize_cue_duration=True):
@@ -60,7 +60,7 @@ class SessionManager(QWidget):
         self.next_transition = -1
 
         # --- NUEVO: configuración de sesión/runs/trials/letras ---
-        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd']
+        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
         self.trials_per_run = len(self.letters)
         self.n_runs = n_runs
         self.randomize_per_run = randomize_per_run
