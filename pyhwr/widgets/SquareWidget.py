@@ -1,42 +1,53 @@
 from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtGui import QColor, QPainter, QFont, QPen
 from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QTextDocument
+
 import sys
 
-class SquareWidget(QWidget):
 
+class SquareWidget(QWidget):
     instances = []
 
-    def __init__(self, x=100, y=100, size=100, color="red", parent=None,
-                 font_size=14, text="", text_color="white", show_on_init=True):
+    def __init__(self, x=100, y=100, width=100, height=None, color="red", parent=None,
+                 font_size=14, text="", text_color="white", show_on_init=True, auto_font_resize=False):
         """
-        Crea un widget cuadrado que puede ser arrastrado y personalizado.
-        Params:
-        - x (int): Posición X inicial del cuadrado.
-        - y (int): Posición Y inicial del cuadrado.
-        - size (int): Tamaño del cuadrado.
-        - color (str): Color del cuadrado en formato hexadecimal o nombre de color.
-        - parent (QWidget): Widget padre al que se adjunta este cuadrado.
-        - font_size (int): Tamaño de la fuente del texto dentro del cuadrado.
-        - text (str): Texto a mostrar dentro del cuadrado.
-        - text_color (str): Color del texto en formato hexadecimal o nombre de color.
-        - show_on_init (bool): Si se debe mostrar el cuadrado al inicializar.
+        Crea un widget rectangular/cuadrado personalizable.
+
+        Parámetros:
+        - x, y: posición inicial del widget.
+        - width, height: dimensiones del rectángulo (si height es None, usa width -> cuadrado).
+        - color: color de fondo.
+        - font_size: tamaño inicial de la fuente del texto.
+        - text: texto a mostrar.
+        - text_color: color del texto.
+        - auto_font_resize: ajusta automáticamente el tamaño de la fuente según el tamaño del widget.
         """
         super().__init__(parent)
-        self.size = size
+
+        # --- Atributos de forma ---
+        self.width = width
+        self.height = height if height is not None else width
         self.square_color = QColor(color)
+
+        # --- Atributos de texto ---
         self.text = text
         self.text_color = QColor(text_color)
         self.font_size = font_size
+        self.auto_font_resize = auto_font_resize
+
+        # --- Estado interno ---
         self.active = True
         self.dragging = False
         self.offset = QPoint()
 
-        self.setGeometry(x, y, size, size)
+        # --- Configuración visual ---
+        self.setGeometry(x, y, self.width, self.height)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.SubWindow)
         self.setAttribute(Qt.WA_TranslucentBackground)
         if show_on_init:
             self.show()
+
         SquareWidget.instances.append(self)
 
     def paintEvent(self, event):
@@ -55,17 +66,68 @@ class SquareWidget(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        #Dibujamos el cuadrado
+        # Dibuja fondo
         painter.setBrush(self.square_color)
         painter.setPen(Qt.black)
-        painter.drawRect(0, 0, self.size, self.size)
+        painter.drawRect(0, 0, self.width, self.height)
 
-        #Dibujamos el texto centrado
-        painter.setPen(QPen(self.text_color))
-        font = QFont("Arial", self.font_size)
+        # Calcula tamaño de fuente (si auto-ajuste activado)
+        font_size = self._calculate_font_size() if self.auto_font_resize else self.font_size
+        font = QFont("Arial", font_size)
         painter.setFont(font)
-        rect = self.rect()
-        painter.drawText(rect, Qt.AlignCenter, self.text)
+        painter.setPen(QPen(self.text_color))
+
+        # Dibuja texto html
+        doc = QTextDocument()
+        doc.setHtml(self.text)
+        doc.setTextWidth(self.width)
+        painter.translate(0, (self.height - doc.size().height()) / 2)
+        doc.drawContents(painter)
+
+    def change_text(self, text):
+        """Cambia el texto mostrado."""
+        self.text = text
+        self.update()
+
+    def change_text_color(self, color):
+        """Cambia el color del texto."""
+        self.text_color = QColor(color)
+        self.update()
+
+    def change_font_size(self, size):
+        """Cambia el tamaño de la fuente del texto."""
+        self.font_size = size
+        self.update()
+
+    # Alias más legibles
+    def set_font_size(self, size):
+        """Setter alternativo del tamaño de fuente."""
+        self.change_font_size(size)
+
+    def get_font_size(self):
+        """Devuelve el tamaño actual de la fuente."""
+        return self.font_size
+
+    def enable_auto_font_resize(self, enable=True):
+        """Activa o desactiva el ajuste automático de tamaño de fuente."""
+        self.auto_font_resize = enable
+        self.update()
+
+    def _calculate_font_size(self):
+        """Calcula automáticamente un tamaño de fuente proporcional al widget."""
+        base = min(self.width, self.height)
+        return max(8, int(base * 0.15))  # 15% del tamaño del lado menor
+
+    def change_color(self, color):
+        self.square_color = QColor(color)
+        self.update()
+
+    def resize_rectangle(self, new_width, new_height):
+        """Cambia el tamaño del rectángulo y actualiza."""
+        self.width = new_width
+        self.height = new_height
+        self.setFixedSize(new_width, new_height)
+        self.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.active:
@@ -79,106 +141,25 @@ class SquareWidget(QWidget):
     def mouseReleaseEvent(self, event):
         self.dragging = False
 
-    ## Métodos para cambiar propiedades del widget
-    ## Estos métodos actualizan el color, texto, color del texto, tamaño de fuente, etc.
-    def change_color(self, color):
-        """ Cambia el color del cuadrado.
-        Params:
-        - color (str): Nuevo color del cuadrado en formato hexadecimal o nombre de color.
-        """
-        self.square_color = QColor(color)
-        self.update()
-
-    def change_text(self, text):
-        """ Cambia el texto dentro del cuadrado.
-        Params:
-        - text (str): Nuevo texto a mostrar dentro del cuadrado.
-        """
-        self.text = text
-        self.update()
-
-    def change_text_color(self, color):
-        """ Cambia el color del texto dentro del cuadrado.
-        Params:
-        - color (str): Nuevo color del texto en formato hexadecimal o nombre de color.
-        """
-        self.text_color = QColor(color)
-        self.update()
-
-    def change_font_size(self, size):
-        """ Cambia el tamaño de la fuente del texto dentro del cuadrado.
-        Params:
-        - size (int): Nuevo tamaño de la fuente.
-        """
-        self.font_size = size
-        self.update()
-
     def activate(self):
-        """
-        Activa el widget, mostrándolo y permitiendo que responda a eventos."""
         self.active = True
         self.show()
         self.update()
 
     def deactivate(self):
-        """
-        Desactiva el widget, ocultándolo y evitando que responda a eventos."""
         self.active = False
         self.hide()
 
     def move_to(self, x, y):
-        """
-        Mueve el widget a una nueva posición (x, y)."""
         self.move(x, y)
 
-    def resize_square(self, new_size):
-        """
-        Cambia el tamaño del cuadrado y actualiza su geometría."""
-        self.size = new_size
-        self.setFixedSize(new_size, new_size)
-        self.update()
-
     def closeEvent(self, event):
-        """
-        Maneja el evento de cierre del widget."""
         if self in SquareWidget.instances:
             SquareWidget.instances.remove(self)
         super().closeEvent(event)
 
     @classmethod
     def close_all(cls):
-        """
-        Cierra todos los widgets de tipo SquareWidget.
-        """
         for inst in cls.instances[:]:
             inst.close()
-        ##eliminar la lista de instancias
         cls.instances.clear()
-
-def cambiar_color_widget(widget, color: str):
-    widget.change_color(color)
-
-if __name__ == "__main__":
-    from PyQt5.QtCore import QTimer
-    from functools import partial
-    # Si ya hay una instancia de QApplication, usala
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication(sys.argv)
-
-    marcador1 = SquareWidget(x=200, y=200, size=150, color="black",
-                             text="Marcador 1", text_color="white")
-    marcador2 = SquareWidget(x=500, y=200, size=150, color="white",
-                             text="Marcador 2", text_color="black")
-
-    cambiar_marc1 = partial(cambiar_color_widget, marcador1, color="#15945D")
-    cambiar_marc2 = partial(cambiar_color_widget, marcador2, color="#FF5733")
-
-    QTimer.singleShot(2000, cambiar_marc1)
-    QTimer.singleShot(2000, cambiar_marc2)
-
-    marcador1.change_color("#281818")
-    # marcador1.resize_square(200)
-    # marcador1.change_text("Mark 2")
-
-    QTimer.singleShot(4000, SquareWidget.close_all)
