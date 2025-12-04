@@ -365,7 +365,11 @@ class LSLDataManager():
             trials_info[streamer] = {i+1: dict(zip(keys, trials_data[i].values()) if isinstance(trials_data[i], dict)
                                                else trials_data[i])
                                                for i in range(len(trials_data))}
-        
+            
+        ##para cada streamer, elimino los trials que no tienen datos (diccionarios vacíos
+        for streamer in trials_info:
+            trials_info[streamer] = {k: v for k, v in trials_info[streamer].items() if v}
+            
         return trials_info
 
     def __getitem__(self, key):

@@ -16,11 +16,11 @@ class SessionManager(QWidget):
         "first_jump": {"next": "start", "duration": 0.1},
         "start": {"next": "precue", "duration": 3.0},
         "precue": {"next": "cue", "duration": 1.0},
-        "cue": {"next": "fadeoff", "duration": 4.0},
+        "cue": {"next": "fadeoff", "duration": 5.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
         "trialInfo": {"next": "sendMarkers", "duration": 0.5},
-        "sendMarkers": {"next": "start", "duration": 0.1},
+        "sendMarkers": {"next": "start", "duration": 0.2},
     }
 
     def __init__(self, sessioninfo, mainTimerDuration=50,
@@ -437,10 +437,16 @@ class SessionManager(QWidget):
         self.laptop_marker_dict["trialID"] = "fin"
         logging.info("Sesión completada. Cerrando.")
 
-        # Mensaje a labrecorder con los marcadores de laptop
-        laptop_markers_msg = json.dumps(self.laptop_marker_dict)
-        self.laptop_marker.sendMarker(laptop_markers_msg)
 
+        ##IMPORTANTE: Si se quisiera enviar los marcadores de laptop al finalizar la sesión,
+        ##se debe descomentar el bloque siguiente
+
+        # Mensaje a labrecorder con los marcadores de laptop
+        # laptop_markers_msg = json.dumps(self.laptop_marker_dict)
+        # self.laptop_marker.sendMarker(laptop_markers_msg)
+
+        ## ---***** El siguiente bloque de try-except debe enviarse si se quiere avisar
+        ## a la tablet que el bloque ha finalizado *****---
         try:
             #envío mensaje a la tablet para avisar el final de la sesión
             #la tablet recibe y guarda el tiempo en que cierra la app
@@ -454,21 +460,25 @@ class SessionManager(QWidget):
             self.tabmanager.send_message(mensaje, self.tabid)
         except Exception:
             logging.error("No se pudo enviar mensaje de final de sesión")
+
+        ##IMPORTANTE: Si se quisiera leer y enviar el último JSON de la tablet,
+        ##se debe descomentar el bloque siguiente
             
-        final_json = self._read_final_with_retry(
-            subject=self.sessioninfo.subject_id,
-            session=self.sessioninfo.session_id,
-            timeout=5.0,
-            interval=0.5)
+        # final_json = self._read_final_with_retry(
+        #     subject=self.sessioninfo.subject_id,
+        #     session=self.sessioninfo.session_id,
+        #     timeout=5.0,
+        #     interval=0.5)
 
-        if final_json is None:
-            logging.error("No se pudo leer el JSON final desde la tablet dentro del timeout.")
-        else:
-            # reenviá por LSL el JSON final de tablet
-            logging.debug("JSON final de la tablet:")
-            logging.debug(final_json)
-            self.tablet_marker.sendMarker(final_json)
+        # if final_json is None:
+        #     logging.error("No se pudo leer el JSON final desde la tablet dentro del timeout.")
+        # else:
+        #     # reenviá por LSL el JSON final de tablet
+        #     logging.debug("JSON final de la tablet:")
+        #     logging.debug(final_json)
+        #     # self.tablet_marker.sendMarker(final_json)
 
+        logging.info(f"Tiempo total de sesión: {self.get_elapsed_time()/1000:.2f} s")
         self.stop()
 
     def _read_final_with_retry(self, subject, session, timeout=3.0, interval=0.1):

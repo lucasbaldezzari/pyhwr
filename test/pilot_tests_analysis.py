@@ -1,18 +1,18 @@
 import numpy as np
 np.set_printoptions(suppress=True)
 import matplotlib.pyplot as plt
-import seaborn as sns
+# import seaborn as sns
 from pyhwr.managers import LSLDataManager, GHiampDataManager
 import pandas as pd
 
-path = "test\\data\\gtec_recordings\\pilot_tests\\subject_0\\no_signals"
-gtec_filename = "subject_0_s1_r1.hdf5"
-lsl_filename = "sub-subject_0_ses-1_task-Default_run-001_no_signals.xdf"
+path = "test\\data\\pilot_tests\\subject_0\\no_signals\\s3"
+gtec_filename = "subject_0_s3_r1.hdf5"
+lsl_filename = "sub-subject_0_ses-3_task-Default_run-001_no_signals.xdf"
 
 lsl_manager = LSLDataManager(path + "\\" + lsl_filename)
 print("Nombre de los marcadores:", lsl_manager.streamers_names)
 print("Nombre de los keys por streamer:", lsl_manager.streamers_keys)
-trial = 3
+trial = 1
 lsl_manager.trials_info["Laptop_Markers"][trial].keys()
 letra = lsl_manager.trials_info["Tablet_Markers"][trial]["letter"]
 coordenadas = np.array(lsl_manager.trials_info["Tablet_Markers"][trial]["coordinates"])
