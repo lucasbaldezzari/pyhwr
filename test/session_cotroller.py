@@ -9,12 +9,12 @@ logging.basicConfig(level=logging.INFO)
 
 ##variables/atributos globales
 tipo_session = "ejecutada" #baseline, entrenamiento, ejecutada, imaginada
-session_number = 4
-session_run = 6
+session_number = 1
+session_run = 5
 letters = ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t'] #['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
 n_runs = 2
 session_id = f"{tipo_session}_s{session_number}_r{session_run}_noSignals"
-subject_id = "subject_0"
+subject_id = "piloto1"
 cue_base_duration = 5.0  # duración base del cue en segundos
 cue_tmin = 1.0
 cue_tmax = 2.0
