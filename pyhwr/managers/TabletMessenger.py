@@ -38,11 +38,6 @@ class TabletMessenger:
         if extra:
             message.update(extra)
         return message
-                # "trialInfo": {"trialID": trialID,
-                #               "trialPhase": trialPhase,
-                #               "letter": letter,
-                #               "duration": duration
-                #               }}
 
     def send_message(self, message: dict, tabletID: str):
         """Envía un mensaje a la tablet usando ADB broadcast."""

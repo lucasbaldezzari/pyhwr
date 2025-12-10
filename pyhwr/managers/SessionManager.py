@@ -32,7 +32,8 @@ class SessionManager(QWidget):
                  cue_base_duration=4.5,
                  cue_tmin_random=1.0,
                  cue_tmax_random=2.0,
-                 randomize_cue_duration=True):
+                 randomize_cue_duration=True,
+                 tabletID = "R52W70ATD1W"):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
         
@@ -84,7 +85,7 @@ class SessionManager(QWidget):
 
         # ----------------------------------------------------------
         # Objeto para enviar mensajes a la tablet
-        self.tabmanager = TabletMessenger(serial="R52W70ATD1W")
+        self.tabmanager = TabletMessenger(serial=tabletID)
         self.tabid = tabid
 
         # ----------------------------------------------------------

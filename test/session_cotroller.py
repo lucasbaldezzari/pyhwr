@@ -51,6 +51,7 @@ cue_base_duration = cue_base_duration,
 cue_tmin_random = cue_tmin,
 cue_tmax_random = cue_tmax,
 randomize_cue_duration = randomize_cue_duration,
+tabletID="R52Y50AG4FF"
 )
 
 exit_code = app.exec_()

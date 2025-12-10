@@ -436,7 +436,7 @@ class LSLDataManager():
             f" Archivo: {self.filename}\n"
             f" Fecha de registro: {self.fecha_registro}\n"
             f"Timestamp inicio: {min(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
-            f"Timestamp fin: {max(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
+            # f"Timestamp fin: {max(self.first_timestamp.values()) if self.first_timestamp else 'N/A'}\n"
             f"Streamers detectados ({len(self.streamers_names)}):\n" +
             "\n".join(resumen_streams) +
             "\n  Trials por streamer:\n" +
@@ -446,6 +446,10 @@ class LSLDataManager():
 
     def __repr__(self):
         return self.__str__()
+    
+    def __len__(self):
+        """Retorna la cantidad de streamers"""
+        return len(self.streamers_names)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
