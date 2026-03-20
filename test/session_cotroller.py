@@ -10,12 +10,12 @@ logging.basicConfig(level=logging.INFO)
 ##variables/atributos globales
 tipo_session = "ejecutada" #baseline, entrenamiento, ejecutada, imaginada
 session_number = 1
-session_run = 5
-letters = ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t'] #['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
-n_runs = 2
+session_run = 1
+n_runs = 1
+letters = ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd'] #['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
 session_id = f"{tipo_session}_s{session_number}_r{session_run}_noSignals"
-subject_id = "piloto2"
-cue_base_duration = 5.0  # duración base del cue en segundos
+subject_id = "testing"
+cue_base_duration = 4.0  # duración base del cue en segundos
 cue_tmin = 1.0
 cue_tmax = 2.0
 randomize_cue_duration = True
@@ -24,8 +24,8 @@ seed = None
 
 ##variables/atributos propios de cada sesión
 if tipo_session == "baseline":
-    cue_base_duration = 60. #cambio la duración del cue para baseline
-    letters = ["ta"]
+    cue_base_duration = 10. #cambio la duración del cue para baseline
+    letters = ["a"]
     n_runs = 1
     randomize_per_run = False
     randomize_cue_duration = False

@@ -14,12 +14,12 @@ class SessionManager(QWidget):
 
     PHASES = {
         "first_jump": {"next": "start", "duration": 0.1},
-        "start": {"next": "precue", "duration": 3.0},
+        "start": {"next": "precue", "duration": 2.0},
         "precue": {"next": "cue", "duration": 1.0},
-        "cue": {"next": "fadeoff", "duration": 5.0},
+        "cue": {"next": "rest", "duration": 5.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 3.0},
-        "trialInfo": {"next": "sendMarkers", "duration": 0.5},
+        "trialInfo": {"next": "sendMarkers", "duration": 0.2},
         "sendMarkers": {"next": "start", "duration": 0.2},
     }
 
