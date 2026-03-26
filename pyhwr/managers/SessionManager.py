@@ -18,7 +18,7 @@ class SessionManager(QWidget):
         "precue": {"next": "cue", "duration": 1.0},
         "cue": {"next": "rest", "duration": 5.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
-        "rest": {"next": "trialInfo", "duration": 3.0},
+        "rest": {"next": "trialInfo", "duration": 1.},
         "trialInfo": {"next": "sendMarkers", "duration": 0.2},
         "sendMarkers": {"next": "start", "duration": 0.2},
     }
@@ -32,7 +32,11 @@ class SessionManager(QWidget):
                  cue_base_duration=4.5,
                  cue_tmin_random=1.0,
                  cue_tmax_random=2.0,
+                 rest_base_duration = 1,
+                 rest_tmin_random = 0.,
+                 rest_tmax_random = 1.0,
                  randomize_cue_duration=True,
+                 randomize_rest_duration=True,
                  tabletID = "R52W70ATD1W"):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
@@ -77,11 +81,21 @@ class SessionManager(QWidget):
         self.cue_base_duration = cue_base_duration
         self.cue_tmin_random = cue_tmin_random
         self.cue_tmax_random = cue_tmax_random
+        self.rest_base_duration = rest_base_duration
+        self.rest_tmin_random = rest_tmin_random
+        self.rest_tmax_random = rest_tmax_random
         self.randomize_cue_duration = randomize_cue_duration
+
         if self.randomize_cue_duration:
             self._set_random_cue_duration()
         else:
             self.phases["cue"]["duration"] = self.cue_base_duration
+
+        self.randomize_rest_duration = randomize_rest_duration
+        if self.randomize_rest_duration:
+            self._set_random_rest_duration()
+        else:
+            self.phases["rest"]["duration"] = self.rest_base_duration
 
         # ----------------------------------------------------------
         # Objeto para enviar mensajes a la tablet
@@ -173,14 +187,22 @@ class SessionManager(QWidget):
         return True
     
     def _set_random_cue_duration(self):
-        """Asigna una duración aleatoria entre 5 y 6 segundos al cue."""
-        # base = 5.0
+        """Asigna una duración aleatoria entre un tmin y tmax segundos al cue."""
         #chequeo que tmin y tmax sean válidos
         if self.cue_tmin_random < 0 or self.cue_tmax_random < 0 or self.cue_tmin_random >= self.cue_tmax_random:
             raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del cue.")
         extra = np.random.uniform(self.cue_tmin_random, self.cue_tmax_random)
         self.phases["cue"]["duration"] = self.cue_base_duration + extra
         logging.info(f"Nueva duración del CUE: {self.phases['cue']['duration']:.2f} s")
+
+    def _set_random_rest_duration(self):
+        """Asigna una duración aleatoria entre un tmin y tmax segundos al rest time."""
+        #chequeo que tmin y tmax sean válidos
+        if self.rest_tmin_random < 0 or self.rest_tmax_random < 0 or self.rest_tmin_random >= self.rest_tmax_random:
+            raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del rest time.")
+        extra = np.random.uniform(self.rest_tmin_random, self.rest_tmax_random)
+        self.phases["rest"]["duration"] = self.rest_base_duration + extra
+        logging.info(f"Nueva duración de REST: {self.phases['rest']['duration']:.2f} s")
 
     def update_main(self):
         """
@@ -215,6 +237,8 @@ class SessionManager(QWidget):
         logging.info(f"Fase actual: {self.in_phase}")
         if self.randomize_cue_duration and self.in_phase == "cue":
             self._set_random_cue_duration()
+        if self.randomize_rest_duration and self.in_phase == "rest":
+            self._set_random_rest_duration()
 
         # --- Enviar mensaje a tablet ---
         mensaje = self.tabmanager.make_message(
@@ -462,23 +486,6 @@ class SessionManager(QWidget):
         except Exception:
             logging.error("No se pudo enviar mensaje de final de sesión")
 
-        ##IMPORTANTE: Si se quisiera leer y enviar el último JSON de la tablet,
-        ##se debe descomentar el bloque siguiente
-            
-        # final_json = self._read_final_with_retry(
-        #     subject=self.sessioninfo.subject_id,
-        #     session=self.sessioninfo.session_id,
-        #     timeout=5.0,
-        #     interval=0.5)
-
-        # if final_json is None:
-        #     logging.error("No se pudo leer el JSON final desde la tablet dentro del timeout.")
-        # else:
-        #     # reenviá por LSL el JSON final de tablet
-        #     logging.debug("JSON final de la tablet:")
-        #     logging.debug(final_json)
-        #     # self.tablet_marker.sendMarker(final_json)
-
         logging.info(f"Tiempo total de sesión: {self.get_elapsed_time()/1000:.2f} s")
         self.stop()
 
@@ -525,10 +532,14 @@ if __name__ == "__main__":
     letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad
-    cue_base_duration = 6.,
+    cue_base_duration = 4.,
     cue_tmin_random = 1.0,
-    cue_tmax_random = 2.5,
+    cue_tmax_random = 2.0,
     randomize_cue_duration = True,
+    rest_base_duration=1.,
+    rest_tmin_random=0.,
+    rest_tmax_random=1.,
+    randomize_rest_duration=True
     )                 
 
     exit_code = app.exec_()
