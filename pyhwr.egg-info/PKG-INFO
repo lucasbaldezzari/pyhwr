@@ -19,6 +19,7 @@ Requires-Dist: pandas>=2.0
 Requires-Dist: pylsl>=1.16
 Requires-Dist: PyQt5>=5.15
 Requires-Dist: keyboard>=0.13
+Requires-Dist: pyxdf>=1.17.0
 Dynamic: author
 Dynamic: home-page
 Dynamic: requires-python

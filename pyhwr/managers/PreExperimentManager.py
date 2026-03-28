@@ -3,51 +3,49 @@ import numpy as np
 import logging
 import json
 from pylsl import local_clock
-from pyhwr.managers.TabletMessenger import TabletMessenger
+# from pyhwr.managers.TabletMessenger import TabletMessenger
 from pyhwr.managers.MarkerManager import MarkerManager
-from pyhwr.widgets import SquareWidget
+from pyhwr.widgets import SquareWidget, StimuliWindow
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtCore import QTimer, Qt
 import sys
 
-class SessionManager(QWidget):
+class PreExperimentManager(QWidget):
 
     PHASES = {
-        "first_jump": {"next": "start", "duration": 5.},
-        "start": {"next": "precue", "duration": 2.0},
-        "precue": {"next": "cue", "duration": 1.0},
+        "first_jump": {"next": "start", "duration": 4.},
+        "start": {"next": "precue", "duration": 1.0},
+        "precue": {"next": "cue", "duration": 0.1},
         "cue": {"next": "rest", "duration": 5.0},
-        "fadeoff": {"next": "rest", "duration": 1.0},
-        "rest": {"next": "trialInfo", "duration": 1.},
-        "trialInfo": {"next": "sendMarkers", "duration": 0.2},
-        "sendMarkers": {"next": "start", "duration": 0.2},
+        "rest": {"next": "trialInfo", "duration": 4.0},
+        "trialInfo": {"next": "sendMarkers", "duration": 0.1},
+        "sendMarkers": {"next": "start", "duration": 0.1},
     }
 
-    def __init__(self, sessioninfo, mainTimerDuration=50,
-                 tabid="com.handwriting.ACTION_MSG",
+    def __init__(self, sessioninfo, pre_experiment,
+                 mainTimerDuration=50,
                  n_runs=1,
-                 letters=None,
                  randomize_per_run=True,
                  seed=None,
                  cue_base_duration=4.5,
                  cue_tmin_random=1.0,
                  cue_tmax_random=2.0,
-                 rest_base_duration = 1,
+                 rest_base_duration = 4,
                  rest_tmin_random = 0.,
                  rest_tmax_random = 1.0,
-                 randomize_cue_duration=True,
-                 randomize_rest_duration=True,
-                 tabletID = "R52W70ATD1W"):
+                 randomize_cue_duration=False,
+                 randomize_rest_duration=False,
+                 emg_actions = None):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
         
         Parámetros:
         - sessioninfo: Objeto SessionInfo con detalles de la sesión.
+        - pre_experiment: string con el tipo de pre-experimento ("emg", "eog", "basal")
         - mainTimerDuration: Intervalo del timer principal en ms.
-        - tabid: ID de la aplicación de la tablet para mensajes.
         - n_runs: Número de runs en la sesión.
-        - letters: Lista de letras para trials. Si es None, se usa una lista por defecto.
-        - randomize_per_run: Si es True, se randomiza el orden de letras por run.
+        - actions: Lista de acciones para trials. Si es None, se usa una lista por defecto.
+        - randomize_per_run: Si es True, se randomiza el orden de acciones por run.
         - seed: Semilla para el generador de números aleatorios (reproducibilidad).
         - cue_base_duration: Duración base del cue en segundos.
         - cue_tmin: Duración mínima del cue en segundos. Se suma a cue_base_duration.
@@ -55,6 +53,13 @@ class SessionManager(QWidget):
         - randomize_cue_duration: Si es True, se randomiza la duración del cue entre cue_tmin y cue_tmax.
         """
         super().__init__()
+
+        self.pre_experiment = pre_experiment.lower()
+        self.emg_actions = emg_actions or ["cerrar las manos",
+                                           "mover brazos",
+                                           "morder y contraer músculos del cuello"]
+        
+        self.eog_actions = ["cruz_arriba","cruz_abajo","cruz_izquierda","cruz_derecha"]
 
         self.phases = self.PHASES.copy()
 
@@ -65,14 +70,22 @@ class SessionManager(QWidget):
         self.next_transition = -1
 
         # --- configuración de sesión/runs/trials/letras ---
-        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
-        self.trials_per_run = len(self.letters)
+        if self.pre_experiment == "emg":
+            self.actions = self.emg_actions
+
+        elif self.pre_experiment == "eog":
+            self.actions = self.eog_actions
+
+        elif self.pre_experiment == "basal":
+            self.actions = ["basal"]
+
+        self.trials_per_run = len(self.actions)
         self.n_runs = n_runs
         self.randomize_per_run = randomize_per_run
 
         self.current_run = 0
         self.current_trial = -1
-        self.current_letter = None
+        self.current_action = None
         self.session_finished = False
 
         self.rng = np.random.default_rng(seed) # para reproducibilidad
@@ -96,11 +109,6 @@ class SessionManager(QWidget):
             self._set_random_rest_duration()
         else:
             self.phases["rest"]["duration"] = self.rest_base_duration
-
-        # ----------------------------------------------------------
-        # Objeto para enviar mensajes a la tablet
-        self.tabmanager = TabletMessenger(serial=tabletID)
-        self.tabid = tabid
 
         # ----------------------------------------------------------
         # Atributos para control del main
@@ -141,15 +149,6 @@ class SessionManager(QWidget):
                                    trialFadeOffTime=0.0, trialRestTime=0.0,
                                    sessionFinalTime=0.0,)
 
-        # --------------------------------------------------------
-        # Marcadores de eventos de tablet
-        self.tablet_marker = MarkerManager(stream_name="Tablet_Markers",
-                                            stream_type="Markers",
-                                            source_id="Tablet",
-                                            channel_count=1,
-                                            channel_format="string",
-                                            nominal_srate=0)
-
         self.initUI()
 
     def _advance_phase(self):
@@ -183,7 +182,7 @@ class SessionManager(QWidget):
 
         # avanzar al próximo trial dentro del run
         self.current_trial += 1
-        self.current_letter = self.run_orders[self.current_run][self.current_trial]
+        self.current_action = self.run_orders[self.current_run][self.current_trial]
         return True
     
     def _set_random_cue_duration(self):
@@ -208,6 +207,9 @@ class SessionManager(QWidget):
         """
         Método para avanzar de fase solamente cuando se superen los tiempos de cada una.
         """
+        if self.session_finished:
+            return False
+        
         now = time.time()#local_clock()
         if now > self.next_transition:
             self._advance_phase()
@@ -240,27 +242,16 @@ class SessionManager(QWidget):
         if self.randomize_rest_duration and self.in_phase == "rest":
             self._set_random_rest_duration()
 
-        # --- Enviar mensaje a tablet ---
-        mensaje = self.tabmanager.make_message(
-            "on",
-            self.sessioninfo.session_id,
-            self.current_run + 1,
-            self.sessioninfo.subject_id,
-            self.current_trial + 1,
-            self.in_phase,
-            self.current_letter or "",
-            self.phases[self.in_phase]["duration"])
-        self.tabmanager.send_message(mensaje, self.tabid)
-
         # --- Actualizar información común ---
         self.laptop_marker_dict.update({
             "runID": self.current_run + 1,
             "trialID": self.current_trial + 1,
-            "letter": self.current_letter
+            "letter": self.current_action
         })
 
         # --- Acciones por fase ---
         phase_actions = {
+            "first_jump": self._on_first_jump,
             "start": lambda: self._on_phase("trialStartTime", "#000000"),
             "precue": lambda: self._on_phase("trialPrecueTime", "#000000"),
             "cue": lambda: self._on_phase("trialCueTime", "#ffffff"),
@@ -273,6 +264,69 @@ class SessionManager(QWidget):
         action = phase_actions.get(self.in_phase)
         if action:
             action()
+
+        self._update_stimuli()
+
+    def _update_stimuli(self):
+        """
+        Método para actualizar los estímulos visuales en la ventana
+        de estímulos según la fase actual y el tipo de pre-experimento.
+        """
+
+        if self.session_finished:
+            return  # 🔥 BLOQUEO CRÍTICO
+
+        if self.stimuli_window is None:
+            return
+        
+        if self.in_phase == "first_jump":
+            return
+
+        phase = self.in_phase
+        action = self.current_action  # reutilizamos esto
+
+        # =========================
+        # EMG
+        # =========================
+        if self.pre_experiment == "emg":
+
+            if phase == "cue":
+                self.stimuli_window.label_orden.setVisible(True)
+                self.stimuli_window.cruz.setVisible(False)
+
+                self.stimuli_window.update_order(action)
+
+            else:
+                self.stimuli_window.label_orden.setVisible(False)
+
+        # =========================
+        # EOG
+        # =========================
+        elif self.pre_experiment == "eog":
+
+            if phase == "cue":
+                self.stimuli_window.label_orden.setVisible(False)
+                self.stimuli_window.cruz.setVisible(True)
+
+                # mover cruz según acción
+                self.stimuli_window.current_state = action
+                self.stimuli_window.update_positions()
+
+            else:
+                # volver al centro
+                self.stimuli_window.current_state = "cruz_centrada"
+                self.stimuli_window.update_positions()
+
+        # =========================
+        # BASAL
+        # =========================
+        elif self.pre_experiment == "basal":
+
+            self.stimuli_window.label_orden.setVisible(False)
+            self.stimuli_window.cruz.setVisible(True)
+
+            self.stimuli_window.current_state = "cruz_centrada"
+            self.stimuli_window.update_positions()
 
     def _on_phase(self, time_key, color, extra_action=None, log=None):
         """Aplica color, guarda tiempo y ejecuta acción opcional.
@@ -303,17 +357,17 @@ class SessionManager(QWidget):
         texto = (
                 f"<div style='font-size:30px; text-align:center;'>"
                 f"<span style='color:#de0000; font-size:34px; font-style:italic; text-decoration:underline;'>"
-                f"Información del Bloque"
+                f"Información de la ronda"
                 f"</span><br><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Run:</span> "
+                f"<span style='color:#2200ff; font-style:italic;'>Ronda:</span> "
                 f"{self.current_run+1} de {self.n_runs}<br>"
 
                 f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
                 f"{self.current_trial+1} de {self.trials_per_run}<br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Letra actual:</span> "
-                f"{self.current_letter or '-'}<br><br>"
+                f"<span style='color:#2200ff; font-style:italic;'>Acción actual:</span> "
+                f"{self.current_action or '-'}<br><br>"
 
                 f"<span style='color:#2200ff; font-style:italic;'>Duración fase (cue): </span> "
                 f"{cue_duration:.2f}s<br><br>"
@@ -325,23 +379,24 @@ class SessionManager(QWidget):
 
         self.information_label.change_text(texto)
 
+    def _on_first_jump(self):
+
+        if self.stimuli_window:
+            self.stimuli_window.label_orden.setVisible(True)
+            self.stimuli_window.cruz.setVisible(False)
+
+            self.stimuli_window.update_order(
+                "Prepárate...",
+                fontsize=48,
+                font_color="#ff6600"
+            )
+
+            self.stimuli_window.current_state = "orden_centrada"
+            self.stimuli_window.update()
+
     def _send_markers_phase(self):
         """Maneja la fase 'sendMarkers': envía marcadores a tablet y laptop."""
         logging.debug("Fase sendMarkers")
-
-        # --- Leer datos del trial desde la tablet ---
-        try:
-            tab_trial_data = self.tabmanager.read_trial_json(
-                subject=self.sessioninfo.subject_id,
-                session=self.sessioninfo.session_id,
-                run=self.current_run + 1,
-                trial_id=self.current_trial + 1
-            )
-            logging.debug("Marcadores de Tablet:")
-            logging.debug(tab_trial_data)
-            self.tablet_marker.sendMarker(tab_trial_data)
-        except Exception as e:
-            logging.error(f"Error al leer marcadores de la tablet: {e}")
 
         # --- Enviar marcadores de laptop ---
         try:
@@ -359,9 +414,6 @@ class SessionManager(QWidget):
 
     def get_elapsed_time(self):
         return (time.time() * 1000) - self.creation_time
-
-    # def get_accumulated_time(self):
-    #     return self.accumulated_time
     
     def runSession(self):
         app = QApplication.instance()
@@ -413,6 +465,11 @@ class SessionManager(QWidget):
         self.setLayout(layout_vertical)
         self.show()
 
+        self.stimuli_window = StimuliWindow()
+        self.stimuli_window.show()
+        self.stimuli_window.raise_()
+        self.stimuli_window.activateWindow()
+
     def keyPressEvent(self, event):
         """Maneja las teclas Enter (inicia) y Escape (detiene la sesión)."""
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
@@ -420,7 +477,10 @@ class SessionManager(QWidget):
             self.startSession()
         elif event.key() == Qt.Key_Escape:
             logging.info("Deteniendo...")
-            self.stop()
+            self._show_end_message()
+            self.mainTimer.stop()
+            self.uiTimer.stop()
+            self.uiTimer.stop()
             QApplication.quit()
 
     def startSession(self):
@@ -431,95 +491,80 @@ class SessionManager(QWidget):
         if not self._prepare_next_trial():
             self._finish_session()
             return
-        ##envío mensaje a la tablet para avisar el inicio de la sesión
-
-        mensaje = self.tabmanager.make_message(
-                "on",
-                self.sessioninfo.session_id,
-                self.current_run + 1,
-                self.sessioninfo.subject_id,
-                self.current_trial + 1,
-                self.in_phase,
-                self.current_letter or "",
-                self.phases[self.in_phase]["duration"],
-                sessionStartTime = t0_abs
-                )
-        
-        self.tabmanager.send_message(mensaje, self.tabid)
 
         # salto de  first_jump a start
         # self._advance_phase()          # entra a "start"
         # self.handle_phase_transition() # envía "start" 1 sola vez
         self.next_transition = time.time() + self.phases[self.in_phase]["duration"]
         self.handle_phase_transition()
-
         self.mainTimer.start()
         self.uiTimer.start()
 
     def _finish_session(self):
-        """
-        Función para finalizar la sesión.
-        """
+
+        self.session_finished = True
+
         self.laptop_marker_dict["sessionFinalTime"] = time.time()*1000
-        self.laptop_marker_dict["letter"] = "fin" #se replica lo que se hace en la tablet
+        self.laptop_marker_dict["letter"] = "fin"
         self.laptop_marker_dict["trialID"] = "fin"
-        logging.info("Sesión completada. Cerrando.")
 
+        logging.info("Sesión completada.")
 
-        ##IMPORTANTE: Si se quisiera enviar los marcadores de laptop al finalizar la sesión,
-        ##se debe descomentar el bloque siguiente
-
-        # Mensaje a labrecorder con los marcadores de laptop
-        # laptop_markers_msg = json.dumps(self.laptop_marker_dict)
-        # self.laptop_marker.sendMarker(laptop_markers_msg)
-
-        ## ---***** El siguiente bloque de try-except debe enviarse si se quiere avisar
-        ## a la tablet que el bloque ha finalizado *****---
-        try:
-            #envío mensaje a la tablet para avisar el final de la sesión
-            #la tablet recibe y guarda el tiempo en que cierra la app
-            mensaje = self.tabmanager.make_message(
-                "final",
-                self.sessioninfo.session_id,
-                "final",
-                self.sessioninfo.subject_id,
-                0,
-                "final", "fin", self.get_elapsed_time()/1000)
-            self.tabmanager.send_message(mensaje, self.tabid)
-        except Exception:
-            logging.error("No se pudo enviar mensaje de final de sesión")
-
-        logging.info(f"Tiempo total de sesión: {self.get_elapsed_time()/1000:.2f} s")
-        self.stop()
-
-    def _read_final_with_retry(self, subject, session, timeout=3.0, interval=0.1):
-        """Intenta leer el último JSON de la tablet con reintentos exponenciales."""
-        t0 = time.time()
-        wait = interval
-        while time.time() - t0 < timeout:
-            try:
-                return self.tabmanager.read_trial_json(
-                    subject=subject, session=session, run="final", trial_id=0)
-            except Exception:
-                time.sleep(wait)
-                wait = min(wait * 1.5, 0.5)
-        return None
-
-    def stop(self):
+        # detener timers
         self.mainTimer.stop()
         self.uiTimer.stop()
-        logging.info("Sesión detenida")
-        self.close()
+
+        # mostrar mensaje final
+        self._show_end_message()
+
+        # cierre opcional (comentado)
+        # QTimer.singleShot(3000, self.stop)
 
     def _make_run_order(self):
-            base = list(self.letters)
+            base = list(self.actions)
             if self.randomize_per_run:
                 self.rng.shuffle(base)
             return base
+    
+    def _show_end_message(self):
+        # -------- StimuliWindow --------
+        if self.stimuli_window:
+            self.stimuli_window.label_orden.setVisible(True)
+            self.stimuli_window.cruz.setVisible(False)
+
+            self.stimuli_window.update_order(
+                "Podes descansar...",
+                fontsize=42,
+                font_color="#008000"
+            )
+
+            self.stimuli_window.current_state = "orden_centrada"
+            self.stimuli_window.repaint()
+            self.stimuli_window.update()
+            
+        # -------- Estado (SquareWidget) --------
+        texto = (
+            f"<div style='font-size:30px; text-align:center;'>"
+            f"<span style='color:#de0000; font-size:34px; font-style:italic; text-decoration:underline;'>"
+            f"Información de la ronda"
+            f"</span><br><br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Ronda:</span> "
+            f"{self.current_run+1} de {self.n_runs}<br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Acción actual:</span> "
+            f"<b>Fin de ronda</b><br><br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Tiempo total:</span> "
+            f"{self.get_elapsed_time()/1000:.1f}s"
+            f"</div>"
+        )
+
+        self.information_label.change_text(texto)
 
 if __name__ == "__main__":
     from pyhwr.utils import SessionInfo
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.INFO)
 
     app = QApplication(sys.argv)
 
@@ -529,18 +574,18 @@ if __name__ == "__main__":
         session_name="test_v0.0.5",
         session_date=time.strftime("%Y-%m-%d"),)
 
-    manager = SessionManager(
+    manager = PreExperimentManager(
     session_info,
+    pre_experiment="eog",
     n_runs = 1,
-    letters = ["ta","a","ta","n","ta"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad
-    cue_base_duration = 4.,
-    cue_tmin_random = 1.0,
-    cue_tmax_random = 2.0,
+    cue_base_duration = 1.,
+    cue_tmin_random = 0.1,
+    cue_tmax_random =  0.5,
     randomize_cue_duration = True,
-    rest_base_duration=1.,
-    rest_tmin_random=0.,
+    rest_base_duration=2.,
+    rest_tmin_random=0.1,
     rest_tmax_random=1.,
     randomize_rest_duration=True
     )                 

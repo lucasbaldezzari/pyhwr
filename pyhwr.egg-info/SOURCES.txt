@@ -17,5 +17,6 @@ pyhwr/utils/SessionInfo.py
 pyhwr/utils/__init__.py
 pyhwr/utils/decorators.py
 pyhwr/widgets/SquareWidget.py
+pyhwr/widgets/StimuliWindow.py
 pyhwr/widgets/__init__.py
 test/test_sueltos.py
