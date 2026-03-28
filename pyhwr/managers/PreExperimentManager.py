@@ -445,6 +445,15 @@ class PreExperimentManager(QWidget):
         
         text = (
                 f"<div style='font-size:24px; text-align:center;'>"
+                    f"<b><span style='color:#ffffff;'>INICIO RONDA</span></b><br>"
+                f"</div>"
+            )
+        
+        self.marcador_inicio = SquareWidget(x=600, y=650, width=250, height=250, color="black",
+                                        text=text, text_color="white")
+        
+        text = (
+                f"<div style='font-size:24px; text-align:center;'>"
                     f"<b><span style='color:#ffffff;'>CUE</span></b><br>"
                 f"</div>"
             )
@@ -484,6 +493,7 @@ class PreExperimentManager(QWidget):
             QApplication.quit()
 
     def startSession(self):
+        self.marcador_inicio.change_color("#FFFFFF")
         self.creation_time = time.time()*1000
         t0_abs = time.time()*1000
         self.laptop_marker_dict["sessionStartTime"] = t0_abs
