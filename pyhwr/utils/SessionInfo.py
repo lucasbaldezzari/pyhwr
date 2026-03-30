@@ -1,14 +1,30 @@
 class SessionInfo():
-    def __init__(self, session_id, subject_id, session_name,
-                 session_date, comments=None):
-        self.session_id = session_id
-        self.subject_id = subject_id
-        self.session_name = session_name
+    def __init__(self, sub=1, ses=1, task="ejecutada", run=1, suffix="eeg",
+                 session_id = None, subject_id = None, session_name = None,
+                 session_date=None, bids_file=None, comments=None):
+        """
+        Función para almacenar la información de una sesión de EEG, con formato BIDS.
+        session_id: ID de la sesión (ej: "ses-01")
+        subject_id: ID del sujeto (ej: "sub-01")
+        session_name: Nombre descriptivo de la sesión (ej: "sesion_pre")
+        session_date: Fecha de la sesión (ej: "2024-06-01")
+        sub, ses, task, run, suffix: campos para generar el nombre de archivo BIDS
+        comments: comentarios adicionales (opcional)
+        """
+        self.session_id = ses if session_id is None else session_id
+        self.subject_id = sub if subject_id is None else subject_id
+        self.session_name = task if session_name is None else session_name
         self.date = session_date
         self.comments = comments
+        self.sub = sub
+        self.ses = ses
+        self.task = task
+        self.run = run
+        self.suffix = suffix
+        self.bids_file_ = bids_file
 
     def __str__(self):
-        return f"SesionInfo(id={self.id}, name={self.session_name}, date={self.date}"
+        return f"SesionInfo(id={self.session_id}, name={self.session_name}, date={self.date})"
     
     def __repr__(self):
         return self.__str__()
@@ -19,8 +35,14 @@ class SessionInfo():
             "session_name": self.session_name,
             "date": self.date,
             "subject_id": self.subject_id,
-            "comments": self.comments
-        }
+            "comments": self.comments,
+            "sub": self.sub,
+            "ses": self.ses,
+            "task": self.task,
+            "run": self.run,
+            "suffix": self.suffix,
+            "bids_file": self.bids_file_,
+            }
     
     def __getitem__(self, key):
         return self.to_dict().get(key)
