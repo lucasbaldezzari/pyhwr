@@ -2,6 +2,6 @@
 from .SquareWidget import SquareWidget
 from .StimuliWindow import StimuliWindow
 from .InitAPP import InitAPP
-from .LauncherAPP import LauncherAPP
+from .RunConfigurationApp import RunConfigurationApp
 
-__all__ = ["SquareWidget", "StimuliWindow", "InitAPP", "LauncherAPP"]
+__all__ = ["SquareWidget", "StimuliWindow", "InitAPP", "RunConfigurationApp"]

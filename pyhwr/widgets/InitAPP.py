@@ -94,9 +94,9 @@ class InitAPP(QMainWindow):
             "root": self.input_rootfolder.text()
         }
 
-        from pyhwr.widgets import LauncherAPP
+        from pyhwr.widgets import RunConfigurationApp
         ## Creamos una nueva ventana
-        self.launcher = LauncherAPP(config)
+        self.launcher = RunConfigurationApp(config)
         self.launcher.show()
         self.close()
 

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication
 
 # Importa tus ventanas
 from pyhwr.widgets import InitAPP
-from pyhwr.widgets import LauncherAPP
+from pyhwr.widgets import RunConfigurationApp
 
 
 class AppManager:
@@ -13,7 +13,7 @@ class AppManager:
 
         # Referencias a ventanas
         self.init_window = None
-        self.launcher_window = None
+        self.configuration_window = None
 
     # -----------------------------
     # START APP
@@ -30,17 +30,17 @@ class AppManager:
     # -----------------------------
     # TRANSICIÓN: Init → Launcher
     # -----------------------------
-    def start_launcher(self, config: dict):
+    def start_configurator(self, config: dict):
         """
         Recibe el diccionario de parámetros desde InitAPP
-        y lanza LauncherAPP
+        y lanza RunConfigurationApp
         """
 
         # Crear launcher con config
-        self.launcher_window = LauncherAPP(config)
+        self.configuration_window = RunConfigurationApp(config)
 
         # Mostrar launcher
-        self.launcher_window.show()
+        self.configuration_window.show()
 
         # Cerrar init (si existe)
         if self.init_window is not None:
@@ -55,9 +55,9 @@ class AppManager:
         self.init_window.manager = self
         self.init_window.show()
 
-        if self.launcher_window is not None:
-            self.launcher_window.close()
-            self.launcher_window = None
+        if self.configuration_window is not None:
+            self.configuration_window.close()
+            self.configuration_window = None
 
 
 # -----------------------------

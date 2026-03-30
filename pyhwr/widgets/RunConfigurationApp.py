@@ -4,13 +4,11 @@ from PyQt5 import uic
 import sys
 import os
 
-from pyhwr.managers import PreExperimentManager
-
-class LauncherAPP(QMainWindow):
+class RunConfigurationApp(QMainWindow):
     def __init__(self, config: dict = None):
         super().__init__()
         # Cargar archivo .ui
-        ui_path = os.path.join(os.path.dirname(__file__), 'launcherAPP.ui')
+        ui_path = os.path.join(os.path.dirname(__file__), 'runConfigurationApp.ui')
         uic.loadUi(ui_path, self)
 
         self.config = config
@@ -162,6 +160,6 @@ class LauncherAPP(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LauncherAPP(config={})
+    window = RunConfigurationApp(config={})
     window.show()
     sys.exit(app.exec_())
