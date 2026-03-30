@@ -15,6 +15,81 @@ class RunConfigurationApp(QMainWindow):
         texto = "ejecutada" if self.config is None or "task" not in self.config else self.config["task"]
         self.tipo_ronda_label.setText(texto)
 
+        ##diccionario con tiempos y cantidad de runs por defecto según tipo de experimento
+        self.experimento_defaults = {
+            "basal": {
+                "n_runs": 1,
+                "cue_base_duration": 60.,
+                "cue_tmin_random": 0.,
+                "cue_tmax_random": 0.,
+                "randomize_cue_duration": False,
+                "rest_base_duration": 1.,
+                "rest_tmin_random": 0.,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": False,
+            },
+            "emg": {
+                "n_runs": 1,
+                "cue_base_duration": 2.,
+                "cue_tmin_random": 0.1,
+                "cue_tmax_random": 0.5,
+                "randomize_cue_duration": True,
+                "rest_base_duration": 2.,
+                "rest_tmin_random": 0.5,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": True,
+                "randomize_per_run": False,
+            },
+            "eog": {
+                "n_runs": 1,
+                "cue_base_duration": 2.,
+                "cue_tmin_random": 0.1,
+                "cue_tmax_random": 0.5,
+                "randomize_cue_duration": True,
+                "rest_base_duration": 2.,
+                "rest_tmin_random": 0.5,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": True,
+                "randomize_per_run": False,
+            },
+            "entrenamiento": {
+                "n_runs": 1,
+                "cue_base_duration": 4.,
+                "cue_tmin_random": 1.,
+                "cue_tmax_random": 2.,
+                "randomize_cue_duration": True,
+                "rest_base_duration": 1.,
+                "rest_tmin_random": 0.,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": True,
+                "randomize_per_run": True,
+            },
+            "ejecutada": {
+                "n_runs": 8,
+                "cue_base_duration": 4.,
+                "cue_tmin_random": 1.,
+                "cue_tmax_random": 2.,
+                "randomize_cue_duration": True,
+                "rest_base_duration": 1.,
+                "rest_tmin_random": 0.,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": True,
+                "randomize_per_run": True,
+            },
+            "imaginada": {
+                "n_runs": 8,
+                "cue_base_duration": 4.,
+                "cue_tmin_random": 1.,
+                "cue_tmax_random": 2.,
+                "randomize_cue_duration": True,
+                "rest_base_duration": 1.,
+                "rest_tmin_random": 0.,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": True,
+                "randomize_per_run": True,
+            },
+        }
+
         ##cargo la task en comboBox_task
         index = self.comboBox_task.findText(texto)
         if index != -1:
@@ -36,6 +111,8 @@ class RunConfigurationApp(QMainWindow):
         self.lanzar_btn.clicked.connect(self.lanzar_btn_clicked)
 
         self.comboBox_task.currentIndexChanged.connect(self.update_tipo_ronda_label)
+        self.comboBox_task.currentIndexChanged.connect(self.fill_form_with_defaults)
+        self.fill_form_with_defaults()  # Llenar con valores por defecto al iniciar
 
         ##habilito randomize_per_run_box
         self.randomize_per_run_box.setEnabled(True)
@@ -80,6 +157,20 @@ class RunConfigurationApp(QMainWindow):
                 return None  ## si o si sacamos la semilla si el valor no es un entero válido
         return None
     
+    def fill_form_with_defaults(self):
+        experimento = self.tipo_ronda_label.text().lower()
+        defaults = self.experimento_defaults.get(experimento, {})
+        self.in_nruns.setText(str(defaults["n_runs"]))
+        self.in_cue_base_duration.setText(str(defaults["cue_base_duration"]))
+        self.randomize_cue_duration.setChecked(defaults["randomize_cue_duration"])
+        self.in_cue_tmin_random.setText(str(defaults["cue_tmin_random"]))
+        self.in_cue_tmax_random.setText(str(defaults["cue_tmax_random"]))
+        self.randomize_rest_duration.setChecked(defaults["randomize_rest_duration"])
+        self.in_rest_base_duration.setText(str(defaults["rest_base_duration"]))
+        self.in_rest_tmin_random.setText(str(defaults["rest_tmin_random"]))
+        self.in_rest_tmax_random.setText(str(defaults["rest_tmax_random"]))
+        self.randomize_per_run_box.setChecked(defaults.get("randomize_per_run", False))
+
     def lanzar_btn_clicked(self):
         """
         Instancia PreExperimentManager con parámetros de la UI,
@@ -95,7 +186,7 @@ class RunConfigurationApp(QMainWindow):
             case "entrenamiento" | "ejecutada" | "imaginada":
                 print("Lanzar experimento completo (no implementado aún)")
             case _:
-                print("Seleccionar un tipo de ronda válido para lanzar el pre-experimento.")
+                print("Ninguna de las opciones es válida. No se hace nada.")
                 return
 
         ## Cerramos launcher
