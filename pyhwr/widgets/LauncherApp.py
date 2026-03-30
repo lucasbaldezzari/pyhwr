@@ -35,6 +35,19 @@ class LauncherApp(QMainWindow):
         self.gtecrecord_cbox.stateChanged.connect(self._update_start_button)
         self.lslstarted_cbox.stateChanged.connect(self._update_start_button)
         self.lslstreamers_cbox.stateChanged.connect(self._update_start_button)
+        self.check_all_btn.clicked.connect(self.check_all)
+
+        self.checkboxes = [
+            self.wigen_cbox,
+            self.widpos_cbox,
+            self.senspos_cbox,
+            self.senscali_cbox,
+            self.triggersok_cbox,
+            self.gtecfile_cbox,
+            self.gtecrecord_cbox,
+            self.lslstarted_cbox,
+            self.lslstreamers_cbox,
+        ]
 
     def update_session_info(self, sub="01", task="basal", n_runs="1",
                             bids_file="sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]"):
@@ -48,23 +61,19 @@ class LauncherApp(QMainWindow):
         self.nruns_label.setText(str(n_runs))
         self.bids_label.setText(str(bids_file))
 
+    def check_all(self):
+        """
+        Marca todos los checkboxes como verificados.
+        """
+        for cb in self.checkboxes:
+            cb.setChecked(True)
+
     def _update_start_button(self):
         """
         Habilita el botón 'Iniciar' solo si todos los checkboxes requeridos están activos.
         """
-        checkboxes = [
-        self.wigen_cbox,
-        self.widpos_cbox,
-        self.senspos_cbox,
-        self.senscali_cbox,
-        self.triggersok_cbox,
-        self.gtecfile_cbox,
-        self.gtecrecord_cbox,
-        self.lslstarted_cbox,
-        self.lslstreamers_cbox,
-        ]
 
-        all_checked = all(cb.isChecked() for cb in checkboxes)
+        all_checked = all(cb.isChecked() for cb in self.checkboxes)
         self.iniciar_btn.setEnabled(all_checked)
 
     def _on_start(self):
