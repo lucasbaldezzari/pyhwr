@@ -1,9 +1,13 @@
 class SessionInfo():
+    """
+    Clase para almacenar información relevante de la sesión,
+    como el ID de la sesión, el nombre descriptivo, la fecha, el ID del sujeto,
+    comentarios adicionales, y campos para generar el nombre de archivo BIDS (sub, ses, task, run, suffix).
+    """
     def __init__(self, sub=1, ses=1, task="ejecutada", run=1, suffix="eeg",
                  session_id = None, subject_id = None, session_name = None,
                  session_date=None, bids_file=None, comments=None):
         """
-        Función para almacenar la información de una sesión de EEG, con formato BIDS.
         session_id: ID de la sesión (ej: "ses-01")
         subject_id: ID del sujeto (ej: "sub-01")
         session_name: Nombre descriptivo de la sesión (ej: "sesion_pre")
@@ -21,7 +25,7 @@ class SessionInfo():
         self.task = task
         self.run = run
         self.suffix = suffix
-        self.bids_file_ = bids_file
+        self.bids_file = bids_file
 
     def __str__(self):
         return f"SesionInfo(id={self.session_id}, name={self.session_name}, date={self.date})"
@@ -41,7 +45,7 @@ class SessionInfo():
             "task": self.task,
             "run": self.run,
             "suffix": self.suffix,
-            "bids_file": self.bids_file_,
+            "bids_file": self.bids_file,
             }
     
     def __getitem__(self, key):

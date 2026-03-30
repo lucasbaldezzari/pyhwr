@@ -6,11 +6,12 @@ from pylsl import local_clock
 # from pyhwr.managers.TabletMessenger import TabletMessenger
 from pyhwr.managers.MarkerManager import MarkerManager
 from pyhwr.widgets import SquareWidget, StimuliWindow
-from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
-from PyQt5.QtCore import QTimer, Qt
+from pyhwr.widgets import LauncherApp
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer, QObject
 import sys
 
-class PreExperimentManager(QWidget):
+class PreExperimentManager(QObject):
 
     PHASES = {
         "first_jump": {"next": "start", "duration": 4.},
@@ -78,6 +79,9 @@ class PreExperimentManager(QWidget):
 
         elif self.pre_experiment == "basal":
             self.actions = ["basal"]
+        else:
+            raise ValueError(f"Tipo de pre-experimento '{self.pre_experiment}' no reconocido para actualizar estímulos.")
+            
 
         self.trials_per_run = len(self.actions)
         self.n_runs = n_runs
@@ -274,7 +278,7 @@ class PreExperimentManager(QWidget):
         """
 
         if self.session_finished:
-            return  # 🔥 BLOQUEO CRÍTICO
+            return
 
         if self.stimuli_window is None:
             return
@@ -283,11 +287,9 @@ class PreExperimentManager(QWidget):
             return
 
         phase = self.in_phase
-        action = self.current_action  # reutilizamos esto
+        action = self.current_action
 
-        # =========================
-        # EMG
-        # =========================
+        ## Ronda EMG
         if self.pre_experiment == "emg":
 
             if phase == "cue":
@@ -299,9 +301,7 @@ class PreExperimentManager(QWidget):
             else:
                 self.stimuli_window.label_orden.setVisible(False)
 
-        # =========================
-        # EOG
-        # =========================
+        ## Ronda EOG
         elif self.pre_experiment == "eog":
 
             if phase == "cue":
@@ -317,9 +317,7 @@ class PreExperimentManager(QWidget):
                 self.stimuli_window.current_state = "cruz_centrada"
                 self.stimuli_window.update_positions()
 
-        # =========================
-        # BASAL
-        # =========================
+        ## Ronda BASAL
         elif self.pre_experiment == "basal":
 
             self.stimuli_window.label_orden.setVisible(False)
@@ -327,6 +325,11 @@ class PreExperimentManager(QWidget):
 
             self.stimuli_window.current_state = "cruz_centrada"
             self.stimuli_window.update_positions()
+
+        else:
+            logging.warning(f"Tipo de pre-experimento '{self.pre_experiment}' no reconocido para actualizar estímulos.")
+            ##cerramos app
+            self.stopSession()
 
     def _on_phase(self, time_key, color, extra_action=None, log=None):
         """Aplica color, guarda tiempo y ejecuta acción opcional.
@@ -423,15 +426,21 @@ class PreExperimentManager(QWidget):
     def initUI(self):
         """
         Inicializa la interfaz gráfica del gestor de sesión."""
-        # Layouts principales
-        layout_vertical = QVBoxLayout()
-        layout_horizontal = QHBoxLayout()
 
-        # Label principal
-        label = QLabel("Presione Enter para iniciar o Escape para salir")
-        label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("font-size: 16px; color: black;")
-        layout_vertical.addWidget(label)
+        ## Launcher para iniciar el registro
+        self.launcher = LauncherApp()
+        # -------- Actualizo labels del launcher --------
+        self.launcher.update_session_info(
+            sub=self.sessioninfo.sub,
+            task=self.pre_experiment,
+            n_runs=self.n_runs,
+            bids_file=self.sessioninfo["bids_file"]
+        )
+
+        ## Conecto las señales del launcher a los métodos correspondientes
+        self.launcher.start_session_signal.connect(self.startSession)
+        self.launcher.stop_session_signal.connect(self.stopSession)
+        self.launcher.quit_session_signal.connect(self.quitSession)
 
         # Widgets de marcadores
         text = (
@@ -471,26 +480,29 @@ class PreExperimentManager(QWidget):
                                                 text=text, text_color="black")
         
         # Agregar widgets al layout horizontal        # Aplicar layout
-        self.setLayout(layout_vertical)
-        self.show()
+        # self.setLayout(layout_vertical)
+        # self.show()
 
         self.stimuli_window = StimuliWindow()
         self.stimuli_window.show()
         self.stimuli_window.raise_()
         self.stimuli_window.activateWindow()
+        self.launcher.show()
 
-    def keyPressEvent(self, event):
-        """Maneja las teclas Enter (inicia) y Escape (detiene la sesión)."""
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
-            logging.info("Iniciando...")
-            self.startSession()
-        elif event.key() == Qt.Key_Escape:
-            logging.info("Deteniendo...")
-            self._show_end_message()
-            self.mainTimer.stop()
-            self.uiTimer.stop()
-            self.uiTimer.stop()
-            QApplication.quit()
+    def stopSession(self):
+        logging.info("Parando sesión...")
+        self.session_finished = True
+        self._show_end_message()
+        self.mainTimer.stop()
+        self.uiTimer.stop()
+
+    def quitSession(self):
+        logging.info("Saliendo de la sesión...")
+        self._show_end_message()
+        self.mainTimer.stop()
+        self.uiTimer.stop()
+        self.launcher.close()
+        QApplication.quit()
 
     def startSession(self):
         self.marcador_inicio.change_color("#FFFFFF")
@@ -578,15 +590,22 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
+    ### SessionInfo
+    task = "basal"
+    bidsf_file = f"sub-01_ses-01_task-{task}_run-01_eeg.bdf"
     session_info = SessionInfo(
-        session_id="1",
-        subject_id="test_v0.0.5",
-        session_name="test_v0.0.5",
-        session_date=time.strftime("%Y-%m-%d"),)
+    sub = 1,
+    ses = 1,
+    task = task,
+    run = 1,
+    suffix = "eeg",
+    session_date=time.strftime("%Y-%m-%d"),
+    bids_file=bidsf_file,
+    )
 
     manager = PreExperimentManager(
     session_info,
-    pre_experiment="eog",
+    pre_experiment=task,
     n_runs = 1,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad

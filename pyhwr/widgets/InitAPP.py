@@ -5,8 +5,6 @@ from PyQt5 import uic
 import sys
 import os
 
-from numpy.strings import index
-
 class InitAPP(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -91,7 +89,8 @@ class InitAPP(QMainWindow):
             "task": self.input_task.text(),
             "run": self.input_run.text(),
             "suffix": self.input_suffix.text(),
-            "root": self.input_rootfolder.text()
+            "root": self.input_rootfolder.text(),
+            "bids_file": self.fileName.text(),
         }
 
         from pyhwr.widgets import RunConfigurationApp
@@ -212,6 +211,6 @@ class InitAPP(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = InitAPP()
-    window.show()
+    initapp = InitAPP()
+    initapp.show()
     sys.exit(app.exec_())

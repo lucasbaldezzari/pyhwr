@@ -80,21 +80,52 @@ class RunConfigurationApp(QMainWindow):
                 return None  ## si o si sacamos la semilla si el valor no es un entero válido
         return None
     
-    def lanzar_preexperiment(self):
-        from pyhwr.utils import SessionInfo
-        from pyhwr.managers.PreExperimentManager import PreExperimentManager
-        import time
+    def lanzar_btn_clicked(self):
+        """
+        Instancia PreExperimentManager con parámetros de la UI,
+        muestra la nueva ventana y cierra el launcher.
+        """
 
+        tipo_experimento = self.comboBox_task.currentText()
+        match tipo_experimento:
+            case "basal" | "emg" | "eog":
+                self.lanzar_preexperiment()
+            case "entrenamiento":
+                print("Lanzar entrenamiento (no implementado aún)")
+            case "entrenamiento" | "ejecutada" | "imaginada":
+                print("Lanzar experimento completo (no implementado aún)")
+            case _:
+                print("Seleccionar un tipo de ronda válido para lanzar el pre-experimento.")
+                return
+
+        ## Cerramos launcher
+        self.close()
+
+    def make_SessionInfo(self):
+        from pyhwr.utils import SessionInfo
+        import time
         ### SessionInfo
+        task = self.comboBox_task.currentText()
+        bidsf_file = f"sub-01_ses-01_task-{task}_run-01_eeg.bdf"
         session_info = SessionInfo(
         sub = self.config.get("sub", 1),
         ses = self.config.get("ses", 1),
         task = self.config.get("task", "ejecutada"),
         run = self.config.get("run", 1),
         suffix = self.config.get("suffix", "eeg"),
-        session_date=time.strftime("%Y-%m-%d"),)
-        print(session_info)
+        session_date=time.strftime("%Y-%m-%d"),
+        bids_file=self.config.get("bids_file", bidsf_file),
+        )
         del time
+        del SessionInfo
+
+        return session_info
+    
+    def lanzar_preexperiment(self):
+        from pyhwr.managers.PreExperimentManager import PreExperimentManager
+
+        ### SessionInfo
+        session_info = self.make_SessionInfo()
 
         ## ***********************************************************
         ## tomando datos de la UI para ejecutar PreExperimentManager
@@ -134,29 +165,6 @@ class RunConfigurationApp(QMainWindow):
             randomize_rest_duration=randomize_rest
         )
 
-        ## Mostramos ventana
-        self.manager.show()
-    
-    def lanzar_btn_clicked(self):
-        """
-        Instancia PreExperimentManager con parámetros de la UI,
-        muestra la nueva ventana y cierra el launcher.
-        """
-
-        tipo_experimento = self.comboBox_task.currentText()
-        match tipo_experimento:
-            case "basal" | "emg" | "eog":
-                self.lanzar_preexperiment()
-            case "entrenamiento":
-                print("Lanzar entrenamiento (no implementado aún)")
-            case "entrenamiento" | "ejecutada" | "imaginada":
-                print("Lanzar experimento completo (no implementado aún)")
-            case _:
-                print("Seleccionar un tipo de ronda válido para lanzar el pre-experimento.")
-                return
-
-        ## Cerramos launcher
-        self.close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

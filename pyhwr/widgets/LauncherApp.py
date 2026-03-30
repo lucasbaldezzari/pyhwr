@@ -1,0 +1,91 @@
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import pyqtSignal
+import sys
+import os
+
+
+class LauncherApp(QMainWindow):
+
+    start_session_signal = pyqtSignal()
+    stop_session_signal = pyqtSignal()
+    quit_session_signal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        ui_path = os.path.join(os.path.dirname(__file__), 'launcherApp.ui')
+        uic.loadUi(ui_path, self)
+
+        self.iniciar_btn.setEnabled(False)
+        self.parar_btn.setEnabled(False)
+
+        # conexiones
+        self.iniciar_btn.clicked.connect(self._on_start)
+        self.parar_btn.clicked.connect(self._on_stop)
+        self.salir_btn.clicked.connect(self._on_quit)
+        self.update_session_info()
+
+        # conectar checkboxes
+        self.wigen_cbox.stateChanged.connect(self._update_start_button)
+        self.widpos_cbox.stateChanged.connect(self._update_start_button)
+        self.senspos_cbox.stateChanged.connect(self._update_start_button)
+        self.senscali_cbox.stateChanged.connect(self._update_start_button)
+        self.triggersok_cbox.stateChanged.connect(self._update_start_button)
+        self.gtecfile_cbox.stateChanged.connect(self._update_start_button)
+        self.gtecrecord_cbox.stateChanged.connect(self._update_start_button)
+        self.lslstarted_cbox.stateChanged.connect(self._update_start_button)
+        self.lslstreamers_cbox.stateChanged.connect(self._update_start_button)
+
+    def update_session_info(self, sub="01", task="basal", n_runs="1",
+                            bids_file="sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]"):
+        """
+        Actualiza los labels de la UI con información de la sesión.
+        Todos los parámetros tienen valores por defecto para robustez.
+        """
+
+        self.sub_label.setText(str(sub))
+        self.task_label.setText(str(task))
+        self.nruns_label.setText(str(n_runs))
+        self.bids_label.setText(str(bids_file))
+
+    def _update_start_button(self):
+        """
+        Habilita el botón 'Iniciar' solo si todos los checkboxes requeridos están activos.
+        """
+        checkboxes = [
+        self.wigen_cbox,
+        self.widpos_cbox,
+        self.senspos_cbox,
+        self.senscali_cbox,
+        self.triggersok_cbox,
+        self.gtecfile_cbox,
+        self.gtecrecord_cbox,
+        self.lslstarted_cbox,
+        self.lslstreamers_cbox,
+        ]
+
+        all_checked = all(cb.isChecked() for cb in checkboxes)
+        self.iniciar_btn.setEnabled(all_checked)
+
+    def _on_start(self):
+        print("Iniciar")
+        self.iniciar_btn.setEnabled(False)
+        self.parar_btn.setEnabled(True)
+        self.start_session_signal.emit()
+
+    def _on_stop(self):
+        print("Parar")
+        self.iniciar_btn.setEnabled(True)
+        self.parar_btn.setEnabled(False)
+        self.stop_session_signal.emit()
+
+    def _on_quit(self):
+        print("Salir")
+        self.quit_session_signal.emit()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    launcher = LauncherApp()
+    launcher.show()
+    sys.exit(app.exec_())
