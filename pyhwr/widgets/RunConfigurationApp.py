@@ -228,6 +228,7 @@ class RunConfigurationApp(QMainWindow):
         suffix = self.config.get("suffix", "eeg"),
         session_date=time.strftime("%Y-%m-%d"),
         bids_file=self.config.get("bids_file", bidsf_file),
+        session_id=task,
         )
         del time
         del SessionInfo
@@ -247,7 +248,6 @@ class RunConfigurationApp(QMainWindow):
         ## ***********************************************************
         ## tomando datos de la UI para ejecutar PreExperimentManager
         ## ***********************************************************
-        task = self.comboBox_task.currentText().lower() ## pre-experimento a ejecutar
 
         n_runs= int(self.in_nruns.text())
         cue_base_duration = float(self.in_cue_base_duration.text())
