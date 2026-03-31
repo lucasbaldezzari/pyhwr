@@ -33,6 +33,12 @@ QLabel#genparams_label {
     color: #ffffff;
 }
 
+QLabel#sanity_label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
 
 /* =========================
    LABELS GENERALES

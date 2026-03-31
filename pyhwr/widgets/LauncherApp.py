@@ -66,6 +66,7 @@ class LauncherApp(QMainWindow):
         ]
 
     def update_session_info(self, sub="01", task="basal", n_runs="1",
+                            ses="01", run = "01",
                             bids_file="sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]",
                             root_folder="D:\\repos\\pyhwr\\"):
         """
@@ -78,6 +79,8 @@ class LauncherApp(QMainWindow):
         self.nruns_label.setText(str(n_runs))
         self.bids_label.setText(str(bids_file))
         self.root_label.setText(str(root_folder))
+        self.ses_label.setText(str(ses))
+        self.run_label.setText(str(run))
 
     def check_all(self):
         """
@@ -99,6 +102,8 @@ class LauncherApp(QMainWindow):
         print("Iniciar")
         self.iniciar_btn.setEnabled(False)
         self.parar_btn.setEnabled(True)
+        #deshabilito volver_btn
+        self.volver_btn.setEnabled(False)
         self.start_session_signal.emit()
 
     def _on_stop(self):
@@ -106,6 +111,8 @@ class LauncherApp(QMainWindow):
         print("Parar")
         self.iniciar_btn.setEnabled(True)
         self.parar_btn.setEnabled(False)
+        ##una vez que se inicia la sesión, no se puede volver a configuración hasta que se cierre la aplicación
+        self.volver_btn.setEnabled(False)
         self.stop_session_signal.emit()
 
     def _on_quit(self):
@@ -119,7 +126,18 @@ class LauncherApp(QMainWindow):
             """
             from pyhwr.widgets import RunConfigurationApp  # ajusta si la ruta es distinta
 
-            self.run_config_window = RunConfigurationApp()
+            config = {
+            # "tipo_ronda": self.task_label.text(),
+            # "sub": self.sub_label.text(),
+            # "ses": ,
+            # "task": self.task_label.text(),
+            # "run": ,
+            # "suffix": ,
+            # "root": ,
+            # "bids_file": ,
+            }
+
+            self.run_config_window = RunConfigurationApp(config=config)
             self.run_config_window.show()
 
             del RunConfigurationApp

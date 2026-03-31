@@ -385,6 +385,8 @@ class SessionManager(QWidget):
             n_runs=self.n_runs,
             bids_file=self.sessioninfo["bids_file"],
             root_folder=self.sessioninfo["root_folder"],
+            ses=self.sessioninfo["ses"],
+            run=self.sessioninfo["run"],
         )
 
         ## Conecto las señales del launcher a los métodos correspondientes

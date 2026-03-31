@@ -88,7 +88,7 @@ class InitAPP(QMainWindow):
 
         ## diccionario de parámetros para pasar a LauncherAPP
         config = {
-            "tipo_ronda": self.combo_tipo_task.currentText(),
+            "tipo_ronda": self.input_task.text(),
             "sub": self.input_sub.text(),
             "ses": self.input_ses.text(),
             "task": self.input_task.text(),
