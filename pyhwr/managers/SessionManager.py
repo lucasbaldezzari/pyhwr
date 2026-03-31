@@ -383,7 +383,8 @@ class SessionManager(QWidget):
             sub=self.sessioninfo.sub,
             task=self.experimento,
             n_runs=self.n_runs,
-            bids_file=self.sessioninfo["bids_file"]
+            bids_file=self.sessioninfo["bids_file"],
+            root_folder=self.sessioninfo["root_folder"],
         )
 
         ## Conecto las señales del launcher a los métodos correspondientes
@@ -556,7 +557,7 @@ if __name__ == "__main__":
     rest_tmin_random=0.,
     rest_tmax_random=1.,
     randomize_rest_duration=True,
-    tabletID="R52Y50AG4FF"
+    tabletID="R52Y50AG4FF",
     )                 
 
     exit_code = app.exec_()

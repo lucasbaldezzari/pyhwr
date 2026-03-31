@@ -434,7 +434,8 @@ class PreExperimentManager(QObject):
             sub=self.sessioninfo.sub,
             task=self.pre_experiment,
             n_runs=self.n_runs,
-            bids_file=self.sessioninfo["bids_file"]
+            bids_file=self.sessioninfo["bids_file"],
+            root_folder=self.sessioninfo["root_folder"],
         )
 
         ## Conecto las señales del launcher a los métodos correspondientes
