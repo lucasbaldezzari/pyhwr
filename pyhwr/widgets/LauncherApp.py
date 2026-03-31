@@ -13,10 +13,17 @@ class LauncherApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        ui_path = os.path.join(os.path.dirname(__file__), 'launcherApp.ui')
+        base_dir = os.path.dirname(__file__)
+        ui_path = os.path.join(base_dir, 'launcherApp.ui')
         uic.loadUi(ui_path, self)
 
-        with open("pyhwr\\widgets\\styles\\launcherapp_styles.css", "r", encoding="utf-8") as f:
+        css_path = os.path.join(
+            base_dir,
+            "styles",
+            "launcherapp_styles.css"
+        )
+
+        with open(css_path, "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
         self.setWindowTitle("Launcher APP - Proyecto Handwratting - NeuroIA LAB")

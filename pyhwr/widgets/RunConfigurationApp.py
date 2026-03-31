@@ -8,10 +8,17 @@ class RunConfigurationApp(QMainWindow):
     def __init__(self, config: dict = None):
         super().__init__()
         # Cargar archivo .ui
-        ui_path = os.path.join(os.path.dirname(__file__), 'runConfigurationApp.ui')
+        base_dir = os.path.dirname(__file__)
+        ui_path = os.path.join(base_dir, 'runConfigurationApp.ui')
         uic.loadUi(ui_path, self)
 
-        with open("pyhwr\\widgets\\styles\\runconfiguration_styles.css", "r", encoding="utf-8") as f:
+        css_path = os.path.join(
+            base_dir,
+            "styles",
+            "runconfiguration_styles.css"
+        )
+
+        with open(css_path, "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
         self.setWindowTitle("Configuración de Ronda - Proyecto Handwratting - NeuroIA LAB")

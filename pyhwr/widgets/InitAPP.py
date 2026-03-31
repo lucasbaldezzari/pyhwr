@@ -8,10 +8,17 @@ import os
 class InitAPP(QMainWindow):
     def __init__(self):
         super().__init__()
-        ui_path = os.path.join(os.path.dirname(__file__), 'initAPP.ui')
+        base_dir = os.path.dirname(__file__)
+        ui_path = os.path.join(base_dir, 'initAPP.ui')
         uic.loadUi(ui_path, self)
 
-        with open("pyhwr\\widgets\\styles\\initapp_styles.css", "r", encoding="utf-8") as f:
+        css_path = os.path.join(
+            base_dir,
+            "styles",
+            "initapp_styles.css"
+        )
+
+        with open(css_path, "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
 
         self.setWindowTitle("Selección de tipo de ronda - Proyecto Handwratting - NeuroIA LAB")
