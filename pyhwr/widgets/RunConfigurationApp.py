@@ -126,6 +126,9 @@ class RunConfigurationApp(QMainWindow):
         ##conecto toggle_tabletid a change_tabid_cbox
         self.change_tabid_cbox.stateChanged.connect(self.toggle_tabletid)
 
+        ##conecto botón volver a inicio
+        self.volver_inicio_btn.clicked.connect(self.volver_inicio)
+
     def update_tipo_ronda_label(self):
         texto = self.comboBox_task.currentText()
         self.tipo_ronda_label.setText(texto)
@@ -330,6 +333,19 @@ class RunConfigurationApp(QMainWindow):
             rest_tmax_random=rest_tmax,
             randomize_rest_duration=randomize_rest
         )
+
+    def volver_inicio(self):
+        """
+        Cierra la ventana actual y vuelve a InitAPP.
+        """
+        from pyhwr.widgets import InitAPP  # ajusta si la ruta es distinta
+
+        self.init_window = InitAPP()
+        self.init_window.show()
+
+        del InitAPP
+
+        self.close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

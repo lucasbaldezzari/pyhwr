@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Launcher – Proyecto Handwritting</string>
+   <string>Configuración de ronda – Proyecto Handwritting</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="mainLayout">
@@ -56,7 +56,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="text">
-       <string>Launcher Pre-experimento
+       <string>Configuración de ronda
 Proyecto Handwritting</string>
       </property>
       <property name="alignment">

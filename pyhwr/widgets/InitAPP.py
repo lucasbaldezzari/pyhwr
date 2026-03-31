@@ -102,6 +102,7 @@ class InitAPP(QMainWindow):
         ## Creamos una nueva ventana
         self.launcher = RunConfigurationApp(config)
         self.launcher.show()
+        del RunConfigurationApp
         self.close()
 
     def resetear(self):

@@ -24,10 +24,11 @@ class LauncherApp(QMainWindow):
         self.iniciar_btn.setEnabled(False)
         self.parar_btn.setEnabled(False)
 
-        # conexiones
+        # conexiones de botones y checkboxes
         self.iniciar_btn.clicked.connect(self._on_start)
         self.parar_btn.clicked.connect(self._on_stop)
         self.salir_btn.clicked.connect(self._on_quit)
+        self.volver_btn.clicked.connect(self._volver_config)
         self.update_session_info()
 
         # conectar checkboxes
@@ -111,6 +112,19 @@ class LauncherApp(QMainWindow):
         """Sale de la aplicación, emitiendo la señal correspondiente."""
         print("Salir")
         self.quit_session_signal.emit()
+
+    def _volver_config(self):
+            """
+            Cierra la ventana actual y vuelve a RunConfigurationApp.
+            """
+            from pyhwr.widgets import RunConfigurationApp  # ajusta si la ruta es distinta
+
+            self.run_config_window = RunConfigurationApp()
+            self.run_config_window.show()
+
+            del RunConfigurationApp
+
+            self.close()
 
     def _copy_bids(self):
         clipboard = QApplication.clipboard()
