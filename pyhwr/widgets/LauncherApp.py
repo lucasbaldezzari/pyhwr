@@ -16,6 +16,11 @@ class LauncherApp(QMainWindow):
         ui_path = os.path.join(os.path.dirname(__file__), 'launcherApp.ui')
         uic.loadUi(ui_path, self)
 
+        with open("pyhwr\\widgets\\styles\\launcherapp_styles.css", "r", encoding="utf-8") as f:
+            self.setStyleSheet(f.read())
+
+        self.setWindowTitle("Launcher APP - Proyecto Handwratting - NeuroIA LAB")
+
         self.iniciar_btn.setEnabled(False)
         self.parar_btn.setEnabled(False)
 
@@ -99,13 +104,7 @@ class LauncherApp(QMainWindow):
 
 
 if __name__ == "__main__":
-
-    def load_stylesheet(app, path):
-        with open(path, "r", encoding="utf-8") as f:
-            app.setStyleSheet(f.read())
-
     app = QApplication(sys.argv)
-    load_stylesheet(app, "pyhwr\\widgets\\styles\\launcherapp_styles.css")
     launcher = LauncherApp()
     launcher.show()
     sys.exit(app.exec_())

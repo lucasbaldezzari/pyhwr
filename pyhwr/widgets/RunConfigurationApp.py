@@ -11,6 +11,11 @@ class RunConfigurationApp(QMainWindow):
         ui_path = os.path.join(os.path.dirname(__file__), 'runConfigurationApp.ui')
         uic.loadUi(ui_path, self)
 
+        with open("pyhwr\\widgets\\styles\\runconfiguration_styles.css", "r", encoding="utf-8") as f:
+            self.setStyleSheet(f.read())
+
+        self.setWindowTitle("Configuración de Ronda - Proyecto Handwratting - NeuroIA LAB")
+
         self.config = config
         texto = "ejecutada" if self.config is None or "task" not in self.config else self.config["task"]
         self.tipo_ronda_label.setText(texto)

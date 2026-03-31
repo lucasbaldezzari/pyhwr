@@ -49,7 +49,7 @@
        <number>50</number>
       </property>
       <item>
-       <widget class="QLabel" name="label_title">
+       <widget class="QLabel" name="title_label">
         <property name="font">
          <font>
           <family>Bahnschrift SemiLight Condensed</family>
@@ -63,7 +63,8 @@
          <string>font-size: 20px; font-weight: bold;</string>
         </property>
         <property name="text">
-         <string>Configuración de Sesión – Proyecto Handwritting</string>
+         <string>Selección tipo de ronda
+Proyecto Handwritting</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

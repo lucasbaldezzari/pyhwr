@@ -11,6 +11,11 @@ class InitAPP(QMainWindow):
         ui_path = os.path.join(os.path.dirname(__file__), 'initAPP.ui')
         uic.loadUi(ui_path, self)
 
+        with open("pyhwr\\widgets\\styles\\initapp_styles.css", "r", encoding="utf-8") as f:
+            self.setStyleSheet(f.read())
+
+        self.setWindowTitle("Selección de tipo de ronda - Proyecto Handwratting - NeuroIA LAB")
+
         current_dir = os.getcwd()
         self.input_rootfolder.setText(current_dir)
 
@@ -107,6 +112,8 @@ class InitAPP(QMainWindow):
         self.input_suffix.setText("eeg")
         self.input_rootfolder.clear()
         self.combo_tipo_task.setCurrentIndex(0)
+        current_dir = os.getcwd()
+        self.input_rootfolder.setText(current_dir)
     
     def update_filename(self):
         sub = self.input_sub.text()
@@ -210,6 +217,7 @@ class InitAPP(QMainWindow):
         print(f"Estructura creada/verificada en: {modality_path}")
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     initapp = InitAPP()
     initapp.show()
