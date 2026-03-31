@@ -39,7 +39,7 @@ class SessionManager(QWidget):
                  rest_tmax_random = 1.0,
                  randomize_cue_duration=True,
                  randomize_rest_duration=True,
-                 tabletID = "R52W70ATD1W"):
+                 tabletID = "R52Y50AG4FF"):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
         
@@ -555,7 +555,8 @@ if __name__ == "__main__":
     rest_base_duration=1.,
     rest_tmin_random=0.,
     rest_tmax_random=1.,
-    randomize_rest_duration=True
+    randomize_rest_duration=True,
+    tabletID="R52Y50AG4FF"
     )                 
 
     exit_code = app.exec_()
