@@ -43,6 +43,14 @@ class LauncherApp(QMainWindow):
         self.lslstreamers_cbox.stateChanged.connect(self._update_start_button)
         self.check_all_btn.clicked.connect(self.check_all)
 
+        ##botones para copiar
+        self.copybids_btn.clicked.connect(self._copy_bids)
+        self.copyroot_btn.clicked.connect(self._copy_root)
+
+        ##conecto a funciones para habilitar cambio de bids y root
+        self.changebids_cbox.stateChanged.connect(self._toggle_bids_edit)
+        self.changeroot_cbox.stateChanged.connect(self._toggle_root_edit)
+
         self.checkboxes = [
             self.wigen_cbox,
             self.widpos_cbox,
@@ -57,7 +65,8 @@ class LauncherApp(QMainWindow):
         ]
 
     def update_session_info(self, sub="01", task="basal", n_runs="1",
-                            bids_file="sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]"):
+                            bids_file="sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]",
+                            root_folder="D:\\repos\\pyhwr\\"):
         """
         Actualiza los labels de la UI con información de la sesión.
         Todos los parámetros tienen valores por defecto para robustez.
@@ -67,6 +76,7 @@ class LauncherApp(QMainWindow):
         self.task_label.setText(str(task))
         self.nruns_label.setText(str(n_runs))
         self.bids_label.setText(str(bids_file))
+        self.root_label.setText(str(root_folder))
 
     def check_all(self):
         """
@@ -102,6 +112,19 @@ class LauncherApp(QMainWindow):
         print("Salir")
         self.quit_session_signal.emit()
 
+    def _copy_bids(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.bids_label.text())
+
+    def _copy_root(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.root_label.text())
+
+    def _toggle_bids_edit(self, state):
+        self.bids_label.setReadOnly(not self.changebids_cbox.isChecked())
+
+    def _toggle_root_edit(self, state):
+        self.root_label.setReadOnly(not self.changeroot_cbox.isChecked())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

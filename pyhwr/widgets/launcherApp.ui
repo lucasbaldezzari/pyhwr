@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>840</height>
+    <height>828</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -63,7 +63,7 @@ NeuroIA LAB</string>
       <x>10</x>
       <y>100</y>
       <width>490</width>
-      <height>141</height>
+      <height>171</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="infoGeneral">
@@ -107,6 +107,24 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
+     <item row="5" column="2" alignment="Qt::AlignHCenter">
+      <widget class="QPushButton" name="copyroot_btn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Copiar</string>
+       </property>
+      </widget>
+     </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_8">
        <property name="font">
@@ -131,6 +149,18 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>ROOT Folder</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
       <widget class="QLabel" name="sub_label">
        <property name="font">
@@ -141,6 +171,21 @@ NeuroIA LAB</string>
        </property>
        <property name="text">
         <string>sub</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="root_label">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>D:\repos\pyhwr</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -171,6 +216,24 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
+     <item row="4" column="2" alignment="Qt::AlignHCenter">
+      <widget class="QPushButton" name="copybids_btn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Copiar</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_4">
        <property name="font">
@@ -183,13 +246,27 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
+     <item row="5" column="3">
+      <widget class="QCheckBox" name="changeroot_cbox">
+       <property name="text">
+        <string>Cambiar</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="3">
+      <widget class="QCheckBox" name="changebids_cbox">
+       <property name="text">
+        <string>Cambiar</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_3">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>280</y>
+      <y>290</y>
       <width>491</width>
       <height>444</height>
      </rect>
@@ -589,7 +666,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>250</y>
+      <y>270</y>
       <width>491</width>
       <height>16</height>
      </rect>

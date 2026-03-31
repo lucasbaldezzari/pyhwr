@@ -228,6 +228,7 @@ class RunConfigurationApp(QMainWindow):
         suffix = self.config.get("suffix", "eeg"),
         session_date=time.strftime("%Y-%m-%d"),
         bids_file=self.config.get("bids_file", bidsf_file),
+        root_folder=self.config.get("root", "data/"),
         session_id=task,
         )
         del time
