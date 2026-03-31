@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>674</width>
-    <height>639</height>
+    <height>660</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -262,6 +262,17 @@ Proyecto Handwritting</string>
          </layout>
         </item>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item alignment="Qt::AlignLeft">
            <widget class="QLabel" name="label_6">
@@ -482,6 +493,17 @@ Proyecto Handwritting</string>
          </layout>
         </item>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="Line" name="line_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QLabel" name="label_13">
@@ -578,6 +600,17 @@ Proyecto Handwritting</string>
          </layout>
         </item>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="Line" name="line_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item alignment="Qt::AlignLeft">
            <widget class="QCheckBox" name="randomize_per_run_box">
@@ -625,6 +658,17 @@ Proyecto Handwritting</string>
             </property>
             <property name="text">
              <string>42</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="Line" name="line_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
