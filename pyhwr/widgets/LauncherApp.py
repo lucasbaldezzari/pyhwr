@@ -32,6 +32,7 @@ class LauncherApp(QMainWindow):
         self.senscali_cbox.stateChanged.connect(self._update_start_button)
         self.triggersok_cbox.stateChanged.connect(self._update_start_button)
         self.gtecfile_cbox.stateChanged.connect(self._update_start_button)
+        self.gtec_impe_cbox.stateChanged.connect(self._update_start_button)
         self.gtecrecord_cbox.stateChanged.connect(self._update_start_button)
         self.lslstarted_cbox.stateChanged.connect(self._update_start_button)
         self.lslstreamers_cbox.stateChanged.connect(self._update_start_button)
@@ -44,6 +45,7 @@ class LauncherApp(QMainWindow):
             self.senscali_cbox,
             self.triggersok_cbox,
             self.gtecfile_cbox,
+            self.gtec_impe_cbox,
             self.gtecrecord_cbox,
             self.lslstarted_cbox,
             self.lslstreamers_cbox,
@@ -77,18 +79,21 @@ class LauncherApp(QMainWindow):
         self.iniciar_btn.setEnabled(all_checked)
 
     def _on_start(self):
+        """Inicia la sesión, emitiendo la señal correspondiente."""
         print("Iniciar")
         self.iniciar_btn.setEnabled(False)
         self.parar_btn.setEnabled(True)
         self.start_session_signal.emit()
 
     def _on_stop(self):
+        """Detiene la sesión, emitiendo la señal correspondiente."""
         print("Parar")
         self.iniciar_btn.setEnabled(True)
         self.parar_btn.setEnabled(False)
         self.stop_session_signal.emit()
 
     def _on_quit(self):
+        """Sale de la aplicación, emitiendo la señal correspondiente."""
         print("Salir")
         self.quit_session_signal.emit()
 

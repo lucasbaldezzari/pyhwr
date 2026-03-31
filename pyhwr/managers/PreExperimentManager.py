@@ -479,10 +479,6 @@ class PreExperimentManager(QObject):
         self.marcador_calibration = SquareWidget(x=200, y=950 , width=250, height=250, color="white",
                                                 text=text, text_color="black")
         
-        # Agregar widgets al layout horizontal        # Aplicar layout
-        # self.setLayout(layout_vertical)
-        # self.show()
-
         self.stimuli_window = StimuliWindow()
         self.stimuli_window.show()
         self.stimuli_window.raise_()

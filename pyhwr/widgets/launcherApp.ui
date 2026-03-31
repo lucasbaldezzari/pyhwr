@@ -191,18 +191,18 @@ NeuroIA LAB</string>
       <x>10</x>
       <y>260</y>
       <width>491</width>
-      <height>371</height>
+      <height>378</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="sanityCheck">
-     <item row="10" column="1" alignment="Qt::AlignHCenter">
+     <item row="11" column="1" alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="gtecfile_cbox">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
+     <item row="11" column="0">
       <widget class="QLabel" name="label_14">
        <property name="font">
         <font>
@@ -233,7 +233,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="0" colspan="2">
+     <item row="13" column="0" colspan="2">
       <widget class="QLabel" name="label_16">
        <property name="font">
         <font>
@@ -273,14 +273,14 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="1" alignment="Qt::AlignHCenter">
+     <item row="12" column="1" alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="gtecrecord_cbox">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item row="10" column="0">
       <widget class="QLabel" name="label_11">
        <property name="font">
         <font>
@@ -292,7 +292,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
+     <item row="14" column="0">
       <widget class="QLabel" name="label_18">
        <property name="font">
         <font>
@@ -304,7 +304,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1" alignment="Qt::AlignHCenter">
+     <item row="10" column="1" alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="triggersok_cbox">
        <property name="toolTipDuration">
         <number>3</number>
@@ -344,7 +344,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="14" column="0">
+     <item row="15" column="0">
       <widget class="QLabel" name="label_19">
        <property name="font">
         <font>
@@ -363,7 +363,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="label_15">
        <property name="font">
         <font>
@@ -375,7 +375,7 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="1" alignment="Qt::AlignHCenter">
+     <item row="14" column="1" alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="lslstreamers_cbox">
        <property name="text">
         <string/>
@@ -401,10 +401,40 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="14" column="1" alignment="Qt::AlignHCenter">
+     <item row="15" column="1" alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="lslstarted_cbox">
        <property name="text">
         <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QPushButton" name="check_all_btn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Check all</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Check todos</string>
        </property>
       </widget>
      </item>
@@ -427,33 +457,28 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Check todos</string>
+        <string>Impedancia de electrodos OK</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QPushButton" name="check_all_btn">
+     <item row="9" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="gtec_impe_cbox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
-        <string>Check all</string>
+        <string/>
        </property>
       </widget>
      </item>

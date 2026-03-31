@@ -112,10 +112,14 @@ class RunConfigurationApp(QMainWindow):
 
         self.comboBox_task.currentIndexChanged.connect(self.update_tipo_ronda_label)
         self.comboBox_task.currentIndexChanged.connect(self.fill_form_with_defaults)
+        self.comboBox_task.currentIndexChanged.connect(self.change_in_letters)
         self.fill_form_with_defaults()  # Llenar con valores por defecto al iniciar
 
         ##habilito randomize_per_run_box
         self.randomize_per_run_box.setEnabled(True)
+
+        ##conecto toggle_tabletid a change_tabid_cbox
+        self.change_tabid_cbox.stateChanged.connect(self.toggle_tabletid)
 
     def update_tipo_ronda_label(self):
         texto = self.comboBox_task.currentText()
@@ -156,6 +160,19 @@ class RunConfigurationApp(QMainWindow):
             except ValueError:
                 return None  ## si o si sacamos la semilla si el valor no es un entero válido
         return None
+
+    def change_in_letters(self):
+        """
+        Habilita o deshabilita el campo de letras según el tipo de experimento.
+        """
+        texto = self.tipo_ronda_label.text().lower()
+        enabled = texto in ["entrenamiento", "ejecutada", "imaginada"]
+        self.in_letters.setEnabled(enabled)
+
+    ##función para leer el estado de change_tabid_cbox y habilitar in_tabletid
+    def toggle_tabletid(self):
+        enabled = self.change_tabid_cbox.isChecked()
+        self.in_tabletid.setEnabled(enabled)
     
     def fill_form_with_defaults(self):
         experimento = self.tipo_ronda_label.text().lower()
@@ -182,9 +199,9 @@ class RunConfigurationApp(QMainWindow):
             case "basal" | "emg" | "eog":
                 self.lanzar_preexperiment()
             case "entrenamiento":
-                print("Lanzar entrenamiento (no implementado aún)")
+                self.lanzar_experimento_completo()
             case "entrenamiento" | "ejecutada" | "imaginada":
-                print("Lanzar experimento completo (no implementado aún)")
+                self.lanzar_experimento_completo()
             case _:
                 print("Ninguna de las opciones es válida. No se hace nada.")
                 return
@@ -212,8 +229,12 @@ class RunConfigurationApp(QMainWindow):
 
         return session_info
     
-    def lanzar_preexperiment(self):
-        from pyhwr.managers.PreExperimentManager import PreExperimentManager
+    def lanzar_experimento_completo(self):
+        """
+        Función placeholder para lanzar experimento completo (entrenamiento, ejecutada o imaginada).
+        """
+
+        from pyhwr.managers import SessionManager
 
         ### SessionInfo
         session_info = self.make_SessionInfo()
@@ -221,7 +242,55 @@ class RunConfigurationApp(QMainWindow):
         ## ***********************************************************
         ## tomando datos de la UI para ejecutar PreExperimentManager
         ## ***********************************************************
-        pre_experiment = self.comboBox_task.currentText().lower() ## pre-experimento a ejecutar
+        task = self.comboBox_task.currentText().lower() ## pre-experimento a ejecutar
+
+        n_runs= int(self.in_nruns.text())
+        cue_base_duration = float(self.in_cue_base_duration.text())
+        randomize_cue = self.randomize_cue_duration.isChecked()
+        cue_tmin = float(self.in_cue_tmin_random.text())
+        cue_tmax = float(self.in_cue_tmax_random.text())
+
+        randomize_rest = self.randomize_rest_duration.isChecked()
+        rest_base_duration = float(self.in_rest_base_duration.text())
+        rest_tmin = float(self.in_rest_tmin_random.text())
+        rest_tmax = float(self.in_rest_tmax_random.text())
+
+        ##tomo las letras de in_letters que tienen el formato a,d,e,l,m,n,o,r,s,u y lo paso a lista
+        letters_str = self.in_letters.text()
+        letters = [letter.strip() for letter in letters_str.split(",") if letter.strip()]
+
+        ##leo loglevel_comboBox para configurar el logging
+        loglevel_str = self.loglevel_comboBox.currentText()
+        import logging
+        logging.basicConfig(level=getattr(logging, loglevel_str))
+
+        self.manager = SessionManager(
+            session_info,
+            n_runs = n_runs,
+            letters = letters,
+            randomize_per_run= self.randomize_per_run_box.isChecked(),
+            seed=self.get_semilla(),
+            cue_base_duration=cue_base_duration,
+            cue_tmin_random=cue_tmin,
+            cue_tmax_random=cue_tmax,
+            randomize_cue_duration=randomize_cue,
+            rest_base_duration=rest_base_duration,
+            rest_tmin_random=rest_tmin,
+            rest_tmax_random=rest_tmax,
+            randomize_rest_duration=randomize_rest,
+            tabletID=self.in_tabletid.text()
+        )
+    
+    def lanzar_preexperiment(self):
+        from pyhwr.managers import PreExperimentManager
+
+        ### SessionInfo
+        session_info = self.make_SessionInfo()
+
+        ## ***********************************************************
+        ## tomando datos de la UI para ejecutar PreExperimentManager
+        ## ***********************************************************
+        task = self.comboBox_task.currentText().lower() ## pre-experimento a ejecutar
 
         n_runs= int(self.in_nruns.text())
         cue_base_duration = float(self.in_cue_base_duration.text())
@@ -242,7 +311,7 @@ class RunConfigurationApp(QMainWindow):
         ## Manager de pre-experiment
         self.manager = PreExperimentManager(
             session_info,
-            pre_experiment=pre_experiment,
+            pre_experiment=task,
             n_runs= n_runs,
             randomize_per_run= self.randomize_per_run_box.isChecked(),
             seed=self.get_semilla(),
@@ -255,7 +324,6 @@ class RunConfigurationApp(QMainWindow):
             rest_tmax_random=rest_tmax,
             randomize_rest_duration=randomize_rest
         )
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

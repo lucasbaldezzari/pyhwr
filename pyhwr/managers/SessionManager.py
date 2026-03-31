@@ -6,6 +6,7 @@ from pylsl import local_clock
 from pyhwr.managers.TabletMessenger import TabletMessenger
 from pyhwr.managers.MarkerManager import MarkerManager
 from pyhwr.widgets import SquareWidget
+from pyhwr.widgets import LauncherApp
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtCore import QTimer, Qt
 import sys
@@ -25,6 +26,7 @@ class SessionManager(QWidget):
 
     def __init__(self, sessioninfo, mainTimerDuration=50,
                  tabid="com.handwriting.ACTION_MSG",
+                 experimento = "ejecutada",
                  n_runs=1,
                  letters=None,
                  randomize_per_run=True,
@@ -45,6 +47,7 @@ class SessionManager(QWidget):
         - sessioninfo: Objeto SessionInfo con detalles de la sesión.
         - mainTimerDuration: Intervalo del timer principal en ms.
         - tabid: ID de la aplicación de la tablet para mensajes.
+        - experimento: Tipo de experimento (entrenamiento, ejecutada, imaginada).
         - n_runs: Número de runs en la sesión.
         - letters: Lista de letras para trials. Si es None, se usa una lista por defecto.
         - randomize_per_run: Si es True, se randomiza el orden de letras por run.
@@ -63,6 +66,8 @@ class SessionManager(QWidget):
         self.session_status = "standby"
         self.sessioninfo = sessioninfo
         self.next_transition = -1
+
+        self.experimento = experimento.lower()
 
         # --- configuración de sesión/runs/trials/letras ---
         self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
@@ -110,7 +115,7 @@ class SessionManager(QWidget):
 
         # Timer para actualizar interfaz de usuario
         self.uiTimer = QTimer(self)
-        self.uiTimer.setInterval(100)  # 100ms
+        self.uiTimer.setInterval(50)  # 100ms
         self.uiTimer.timeout.connect(self._update_information_label)
 
         # ----------------------------------------------------------
@@ -234,6 +239,8 @@ class SessionManager(QWidget):
             logging.error(f"Fase '{phase_name}' no encontrada en las fases definidas.")
 
     def handle_phase_transition(self):
+        if self.session_finished:
+            return
         logging.info(f"Fase actual: {self.in_phase}")
         if self.randomize_cue_duration and self.in_phase == "cue":
             self._set_random_cue_duration()
@@ -356,12 +363,10 @@ class SessionManager(QWidget):
         has_next = self._prepare_next_trial()
         if not has_next:
             self._finish_session()
+            return
 
     def get_elapsed_time(self):
         return (time.time() * 1000) - self.creation_time
-
-    # def get_accumulated_time(self):
-    #     return self.accumulated_time
     
     def runSession(self):
         app = QApplication.instance()
@@ -371,15 +376,20 @@ class SessionManager(QWidget):
     def initUI(self):
         """
         Inicializa la interfaz gráfica del gestor de sesión."""
-        # Layouts principales
-        layout_vertical = QVBoxLayout()
-        layout_horizontal = QHBoxLayout()
+        ## Launcher para iniciar el registro
+        self.launcher = LauncherApp()
+        # -------- Actualizo labels del launcher --------
+        self.launcher.update_session_info(
+            sub=self.sessioninfo.sub,
+            task=self.experimento,
+            n_runs=self.n_runs,
+            bids_file=self.sessioninfo["bids_file"]
+        )
 
-        # Label principal
-        label = QLabel("Presione Enter para iniciar o Escape para salir")
-        label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("font-size: 16px; color: black;")
-        layout_vertical.addWidget(label)
+        ## Conecto las señales del launcher a los métodos correspondientes
+        self.launcher.start_session_signal.connect(self.startSession)
+        self.launcher.stop_session_signal.connect(self.stopSession)
+        self.launcher.quit_session_signal.connect(self.quitSession)
 
         # Widgets de marcadores
         text = (
@@ -409,20 +419,8 @@ class SessionManager(QWidget):
         self.marcador_calibration = SquareWidget(x=200, y=950 , width=250, height=250, color="white",
                                                 text=text, text_color="black")
         
-        # Agregar widgets al layout horizontal        # Aplicar layout
-        self.setLayout(layout_vertical)
-        self.show()
-
-    def keyPressEvent(self, event):
-        """Maneja las teclas Enter (inicia) y Escape (detiene la sesión)."""
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
-            logging.info("Iniciando...")
-            self.startSession()
-        elif event.key() == Qt.Key_Escape:
-            logging.info("Deteniendo...")
-            self.stop()
-            QApplication.quit()
-
+        self.launcher.show()
+        
     def startSession(self):
         self.creation_time = time.time()*1000
         t0_abs = time.time()*1000
@@ -447,9 +445,6 @@ class SessionManager(QWidget):
         
         self.tabmanager.send_message(mensaje, self.tabid)
 
-        # salto de  first_jump a start
-        # self._advance_phase()          # entra a "start"
-        # self.handle_phase_transition() # envía "start" 1 sola vez
         self.next_transition = time.time() + self.phases[self.in_phase]["duration"]
         self.handle_phase_transition()
 
@@ -463,8 +458,8 @@ class SessionManager(QWidget):
         self.laptop_marker_dict["sessionFinalTime"] = time.time()*1000
         self.laptop_marker_dict["letter"] = "fin" #se replica lo que se hace en la tablet
         self.laptop_marker_dict["trialID"] = "fin"
+        self.in_phase = "final"
         logging.info("Sesión completada. Cerrando.")
-
 
         ##IMPORTANTE: Si se quisiera enviar los marcadores de laptop al finalizar la sesión,
         ##se debe descomentar el bloque siguiente
@@ -490,25 +485,27 @@ class SessionManager(QWidget):
             logging.error("No se pudo enviar mensaje de final de sesión")
 
         logging.info(f"Tiempo total de sesión: {self.get_elapsed_time()/1000:.2f} s")
+        self.show_final_message()
         self.stop()
 
-    def _read_final_with_retry(self, subject, session, timeout=3.0, interval=0.1):
-        """Intenta leer el último JSON de la tablet con reintentos exponenciales."""
-        t0 = time.time()
-        wait = interval
-        while time.time() - t0 < timeout:
-            try:
-                return self.tabmanager.read_trial_json(
-                    subject=subject, session=session, run="final", trial_id=0)
-            except Exception:
-                time.sleep(wait)
-                wait = min(wait * 1.5, 0.5)
-        return None
+    def stopSession(self):
+        logging.info("Parando sesión...")
+        self.session_finished = True
+        self.mainTimer.stop()
+        self.uiTimer.stop()
+
+    def quitSession(self):
+        logging.info("Saliendo de la sesión...")
+        self.mainTimer.stop()
+        self.uiTimer.stop()
+        self.launcher.close()
+        QApplication.quit()
 
     def stop(self):
         self.mainTimer.stop()
         self.uiTimer.stop()
-        logging.info("Sesión detenida")
+        logging.info("Ronda finalizada")
+        self.show_final_message()
         self.close()
 
     def _make_run_order(self):
@@ -516,10 +513,26 @@ class SessionManager(QWidget):
             if self.randomize_per_run:
                 self.rng.shuffle(base)
             return base
+    
+    def show_final_message(self):
+        """
+        Reemplaza completamente el contenido de information_label
+        por el mensaje de fin de ronda.
+        """
+        font_color="#00A800"
+        texto = (
+            f"<div style='font-size:40px; text-align:center;'>"
+            f"<span style='color:{font_color}; font-weight:bold;'>"
+            f"RONDA FINALIZADA"
+            f"</span>"
+            f"</div>"
+        )
+
+        self.information_label.change_text(texto)
 
 if __name__ == "__main__":
     from pyhwr.utils import SessionInfo
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.INFO)
 
     app = QApplication(sys.argv)
 
@@ -532,12 +545,12 @@ if __name__ == "__main__":
     manager = SessionManager(
     session_info,
     n_runs = 1,
-    letters = ["ta","a","ta","n","ta"],#None,
+    letters = ["a"],#None,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad
-    cue_base_duration = 4.,
-    cue_tmin_random = 1.0,
-    cue_tmax_random = 2.0,
+    cue_base_duration = 1.,
+    cue_tmin_random = 0.0,
+    cue_tmax_random = 0.1,
     randomize_cue_duration = True,
     rest_base_duration=1.,
     rest_tmin_random=0.,
