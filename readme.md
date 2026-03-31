@@ -8,16 +8,20 @@ Este repositorio contiene los script en Python para generar, gestionar y almacen
 
 La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
 
-#### Versión 0.0.3
+#### Versión 1.0.0
 
-- Corrección de bugs menores.
-- Se generan clases para poder manejar los datos registrados por el g.HIAMP que se almacenan en archivos _hdf5_ y los datos de los archivos _xdf_ de Lab Streaming Layer. 
+Se implementa:
 
-#### Versión 0.0.1
+- SessionManager para control de rondas de entrenamiento, ejecutadas e imaginadas.
+- PreExperimentManager para control de rondas basal, emg y eog.
+- SessionInfo para almacenar información importante de la sesión, ronda, runs, etc.
+- Entornos gráficos para configuración de diferentes parámetros de la sesión, de la ronda, etc. También para lanzar el experimento. Entre otras posibilidades.
 
-- Comunicación bidireccional entre PC y Tablet.
-- Envío de eventos por LSL.
-- Generación de interfaz gráfica para usarlo con sensores ópticos de trigbox de gtec.
+Para correr la sesión se debe hacer desde consola
+
+> python -m pyhwr.widgets.InitAPP
+
+NOTA: Se recomienda crear un environment, activarlo y ejecutar luego.
 
 ## Cominucación USB
 
