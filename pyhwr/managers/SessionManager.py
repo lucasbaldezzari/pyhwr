@@ -72,6 +72,7 @@ class SessionManager(QWidget):
         # --- configuración de sesión/runs/trials/letras ---
         self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
         self.trials_per_run = len(self.letters)
+        self.total_trials = self.trials_per_run * n_runs
         self.n_runs = n_runs
         self.randomize_per_run = randomize_per_run
 
@@ -319,7 +320,7 @@ class SessionManager(QWidget):
                 f"{self.current_run+1} de {self.n_runs}<br>"
 
                 f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
-                f"{self.current_trial+1} de {self.trials_per_run}<br>"
+                f"{self.trials_acummulated+1} de {self.total_trials}<br>"
 
                 f"<span style='color:#2200ff; font-style:italic;'>Letra actual:</span> "
                 f"{self.current_letter or '-'}<br><br>"
