@@ -529,6 +529,8 @@ class SessionManager(QWidget):
             f"<div style='font-size:40px; text-align:center;'>"
             f"<span style='color:{font_color}; font-weight:bold;'>"
             f"RONDA FINALIZADA"
+            f"\n\n"
+            f"Tiempo total: {self.get_elapsed_time()/1000:.2f} s"
             f"</span>"
             f"</div>"
         )
