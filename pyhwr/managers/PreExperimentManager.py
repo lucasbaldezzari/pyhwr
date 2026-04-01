@@ -89,6 +89,7 @@ class PreExperimentManager(QObject):
 
         self.current_run = 0
         self.current_trial = -1
+        self.trials_acummulated = -1
         self.current_action = None
         self.session_finished = False
 
@@ -186,6 +187,7 @@ class PreExperimentManager(QObject):
 
         # avanzar al próximo trial dentro del run
         self.current_trial += 1
+        self.trials_acummulated += 1
         self.current_action = self.run_orders[self.current_run][self.current_trial]
         return True
     
@@ -249,7 +251,7 @@ class PreExperimentManager(QObject):
         # --- Actualizar información común ---
         self.laptop_marker_dict.update({
             "runID": self.current_run + 1,
-            "trialID": self.current_trial + 1,
+            "trialID": self.trials_acummulated + 1,
             "letter": self.current_action
         })
 

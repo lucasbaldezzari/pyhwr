@@ -77,6 +77,7 @@ class SessionManager(QWidget):
 
         self.current_run = 0
         self.current_trial = -1
+        self.trials_acummulated = -1
         self.current_letter = None
         self.session_finished = False
 
@@ -188,6 +189,7 @@ class SessionManager(QWidget):
 
         # avanzar al próximo trial dentro del run
         self.current_trial += 1
+        self.trials_acummulated += 1
         self.current_letter = self.run_orders[self.current_run][self.current_trial]
         return True
     
@@ -253,7 +255,7 @@ class SessionManager(QWidget):
             self.sessioninfo.session_id,
             self.current_run + 1,
             self.sessioninfo.subject_id,
-            self.current_trial + 1,
+            self.trials_acummulated + 1,
             self.in_phase,
             self.current_letter or "",
             self.phases[self.in_phase]["duration"])
@@ -262,7 +264,7 @@ class SessionManager(QWidget):
         # --- Actualizar información común ---
         self.laptop_marker_dict.update({
             "runID": self.current_run + 1,
-            "trialID": self.current_trial + 1,
+            "trialID": self.trials_acummulated + 1,
             "letter": self.current_letter
         })
 
