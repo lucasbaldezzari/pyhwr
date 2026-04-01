@@ -133,18 +133,12 @@ class InitAPP(QMainWindow):
         # Formato: padding para números
         if sub.isdigit():
             sub = f"{int(sub):02d}"
-        else:
-            sub = "[sub]"
 
         if ses.isdigit():
             ses = f"{int(ses):02d}"
-        else:
-            ses = "[ses]"
 
         if run.isdigit():
             run = f"{int(run):02d}"
-        else:
-            run = "[run]"
 
         # Campos libres
         task = task if task else "[task]"
