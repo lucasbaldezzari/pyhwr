@@ -184,11 +184,18 @@ QGroupBox::title {
 
 QFrame[frameShape="4"] {
     border: none;
-    min-height: 1px;
-    max-height: 1px;
-    background-color: #2a2a2a;
+    min-height: 2px;
+    max-height: 2px;
+    background-color: #747474;
 }
 
+
+QFrame[frameShape="5"] {
+    border: none;
+    min-width: 3px;
+    max-width: 3px;
+    background-color: #2a2a2a;
+}
 
 /* =========================
    TOOLTIP

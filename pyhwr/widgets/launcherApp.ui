@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>626</width>
-    <height>927</height>
+    <height>940</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -322,6 +322,76 @@ NeuroIA LAB</string>
      </rect>
     </property>
     <layout class="QGridLayout" name="sanityCheck">
+     <item row="10" column="0" colspan="2" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_16">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <italic>true</italic>
+         <underline>true</underline>
+        </font>
+       </property>
+       <property name="text">
+        <string>LSL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="senspos_cbox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_20">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <italic>true</italic>
+         <underline>true</underline>
+        </font>
+       </property>
+       <property name="text">
+        <string>Widgets y sensores ópticos</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="gtecrecord_cbox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+      <widget class="QLabel" name="sanity_label">
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+         <weight>75</weight>
+         <italic>false</italic>
+         <bold>true</bold>
+         <underline>false</underline>
+        </font>
+       </property>
+       <property name="text">
+        <string>Sanity check</string>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="0">
+      <widget class="QLabel" name="label_14">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Nombre del archivo a guardar seteado</string>
+       </property>
+      </widget>
+     </item>
      <item row="8" column="0">
       <widget class="QLabel" name="label_23">
        <property name="font">
@@ -331,6 +401,41 @@ NeuroIA LAB</string>
        </property>
        <property name="text">
         <string>Sensores ópticos posicionados (en Tablet y Monitor)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_24">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Sensores ópticos calibrados</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>60</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="6" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="wigen_cbox">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -352,50 +457,57 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="16" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="lslstreamers_cbox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="senscali_cbox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="0">
-      <widget class="QLabel" name="label_18">
+     <item row="15" column="0">
+      <widget class="QLabel" name="label_11">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Streamers visibles y seleccionados en Lab Recorder</string>
+        <string>Triggers configurados</string>
        </property>
       </widget>
      </item>
-     <item row="17" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="lslstarted_cbox">
+     <item row="14" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="gtec_impe_cbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="2" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="label_13">
+     <item row="7" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="widpos_cbox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="0">
+      <widget class="QLabel" name="label_15">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
-         <italic>true</italic>
-         <underline>true</underline>
         </font>
        </property>
        <property name="text">
-        <string>g.Tec</string>
+        <string>Grabación iniciada</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="triggersok_cbox">
+       <property name="toolTipDuration">
+        <number>3</number>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -411,29 +523,26 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
-      <widget class="QLabel" name="label_14">
+     <item row="11" column="0">
+      <widget class="QLabel" name="label_18">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Nombre del archivo a guardar seteado</string>
+        <string>Streamers visibles y seleccionados en Lab Recorder</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="triggersok_cbox">
-       <property name="toolTipDuration">
-        <number>3</number>
-       </property>
+     <item row="11" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="lslstreamers_cbox">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="14" column="0">
       <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
@@ -442,6 +551,13 @@ NeuroIA LAB</string>
        </property>
        <property name="text">
         <string>Impedancia de electrodos OK</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="senscali_cbox">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -457,106 +573,6 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-      <widget class="QLabel" name="sanity_label">
-       <property name="font">
-        <font>
-         <pointsize>13</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-         <underline>false</underline>
-        </font>
-       </property>
-       <property name="text">
-        <string>Sanity check</string>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="gtecfile_cbox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="0">
-      <widget class="QLabel" name="label_15">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Grabación iniciada</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="wigen_cbox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_24">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Sensores ópticos calibrados</string>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="gtec_impe_cbox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="0" colspan="2" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="label_16">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <italic>true</italic>
-         <underline>true</underline>
-        </font>
-       </property>
-       <property name="text">
-        <string>LSL</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="senspos_cbox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Triggers configurados</string>
-       </property>
-      </widget>
-     </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label_22">
        <property name="font">
@@ -569,37 +585,28 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="widpos_cbox">
+     <item row="16" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="gtecfile_cbox">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+     <item row="13" column="0" colspan="2" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_13">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <italic>true</italic>
+         <underline>true</underline>
+        </font>
        </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>60</width>
-         <height>10</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="14" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QCheckBox" name="gtecrecord_cbox">
        <property name="text">
-        <string/>
+        <string>g.Tec</string>
        </property>
       </widget>
      </item>
-     <item row="17" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="label_19">
        <property name="font">
         <font>
@@ -611,17 +618,10 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0" colspan="2" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="label_20">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <italic>true</italic>
-         <underline>true</underline>
-        </font>
-       </property>
+     <item row="12" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="lslstarted_cbox">
        <property name="text">
-        <string>Widgets y sensores ópticos</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -656,6 +656,13 @@ NeuroIA LAB</string>
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="parar_btn">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -674,6 +681,13 @@ NeuroIA LAB</string>
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="volver_btn">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -688,6 +702,13 @@ NeuroIA LAB</string>
        </property>
        <property name="text">
         <string>Volver</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
