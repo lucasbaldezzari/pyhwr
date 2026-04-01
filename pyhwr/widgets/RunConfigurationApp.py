@@ -78,9 +78,9 @@ class RunConfigurationApp(QMainWindow):
             },
             "ejecutada": {
                 "n_runs": 8,
-                "cue_base_duration": 4.,
+                "cue_base_duration": 3.5,
                 "cue_tmin_random": 1.,
-                "cue_tmax_random": 2.,
+                "cue_tmax_random": 1.5,
                 "randomize_cue_duration": True,
                 "rest_base_duration": 1.,
                 "rest_tmin_random": 0.,
@@ -90,9 +90,9 @@ class RunConfigurationApp(QMainWindow):
             },
             "imaginada": {
                 "n_runs": 8,
-                "cue_base_duration": 4.,
+                "cue_base_duration": 3.5,
                 "cue_tmin_random": 1.,
-                "cue_tmax_random": 2.,
+                "cue_tmax_random": 1.5,
                 "randomize_cue_duration": True,
                 "rest_base_duration": 1.,
                 "rest_tmin_random": 0.,
