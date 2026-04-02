@@ -247,6 +247,10 @@ class GHiampDataManager():
 
     def __repr__(self):
         return self.__str__()
+    
+    def __len__(self):
+        """Retorna la cantidad de eventos registrados"""
+        pass
 
 class LSLDataManager():
     """
@@ -266,7 +270,6 @@ class LSLDataManager():
         self.trials_info = self._get_trials_info()
         ##agregar método para obtener tiempo promedio entre triasl, duración total de la sesión,
         ##tiempo promedio entre cues y otras cosas relevantes.
-        
 
     def _read_data(self, filename):
         """
@@ -292,6 +295,17 @@ class LSLDataManager():
             streamers_keys[streamer_name] = list(data)
 
         return streamers_keys
+    
+    @property
+    def trials_qty(self):
+        """
+        Función para obtener la cantidad de trials registrados en cada streamer.
+        """
+        trials_qty = {}
+        for streamer in self.streamers_names:
+            trials_qty[streamer] = len(self.trials_info[streamer])
+
+        return trials_qty
     
     def _get_timeseries(self):
         """
@@ -433,18 +447,18 @@ class LSLDataManager():
         laptop_dict["trials_avg_time"] = round(float(np.mean(laptop_trial_times_diff) / 1000), 3)
         laptop_dict["trials_time_std"] = round(float(np.std(laptop_trial_times_diff) / 1000), 3)
 
-        ##tiempos entre cues. Es la diferencia entre trialFadeOffTime y trialCueTime
+        ##tiempos entre cues. Es la diferencia entre trialRestTime y trialCueTime
         tablet_cue_times = [trial["trialCueTime"] for trial in tablet_trials_info.values()]
         laptop_cue_times = [trial["trialCueTime"] for trial in laptop_trials_info.values()]
-        tablet_fadeoff_times = [trial["trialFadeOffTime"] for trial in tablet_trials_info.values()]
-        laptop_fadeoff_times = [trial["trialFadeOffTime"] for trial in laptop_trials_info.values()]
-        #calculo las diferencias entre trialFadeOffTime y trialCueTime para cada trial
-        tablet_cue_durations = np.abs(np.array(tablet_fadeoff_times) - np.array(tablet_cue_times))
-        laptop_cue_durations = np.abs(np.array(laptop_fadeoff_times) - np.array(laptop_cue_times))
-        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 3)/1000
-        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 3)/1000
-        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 3)/1000
-        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 3)/1000
+        tablet_resttime = [trial["trialRestTime"] for trial in tablet_trials_info.values()]
+        laptop_resttime = [trial["trialRestTime"] for trial in laptop_trials_info.values()]
+        #calculo las diferencias entre trialRestTime y trialCueTime para cada trial
+        tablet_cue_durations = np.abs(np.array(tablet_resttime) - np.array(tablet_cue_times))
+        laptop_cue_durations = np.abs(np.array(laptop_resttime) - np.array(laptop_cue_times))
+        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 3)
+        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 3)
+        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 3)
+        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 3)
 
         ##letras mostradas
         tablet_dict["letters"] = list(set([trial["letter"] for trial in tablet_trials_info.values()]))

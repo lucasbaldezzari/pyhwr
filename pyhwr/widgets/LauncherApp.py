@@ -86,9 +86,8 @@ class LauncherApp(QMainWindow):
         self.sub_label.setText(str(sub))
         self.task_label.setText(str(task))
         self.nruns_label.setText(str(n_runs))
-        #lab-recorder bids file: estructura de bids_file + .xdf
-        self.labrecorder_bids_file = f"{bids_file}.xdf"
-        self.bids_label.setText(str(bids_file))
+        self.bids_label.setText(str(f"{bids_file}.xdf"))
+        self.gtec_bids_label.setText(str(f"{bids_file}.hdf5"))
         self.root_label.setText(str(root_folder))
         self.ses_label.setText(str(ses))
         self.run_label.setText(str(run))

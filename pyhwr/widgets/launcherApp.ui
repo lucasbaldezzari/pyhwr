@@ -319,7 +319,7 @@ NeuroIA LAB</string>
         </font>
        </property>
        <property name="text">
-        <string>sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix].hf5</string>
+        <string>sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix].hdf5</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>
