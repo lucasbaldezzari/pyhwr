@@ -371,6 +371,90 @@ class LSLDataManager():
             trials_info[streamer] = {k: v for k, v in trials_info[streamer].items() if v}
             
         return trials_info
+    
+    def describe_trials(self):
+        """
+        Función para obtener:
+        - Cantidad de trials
+        - Tiempo total de la ronda
+        - Tiempo promedio entre trials + desvío
+        - Tiempo promedio entre cues + desvío
+        - Letras mostradas a la persona
+        - Tiempo promedio desde el inicio del cue al primer pendown registrado + desvío
+        """
+        ## Describe los trials registrados en el archivo LSL, incluyendo tiempos, letras mostradas, etc.
+        tablet_dict = {
+            "duration": None,
+            "trials": None,
+            "trials_avg_time": None,
+            "trials_time_std": None,
+            "cues_avg_time": None,
+            "cues_time_std": None,
+            "letters": None,
+        }
+
+        laptop_dict = {
+            "duration": None,
+            "trials": None,
+            "trials_avg_time": None,
+            "trials_time_std": None,
+            "cues_avg_time": None,
+            "cues_time_std": None,
+            "letters": None
+        }
+
+        trials_info = self._get_trials_info()
+
+        tablet_trials_info = trials_info["Tablet_Markers"]
+        laptop_trials_info = trials_info["Laptop_Markers"]
+
+        fkt = list(tablet_trials_info.keys())[0] #first key tablet
+        fkl = list(laptop_trials_info.keys())[0] #first key laptop
+        lkt = list(tablet_trials_info.keys())[-1] #last key tablet
+        lkl = list(laptop_trials_info.keys())[-1] #last key laptop
+
+        ##duraciones de ronda por cada dispositivo
+        tablet_duration = tablet_trials_info[lkt]["sessionFinalTime"] - tablet_trials_info[fkt]["sessionStartTime"]
+        laptop_duration = laptop_trials_info[lkl]["sessionFinalTime"] - laptop_trials_info[fkl]["sessionStartTime"]
+        tablet_dict["duration"] = tablet_duration/1000 #paso a segundos
+        laptop_dict["duration"] = laptop_duration/1000 #paso a segundos
+
+        #cantidad de trials
+        tablet_dict["trials"] = len(tablet_trials_info)
+        laptop_dict["trials"] = len(laptop_trials_info)
+
+        ##tiempos entre trials
+        tablet_trial_times = [trial["trialStartTime"] for trial in tablet_trials_info.values()]
+        laptop_trial_times = [trial["trialStartTime"] for trial in laptop_trials_info.values()]
+        tablet_trial_times_diff = np.abs(np.diff(tablet_trial_times))
+        laptop_trial_times_diff = np.abs(np.diff(laptop_trial_times))
+        tablet_dict["trials_avg_time"] = round(float(np.mean(tablet_trial_times_diff) / 1000), 3)
+        tablet_dict["trials_time_std"] = round(float(np.std(tablet_trial_times_diff) / 1000), 3)
+        laptop_dict["trials_avg_time"] = round(float(np.mean(laptop_trial_times_diff) / 1000), 3)
+        laptop_dict["trials_time_std"] = round(float(np.std(laptop_trial_times_diff) / 1000), 3)
+
+        ##tiempos entre cues. Es la diferencia entre trialFadeOffTime y trialCueTime
+        tablet_cue_times = [trial["trialCueTime"] for trial in tablet_trials_info.values()]
+        laptop_cue_times = [trial["trialCueTime"] for trial in laptop_trials_info.values()]
+        tablet_fadeoff_times = [trial["trialFadeOffTime"] for trial in tablet_trials_info.values()]
+        laptop_fadeoff_times = [trial["trialFadeOffTime"] for trial in laptop_trials_info.values()]
+        #calculo las diferencias entre trialFadeOffTime y trialCueTime para cada trial
+        tablet_cue_durations = np.abs(np.array(tablet_fadeoff_times) - np.array(tablet_cue_times))
+        laptop_cue_durations = np.abs(np.array(laptop_fadeoff_times) - np.array(laptop_cue_times))
+        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 3)/1000
+        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 3)/1000
+        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 3)/1000
+        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 3)/1000
+
+        ##letras mostradas
+        tablet_dict["letters"] = list(set([trial["letter"] for trial in tablet_trials_info.values()]))
+        tablet_dict["letters"].sort()
+        laptop_dict["letters"] = list(set([trial["letter"] for trial in laptop_trials_info.values()]))
+        laptop_dict["letters"].sort()       
+
+        final_dict = {"Tablet_Markers":tablet_dict, "Laptop_Markers":laptop_dict}
+        #convierto a DataFrame para mostrarlo mejor en el reporte. Cada fila es un dispositivo.
+        return pd.DataFrame(final_dict)
 
     def __getitem__(self, key):
         """

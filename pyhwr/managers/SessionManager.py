@@ -345,7 +345,7 @@ class SessionManager(QWidget):
                 subject=self.sessioninfo.subject_id,
                 session=self.sessioninfo.session_id,
                 run=self.current_run + 1,
-                trial_id=self.current_trial + 1
+                trial_id=self.trials_acummulated + 1
             )
             logging.debug("Marcadores de Tablet:")
             logging.debug(tab_trial_data)
