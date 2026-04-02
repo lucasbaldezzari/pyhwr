@@ -54,10 +54,12 @@ class LauncherApp(QMainWindow):
         ##botones para copiar
         self.copybids_btn.clicked.connect(self._copy_bids)
         self.copyroot_btn.clicked.connect(self._copy_root)
+        self.copygbids_btn.clicked.connect(self._copy_gtecbids)
 
         ##conecto a funciones para habilitar cambio de bids y root
         self.changebids_cbox.stateChanged.connect(self._toggle_bids_edit)
         self.changeroot_cbox.stateChanged.connect(self._toggle_root_edit)
+        self.changegbids_cbox.stateChanged.connect(self._toggle_gtecbids_edit)
 
         self.checkboxes = [
             self.wigen_cbox,
@@ -84,6 +86,8 @@ class LauncherApp(QMainWindow):
         self.sub_label.setText(str(sub))
         self.task_label.setText(str(task))
         self.nruns_label.setText(str(n_runs))
+        #lab-recorder bids file: estructura de bids_file + .xdf
+        self.labrecorder_bids_file = f"{bids_file}.xdf"
         self.bids_label.setText(str(bids_file))
         self.root_label.setText(str(root_folder))
         self.ses_label.setText(str(ses))
@@ -155,14 +159,21 @@ class LauncherApp(QMainWindow):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.bids_label.text())
 
+    def _copy_gtecbids(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.gtec_bids_label.text())
+
     def _copy_root(self):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.root_label.text())
 
-    def _toggle_bids_edit(self, state):
+    def _toggle_bids_edit(self):
         self.bids_label.setReadOnly(not self.changebids_cbox.isChecked())
 
-    def _toggle_root_edit(self, state):
+    def _toggle_gtecbids_edit(self):
+        self.gtec_bids_label.setReadOnly(not self.changegbids_cbox.isChecked())
+
+    def _toggle_root_edit(self):
         self.root_label.setReadOnly(not self.changeroot_cbox.isChecked())
 
 if __name__ == "__main__":

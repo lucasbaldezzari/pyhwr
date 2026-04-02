@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>626</width>
-    <height>940</height>
+    <height>969</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -63,87 +63,19 @@ NeuroIA LAB</string>
       <x>10</x>
       <y>100</y>
       <width>601</width>
-      <height>241</height>
+      <height>281</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="infoGeneral">
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="bids_label">
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix]</string>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_7">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_6">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Sesión:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLineEdit" name="root_label">
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>D:\repos\pyhwr</string>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="task_label">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="text">
-        <string>task</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="2" alignment="Qt::AlignHCenter">
-      <widget class="QPushButton" name="copyroot_btn">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Copiar</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="3">
-      <widget class="QCheckBox" name="changeroot_cbox">
-       <property name="text">
-        <string>Cambiar</string>
+        <string>Cantidad de runs:</string>
        </property>
       </widget>
      </item>
@@ -160,8 +92,32 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="ses_label">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Sujeto:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>g.Recorder BIDS FILE</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="task_label">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -169,11 +125,23 @@ NeuroIA LAB</string>
         </font>
        </property>
        <property name="text">
-        <string>1</string>
+        <string>task</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Tipo de RONDA:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
@@ -185,17 +153,90 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="4" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="genparams_label">
+     <item row="1" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="sub_label">
        <property name="font">
         <font>
-         <pointsize>13</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
+         <pointsize>12</pointsize>
+         <italic>true</italic>
         </font>
        </property>
        <property name="text">
-        <string>Parámetros generales</string>
+        <string>sub</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>LabRecorder BIDS File:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="root_label">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>D:\repos\pyhwr</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="bids_label">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix].xdf</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="run_label">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="3">
+      <widget class="QCheckBox" name="changebids_cbox">
+       <property name="text">
+        <string>Cambiar</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Run:</string>
        </property>
       </widget>
      </item>
@@ -217,88 +258,27 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Tipo de RONDA:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>BIDS File:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="3">
-      <widget class="QCheckBox" name="changebids_cbox">
+     <item row="8" column="3">
+      <widget class="QCheckBox" name="changeroot_cbox">
        <property name="text">
         <string>Cambiar</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_6">
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_7">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Cantidad de runs:</string>
+        <string>Sesión:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="sub_label">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="text">
-        <string>sub</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Sujeto:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Run:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="run_label">
+     <item row="4" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="ses_label">
        <property name="font">
         <font>
          <pointsize>12</pointsize>
@@ -310,13 +290,82 @@ NeuroIA LAB</string>
        </property>
       </widget>
      </item>
+     <item row="8" column="2" alignment="Qt::AlignHCenter">
+      <widget class="QPushButton" name="copyroot_btn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Copiar</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="gtec_bids_label">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>sub-[sub]_ses-[ses]_task-[task]_run-[run]_[suffix].hf5</string>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="4" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="genparams_label">
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Parámetros generales</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QPushButton" name="copygbids_btn">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Copiar</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="3">
+      <widget class="QCheckBox" name="changegbids_cbox">
+       <property name="text">
+        <string>Cambiar</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_3">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>370</y>
+      <y>410</y>
       <width>601</width>
       <height>444</height>
      </rect>
@@ -631,7 +680,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>850</y>
+      <y>890</y>
       <width>601</width>
       <height>56</height>
      </rect>
@@ -736,7 +785,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>820</y>
+      <y>860</y>
       <width>601</width>
       <height>16</height>
      </rect>
@@ -755,7 +804,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>390</y>
       <width>601</width>
       <height>16</height>
      </rect>
