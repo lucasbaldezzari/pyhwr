@@ -294,6 +294,7 @@ class SessionManager(QWidget):
         - log: Mensaje de log opcional.
         """
         self.laptop_marker_dict[time_key] = time.time() * 1000
+        self.laptop_marker_dict["sessionFinalTime"] = time.time() * 1000
         self.marcador_cue.change_color(color)
         if log:
             logging.debug(log)
