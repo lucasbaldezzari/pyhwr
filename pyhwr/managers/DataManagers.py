@@ -29,7 +29,7 @@ class GHiampDataManager():
         self.sample_rate = self.channels_info["used_channels"]["SampleRate"][0]
         self.markers_info = self._get_markers_info()
         self.times = self._get_times()
-        
+
     def _read_data(self, filename):
         return h5py.File(filename, "r")
 
@@ -268,6 +268,7 @@ class LSLDataManager():
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
         self.first_timestamp = self._get_first_timestamp() #esta en tiempo interno de LSL
         self.trials_info = self._get_trials_info()
+        self.coordinates_info = self.get_coordinates_info()
         ##agregar método para obtener tiempo promedio entre triasl, duración total de la sesión,
         ##tiempo promedio entre cues y otras cosas relevantes.
 
@@ -276,6 +277,26 @@ class LSLDataManager():
         Lee los datos del archivo .xdf y retorna el contenido crudo y el encabezado.
         """
         return pyxdf.load_xdf(filename)
+    
+    def _parse_trial_message(self, raw):
+        """
+        Función para parsear el mensaje JSON de cada trial.
+        Retorna un diccionario con la información del trial.
+        """
+        # 1) Si viene como bytes (a veces pasa con sockets/LSL)
+        if isinstance(raw, (bytes, bytearray)):
+            raw = raw.decode("utf-8", errors="replace")
+
+        if raw is None or raw == "":
+            return []
+        
+        # 2) Limpieza simple
+        raw = raw.strip()
+        # 3) Si por logging quedó envuelto en comillas, las quitamos (solo las exteriores)
+        if raw and raw[0] in "\"'" and raw[-1] == raw[0]:
+            raw = raw[1:-1]
+        # 4) Parseo JSON → dict
+        return json.loads(raw)
     
     def _get_streamers_names(self):
         """
@@ -320,26 +341,51 @@ class LSLDataManager():
             timeseries_dict[data["info"]["name"][0]] = streamer_timeseries
 
         return timeseries_dict
-
-    def _parse_trial_message(self, raw):
+    
+    def trialsTimes(self):
         """
-        Función para parsear el mensaje JSON de cada trial.
-        Retorna un diccionario con la información del trial.
+        Función para obtener un dataframe con los tiempos de cada trial en segundos y relativos al
+        sessionStartTime. Cada fila es un trial, las columnas son, letra, trialStartTime, trialCueTime y trialRestTime.
         """
-        # 1) Si viene como bytes (a veces pasa con sockets/LSL)
-        if isinstance(raw, (bytes, bytearray)):
-            raw = raw.decode("utf-8", errors="replace")
+        pass
 
-        if raw is None or raw == "":
-            return []
-        
-        # 2) Limpieza simple
-        raw = raw.strip()
-        # 3) Si por logging quedó envuelto en comillas, las quitamos (solo las exteriores)
-        if raw and raw[0] in "\"'" and raw[-1] == raw[0]:
-            raw = raw[1:-1]
-        # 4) Parseo JSON → dict
-        return json.loads(raw)
+    def get_coordinates_info(self):
+        """
+        Función para obtener las coordenadas de los trazos registrados. Se retorna un diccionario
+        donde cada key es el trialID y los valores son otro diccionario con, letra, lista de ternas (x,y,t) donde t
+        es el tiempo relativo al inicio del trazo (primer timestamp de la primera coordenada).
+        """
+        ##creo el dataframe con las columnas letra, x, y, t
+        coordinates_info = {}
+        ##recorro cada trial registrado en el streamer Tablet_Markers de self.time_series
+        for trial in self.time_series["Tablet_Markers"]:
+            coordinates_trial = np.array(trial["coordinates"])
+            letter_trial = trial["letter"]
+            if len(coordinates_trial) > 0:
+                first_timestamp = coordinates_trial[0,2]
+                #resto el primer timestamp a todos los tiempos para tenerlos relativos al inicio del trazo
+                coordinates_trial[:,2] = coordinates_trial[:,2] - first_timestamp
+                coordinates_info[trial["trialID"]] = {
+                    "letter": letter_trial,
+                    "coordinates": [(x, y, t) for x, y, t in coordinates_trial]
+                }
+            else:
+                coordinates_info[trial["trialID"]] = {
+                    "letter": trial["letter"],
+                    "coordinates": None
+                    }
+
+        return coordinates_info
+    
+    def getTrialCoordinates(self, trialID):
+        """
+        Función para obtener las coordenadas de un trial específico.
+        Retorna un numpy array.
+        """
+        #chequeo que el trialID exista en coordinates_info. Sino retorno None
+        if trialID in self.coordinates_info:
+            return np.array(self.coordinates_info[trialID]["coordinates"])
+        return None
 
     def _get_datetime(self):
         """
@@ -469,6 +515,36 @@ class LSLDataManager():
         final_dict = {"Tablet_Markers":tablet_dict, "Laptop_Markers":laptop_dict}
         #convierto a DataFrame para mostrarlo mejor en el reporte. Cada fila es un dispositivo.
         return pd.DataFrame(final_dict)
+    
+    def pendown_delays(self):
+        """
+        Retorna un diccionario con los keys seindo los trialID y cada valor es otro diccionario con
+        letra y la diferencia de tiempo entre el trialCueTime y el primer penDown registrado en coordinates_info.
+        Esto da una idea del tiempo que tarda la persona en comenzar a dibujar después de recibir el cue.
+
+        Si no hay penDown registrado para un trial, se aigna un valor de None para ese trialID.
+        """
+        delays = {}
+        for trial in self.trials_info["Tablet_Markers"].values():
+            pendownmarker = trial["penDownMarkers"]
+            if len(pendownmarker) > 0: #hubo un evento de penDown registrado
+                penDownTime = pendownmarker[0] #tiempo del primer penDown registrado
+                trialCueTime = trial["trialCueTime"] #tiempo del cue
+                print(f"trialCueTime {trialCueTime}, penDownTime {penDownTime}")
+                delay = penDownTime - trialCueTime #diferencia entre ambos tiempos
+                delays[trial["trialID"]] = {
+                    "letter": trial["letter"],
+                    "delay": delay/1000 #paso a segundos
+                }
+                
+            else:
+                delays[trial["trialID"]] = {
+                    "letter": trial["letter"],
+                    "delay": None
+                }
+                continue
+
+        return delays
 
     def __getitem__(self, key):
         """
