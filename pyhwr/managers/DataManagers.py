@@ -4,6 +4,8 @@ import json
 import numpy as np
 from datetime import datetime, timezone, timedelta
 import pandas as pd
+import matplotlib.pyplot as plt
+from collections import defaultdict
 import xml.etree.ElementTree as ET
 
 class GHiampDataManager():
@@ -545,6 +547,142 @@ class LSLDataManager():
                 continue
 
         return delays
+    
+    def plot_traces(self, trialID, title = None, filename = None,
+                    show = True, save = False, figsize=(12, 6),
+                    line_color = "#9d1212", line_width = 10,
+                    point_color = "#ffffff", point_size = 20,
+                    hide_title = False, hide_axes = False, hide_ticks = False,
+                    hide_labels = False, hide_spines = False):
+        """
+        Función para graficar el trazo registrado
+        en un trial específico. Se obtiene la información de coordinates_info.
+        """
+        coordinates = self.getTrialCoordinates(trialID)
+        if coordinates is None:
+            print(f"No hay coordenadas registradas para el trialID {trialID}")
+            return
+        
+        x, y, t = coordinates[:, 0], coordinates[:, 1], coordinates[:, 2]
+        letra = self.coordinates_info[trialID]["letter"]
+        if filename is None:
+            filename = f"trazo_trial_{trialID}_letra_{letra}.png"
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches(*figsize)
+        ax.plot(x, y, color=line_color, linewidth=line_width, zorder=1)   # Une los puntos en orden
+        ax.scatter(x, y, color=point_color, s=point_size, zorder = 2)  # Opcional: puntos de muestreo
+        ax.set_title(title if title else f"Trazo registrado - Trial {trialID}")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.invert_yaxis()  # Si la tableta tiene origen en la esquina superior izquierda
+        ax.axis("equal")
+
+        if hide_title:
+            ax.set_title("")
+        if hide_axes:
+            ax.axis("off")
+
+        if hide_ticks:
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+        if hide_labels:
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+
+        if hide_spines:
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+        if save:
+            plt.savefig(filename)
+
+        if show:
+            plt.show()
+
+        return fig, ax
+
+    def plot_all_traces(self, grilla=None, figsize=(12, 8), line_color = "#9d1212", line_width = 10,
+                        point_color = "#ffffff", point_size = 20,
+                        hide_title = False, hide_axes = False, hide_ticks = False,
+                        hide_labels = False, hide_spines = False):
+        """Función para graficar todos los trazos registrados en el streamer Tablet_Markers.
+        Se organiza en una grilla donde las columnas son las letras y las filas son los trials de cada letra.
+        Si no se especifica el tamaño de la grilla, se calcula automáticamente en función de la cantidad de letras y trials.
+        """
+        trials_by_letter = defaultdict(list)
+        for trialID in self.coordinates_info.keys():
+            letra = self.coordinates_info[trialID]["letter"]
+            trials_by_letter[letra].append(trialID)
+
+        different_letters = sorted(trials_by_letter.keys()) #ordenamos letras por columna
+
+        for letra in different_letters:
+            trials_by_letter[letra].sort()
+
+        if grilla is None:
+            n_columnas = len(different_letters)
+            n_filas = max(len(trials_by_letter[letra]) for letra in different_letters)
+        else:
+            n_filas, n_columnas = grilla
+
+        fig, axes = plt.subplots(n_filas, n_columnas,
+                                figsize=figsize)
+
+        # Normalizar axes a matriz 2D siempre
+        if n_filas == 1 and n_columnas == 1:
+            axes = [[axes]]
+        elif n_filas == 1:
+            axes = [axes]
+        elif n_columnas == 1:
+            axes = [[ax] for ax in axes]
+
+        # 6. Poblar grilla correctamente
+        for col, letra in enumerate(different_letters):
+            trials = trials_by_letter[letra]
+
+            for row, trialID in enumerate(trials):
+                ax = axes[row][col]
+
+                coordinates = self.getTrialCoordinates(trialID)
+                if coordinates is None or len(coordinates) == 0:
+                    ax.axis("off")
+                    continue
+
+                x, y, t = coordinates[:, 0], coordinates[:, 1], coordinates[:, 2]
+
+                ax.plot(x, y, color=line_color, linewidth=line_width, zorder=1)
+                ax.scatter(x, y, color=point_color, s=point_size, zorder=2)
+
+                ax.set_title(f"Trial {trialID} - {letra}")
+                ax.set_xlabel("X")
+                ax.set_ylabel("Y")
+                ax.invert_yaxis()
+                ax.axis("equal")
+
+                if hide_title:
+                    ax.set_title("")
+                if hide_axes:
+                    ax.axis("off")
+                if hide_ticks:
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                if hide_labels:
+                    ax.set_xlabel("")
+                    ax.set_ylabel("")
+                if hide_spines:
+                    for spine in ax.spines.values():
+                        spine.set_visible(False)
+
+            # 7. Apagar celdas vacías en la columna
+            for row in range(len(trials), n_filas):
+                axes[row][col].axis("off")
+
+        plt.tight_layout()
+        plt.show()
+
+        return fig, axes
 
     def __getitem__(self, key):
         """
