@@ -8,6 +8,11 @@ Se busca testear:
 
 - [ ] Que todos los eventos importantes generados en la tablet y la PC se almacenen correctamente para cada tipo de task (emg, eog, basal, entrenamiento/ejectuado/imaginado).
 
+Files creados:
+
+1. sub-test_eventos_ses-test_eventos_task-ejecutada_run-01_eeg: Contiene 240 trials. Sin trazos. Se eveluó que todos los marcadores y eventos sean registrados correctamente. Commit de handwritting app (f9aba4f33b02c4b8e44af876fb0faacd11fc9a2d)
+2. sub-contrazos_ses-02_task-ejecutada_run-01_eeg y sub-contrazos_ses-02_task-ejecutada_run-02_eeg. Rondas de 40 trials cada una. Se realizaron trazos. Commit de handwritting app (7126d40e7652d4a649170119d1a9db3492c78bdc).
+
 ### 2. Testeo de trazos y marcadores
 
 - [ ] Volver a evaluar el punto _Testeo de marcadores_ y además corroborar que todos los trazos generados en la tablet para cada letra (cada trial) se vean correctamente (se debe leer la información de cada trazo y plotearlo para evaluar visualmente).

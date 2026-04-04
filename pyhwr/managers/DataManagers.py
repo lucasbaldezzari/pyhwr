@@ -268,9 +268,12 @@ class LSLDataManager():
         self.streamers_keys = self._get_streamers_keys()
         self.time_series = self._get_timeseries()
         self.fecha_registro, self.timestamp_registro = self._get_datetime()
-        self.first_timestamp = self._get_first_timestamp() #esta en tiempo interno de LSL
         self.trials_info = self._get_trials_info()
+        self.first_lsl_timestamp = self._get_first_lsl_timestamp() #esta en tiempo interno de LSL
+        self.first_timestamp = self._get_first_run_timestamp() #tiempo del primer trial registrado en cada streamer, que se asume es el inicio de la primera ronda
         self.coordinates_info = self.get_coordinates_info()
+        self.pendown_delays = self.get_pendownDelays()
+        self.trials_times = self.trialsTimes()
         ##agregar método para obtener tiempo promedio entre triasl, duración total de la sesión,
         ##tiempo promedio entre cues y otras cosas relevantes.
 
@@ -349,7 +352,16 @@ class LSLDataManager():
         Función para obtener un dataframe con los tiempos de cada trial en segundos y relativos al
         sessionStartTime. Cada fila es un trial, las columnas son, letra, trialStartTime, trialCueTime y trialRestTime.
         """
-        pass
+        trials_time_dic = {}
+        for name in self.streamers_names:
+            df = pd.DataFrame(self.trials_info[name]).T[["letter", "trialStartTime", "trialCueTime", "trialRestTime"]]
+            first_timestamp = self.first_timestamp[name]
+            values = df[["trialStartTime", "trialCueTime", "trialRestTime"]].values
+            values = (values - first_timestamp)/1000
+            df[["trialStartTime", "trialCueTime", "trialRestTime"]] = values
+            trials_time_dic[name] = df
+
+        return trials_time_dic
 
     def get_coordinates_info(self):
         """
@@ -403,7 +415,7 @@ class LSLDataManager():
         except Exception:
             return None, None
         
-    def _get_first_timestamp(self):
+    def _get_first_lsl_timestamp(self):
         """
         Función para obtener el primer timestamp registrado en el archivo xdf.
         """
@@ -413,6 +425,16 @@ class LSLDataManager():
             first_timestamp[streamer_name] = float(data["footer"]["info"]["first_timestamp"][0])
 
         return first_timestamp
+    
+    def _get_first_run_timestamp(self):
+        """
+        Función para obtener el timestamp del inicio de la primera ronda registrada en el archivo xdf.
+        Se asume que el primer trial registrado en Tablet_Markers es el inicio de la primera ronda.
+        """
+        dic = {}
+        for name in self.streamers_names:
+            dic[name] = self.trials_info[name][1]["sessionStartTime"]
+        return dic
 
     def _get_trials_info(self):
         """
@@ -518,7 +540,7 @@ class LSLDataManager():
         #convierto a DataFrame para mostrarlo mejor en el reporte. Cada fila es un dispositivo.
         return pd.DataFrame(final_dict)
     
-    def pendown_delays(self):
+    def get_pendownDelays(self):
         """
         Retorna un diccionario con los keys seindo los trialID y cada valor es otro diccionario con
         letra y la diferencia de tiempo entre el trialCueTime y el primer penDown registrado en coordinates_info.
@@ -548,6 +570,59 @@ class LSLDataManager():
 
         return delays
     
+    def infoTrial(self, trialID):
+        """
+        Función para obtener toda la información de un trial específico a partir de su ID.
+        Retorna un diccionario con la información del trial (sólo se considera la info dentro de la tablet).
+        """
+        info_dict = {
+            "letter": None,
+            "trialStartTime": None,
+            "trialCueTime": None,
+            "trialRestTime": None,
+            "pendowns": None,
+            "penups": None,
+            "writting_duration": None,
+            "pendown_delay": None
+        }
+        info_trial = self.trials_info["Tablet_Markers"].get(trialID, None)
+        if info_trial is not None:
+            info_dict["letter"] = info_trial.get("letter", None)
+            info_dict["trialStartTime"] = (info_trial.get("trialStartTime", None) - self.first_timestamp["Tablet_Markers"])/1000
+            info_dict["trialCueTime"] = (info_trial.get("trialCueTime", None) - self.first_timestamp["Tablet_Markers"])/1000
+            info_dict["trialRestTime"] = (info_trial.get("trialRestTime", None) - self.first_timestamp["Tablet_Markers"])/1000
+            info_dict["pendowns"] = [(t - self.first_timestamp["Tablet_Markers"])/1000 for t in info_trial.get("penDownMarkers", [])]
+            info_dict["penups"] = [(t - self.first_timestamp["Tablet_Markers"])/1000 for t in info_trial.get("penUpMarkers", [])]
+            info_dict["writing_duration"] = self.getTrialCoordinates(trialID)[-1,2]/1000
+
+            # if info_dict["pendowns"] and info_dict["penups"]:
+            #     # Calculo duración de escritura como la diferencia entre el primer penUp y el primer penDown
+            #     writing_duration = (info_dict["penups"][0] - info_dict["pendowns"][0]) / 1000  # en segundos
+
+            coordinates = self.getTrialCoordinates(trialID)
+            if coordinates is not None and len(coordinates) > 0:
+                # Calculo duración de escritura como la diferencia entre el último y el primer timestamp de las coordenadas
+                writing_duration = coordinates[-1, 2] / 1000  # en segundos
+            info_dict["writing_duration"] = round(float(writing_duration), 3) if writing_duration is not None else None
+
+            info_dict["pendown_delay"] = self.pendown_delays.get(trialID, {}).get("delay", None)
+
+            return info_dict
+
+        return None
+    
+    def lettersTrials(self, letter):
+        """Retorna una lista con los trialID correspondiente a la letra solicitada."""
+        trial_ids_tablet = []
+        trials_ids_laptop = []
+        for trialID, info in self.trials_info["Laptop_Markers"].items():
+            if info["letter"] == letter:
+                trials_ids_laptop.append(trialID)
+        for trialID, info in self.trials_info["Tablet_Markers"].items():
+            if info["letter"] == letter:
+                trial_ids_tablet.append(trialID)
+        return trials_ids_laptop, trial_ids_tablet
+    
     def plot_traces(self, trialID, title = None, filename = None,
                     show = True, save = False, figsize=(12, 6),
                     line_color = "#9d1212", line_width = 10,
@@ -559,6 +634,8 @@ class LSLDataManager():
         en un trial específico. Se obtiene la información de coordinates_info.
         """
         coordinates = self.getTrialCoordinates(trialID)
+        if coordinates is None:
+            raise ValueError(f"No hay coordenadas registradas para el trialID {trialID}")
         if coordinates is None:
             print(f"No hay coordenadas registradas para el trialID {trialID}")
             return
@@ -604,7 +681,7 @@ class LSLDataManager():
         return fig, ax
 
     def plot_all_traces(self, grilla=None, figsize=(12, 8), line_color = "#9d1212", line_width = 10,
-                        point_color = "#ffffff", point_size = 20,
+                        point_color = "#ffffff", point_size = 20, show = True,
                         hide_title = False, hide_axes = False, hide_ticks = False,
                         hide_labels = False, hide_spines = False):
         """Función para graficar todos los trazos registrados en el streamer Tablet_Markers.
@@ -680,7 +757,9 @@ class LSLDataManager():
                 axes[row][col].axis("off")
 
         plt.tight_layout()
-        plt.show()
+
+        if show:
+            plt.show()
 
         return fig, axes
 
