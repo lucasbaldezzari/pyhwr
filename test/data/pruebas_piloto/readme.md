@@ -12,6 +12,7 @@ Files creados:
 
 1. sub-test_eventos_ses-test_eventos_task-ejecutada_run-01_eeg: Contiene 240 trials. Sin trazos. Se eveluó que todos los marcadores y eventos sean registrados correctamente. Commit de handwritting app (f9aba4f33b02c4b8e44af876fb0faacd11fc9a2d)
 2. sub-contrazos_ses-02_task-ejecutada_run-01_eeg y sub-contrazos_ses-02_task-ejecutada_run-02_eeg. Rondas de 40 trials cada una. Se realizaron trazos. Commit de handwritting app (7126d40e7652d4a649170119d1a9db3492c78bdc).
+3. sub-contrazos_ses-03_task-ejecutada_run-01_eeg contiene 20 trials donde para algunos no se dibujaron trazos. Se usa para corroborar funcionamiento de LSLDataManager.plot_traces() y LSLDataManager.plot_all_traces(). Commit de handwritting app (7126d40e7652d4a649170119d1a9db3492c78bdc).
 
 ### 2. Testeo de trazos y marcadores
 
