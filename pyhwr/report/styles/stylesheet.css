@@ -1,0 +1,282 @@
+:root {
+    --color-primary: #1f4e79;
+    --color-secondary: #2f2f2f;
+    --color-muted: #6b7280;
+    --color-border: #d9dee7;
+    --color-bg-soft: #f7f9fc;
+    --color-white: #ffffff;
+}
+
+/* RESET BÁSICO */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--color-secondary);
+    background: var(--color-white);
+    line-height: 1.5;
+}
+
+/* CONTENEDOR DE PÁGINA */
+.page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 50px;
+}
+
+.page-break {
+    page-break-before: always;
+    break-before: page;
+}
+
+/* TIPOGRAFÍA */
+h1, h2, h3 {
+    margin-top: 0;
+    color: var(--color-primary);
+}
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 8px;
+}
+
+h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+p {
+    margin: 8px 0 14px 0;
+}
+
+.muted {
+    color: var(--color-muted);
+}
+
+/* =========================
+   PORTADA
+========================= */
+
+.cover {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.cover-title {
+    flex: 1;
+}
+
+.cover-title .subtitle {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.cover-meta {
+    margin-top: 30px;
+    font-size: 16px;
+}
+
+.logo-box {
+    width: 180px;
+    min-height: 140px;
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-soft);
+}
+
+.logo-box img {
+    max-width: 100%;
+    max-height: 120px;
+}
+
+/* =========================
+   RESUMEN GENERAL
+========================= */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 14px 20px;
+    margin-top: 20px;
+}
+
+.summary-card {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 16px;
+    background: var(--color-bg-soft);
+}
+
+.summary-card .label {
+    font-size: 13px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.summary-card .value {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* =========================
+   SECCIONES
+========================= */
+
+.section {
+    margin-top: 34px;
+}
+
+.block {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+    background: var(--color-white);
+}
+
+/* =========================
+   TABLAS
+========================= */
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid var(--color-border);
+    padding: 8px 10px;
+    text-align: left;
+}
+
+th {
+    background: var(--color-bg-soft);
+}
+
+/* OPCIONAL: mejora visual de DataFrame */
+.dataframe {
+    font-size: 13px;
+}
+
+/* =========================
+   FIGURAS
+========================= */
+
+.figure {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.caption {
+    font-size: 13px;
+    color: var(--color-muted);
+    margin-top: 8px;
+}
+
+/* GRID DE FIGURAS */
+
+.figure-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.figure-card {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px;
+    background: var(--color-white);
+}
+
+/* =========================
+   TABLA DE CONTENIDO
+========================= */
+
+.toc {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 16px;
+    background: var(--color-bg-soft);
+}
+
+.toc ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer-note {
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--color-muted);
+    text-align: center;
+}
+
+/* =========================
+   IMPRESIÓN (PDF)
+========================= */
+
+@media print {
+
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .page {
+        max-width: none;
+        padding: 20mm 16mm;
+    }
+
+    h2 {
+        page-break-after: avoid;
+    }
+
+    .block, .figure, table {
+        page-break-inside: avoid;
+    }
+
+    .figure-grid {
+        page-break-inside: avoid;
+    }
+}

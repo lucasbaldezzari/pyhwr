@@ -623,6 +623,19 @@ class LSLDataManager():
                 trial_ids_tablet.append(trialID)
         return trials_ids_laptop, trial_ids_tablet
     
+    def is_none_like(self, coordinates):
+        """
+        Función para verificar si un valor es None o equivalente a
+        None (como un array vacío o un array escalar con valor None).
+        Params:
+            - coordinates: valor a verificar
+        """
+        if coordinates is None:
+            return True
+        if isinstance(coordinates, np.ndarray) and coordinates.shape == () and coordinates.item() is None:
+            return True
+        return False
+    
     def plot_traces(self, trialID, title = None, filename = None,
                     show = True, save = False, figsize=(12, 6),
                     line_color = "#9d1212", line_width = 10,
@@ -634,11 +647,8 @@ class LSLDataManager():
         en un trial específico. Se obtiene la información de coordinates_info.
         """
         coordinates = self.getTrialCoordinates(trialID)
-        if coordinates is None:
+        if self.is_none_like(coordinates):
             raise ValueError(f"No hay coordenadas registradas para el trialID {trialID}")
-        if coordinates is None:
-            print(f"No hay coordenadas registradas para el trialID {trialID}")
-            return
         
         x, y, t = coordinates[:, 0], coordinates[:, 1], coordinates[:, 2]
         letra = self.coordinates_info[trialID]["letter"]
@@ -723,7 +733,7 @@ class LSLDataManager():
                 ax = axes[row][col]
 
                 coordinates = self.getTrialCoordinates(trialID)
-                if coordinates is None or len(coordinates) == 0:
+                if self.is_none_like(coordinates):
                     ax.axis("off")
                     continue
 

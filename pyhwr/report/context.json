@@ -1,0 +1,60 @@
+{
+  "report_title": "Reporte",
+  "project_name": "Proyecto Handwriting - Doctorado en Ingeniería",
+  "author": "MSc. BALDEZZARI LUCAS.",
+  "report_date": "2026-04-03",
+  "institution": "Nombre del laboratorio",
+  "logo_path": "../styles/logo_lab.png",
+  "include_toc": true,
+
+  "subject_id": "01",
+  "round_type": "Ejecutada",
+  "trial_count": 80,
+  "round_duration": "800 segundos (~13.3 min)",
+  "general_comments": "Breve resumen automático de la sesión.",
+
+  "lsl_text": "Resumen textual de streams, timestamps y eventos.",
+  "lsl_tables": [
+    {
+      "title": "Streams detectados",
+      "description": "Información general de streams LSL.",
+      "html": "df_lsl"
+    }
+  ],
+
+  "gtec_text": "Resumen de adquisición g.tec.",
+  "gtec_tables": [
+    {
+      "title": "Canales y calidad",
+      "description": "Tabla resumen del sistema.",
+      "html": "df_gte"
+    }
+  ],
+
+  "traces_intro": "Visualización general de los trazos capturados.",
+  "trace_plot_path": "../figures/trazos.png",
+  "trace_plot_caption": "Trazos agrupados por letra y trial.",
+
+  "trace_extra_plots": [
+    {
+      "title": "Letra A",
+      "path": "../figures/a.png",
+      "caption": "Ejemplo de trazos"
+    },
+    {
+      "title": "Letra B",
+      "path": "../figures/b.png",
+      "caption": "Ejemplo de trazos"
+    }
+  ],
+
+  "other_graphs_intro": "Gráficos complementarios del experimento.",
+  "other_graphs": [
+    {
+      "title": "Distribución de duración",
+      "path": "../figures/duracion.png",
+      "caption": "Histograma de tiempos",
+      "description": "Distribución de la duración de los trials."
+    }
+  ]
+}

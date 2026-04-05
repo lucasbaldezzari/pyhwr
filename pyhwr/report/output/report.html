@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte</title>
+    <link rel="stylesheet" href="../styles/stylesheet.css">
+    <!-- <style>
+        :root {
+            --color-primary: #1f4e79;
+            --color-secondary: #2f2f2f;
+            --color-muted: #6b7280;
+            --color-border: #d9dee7;
+            --color-bg-soft: #f7f9fc;
+            --color-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--color-secondary);
+            background: var(--color-white);
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 50px;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--color-primary);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 14px;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 8px 0 14px 0;
+        }
+
+        .muted {
+            color: var(--color-muted);
+        }
+
+        .cover {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cover-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .cover-title {
+            flex: 1;
+        }
+
+        .cover-title h1 {
+            margin-bottom: 12px;
+        }
+
+        .cover-title .subtitle {
+            font-size: 22px;
+            color: var(--color-secondary);
+            margin-bottom: 20px;
+        }
+
+        .logo-box {
+            width: 180px;
+            min-height: 140px;
+            border: 2px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            background: var(--color-bg-soft);
+        }
+
+        .logo-box img {
+            max-width: 100%;
+            max-height: 120px;
+            display: block;
+        }
+
+        .cover-meta {
+            margin-top: 30px;
+            font-size: 16px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 14px 20px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 16px;
+            background: var(--color-bg-soft);
+        }
+
+        .summary-card .label {
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .summary-card .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--color-secondary);
+        }
+
+        .section {
+            margin-top: 34px;
+        }
+
+        .block {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 20px;
+            background: var(--color-white);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--color-border);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--color-bg-soft);
+        }
+
+        .figure {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .caption {
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-top: 8px;
+        }
+
+        .figure-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .figure-card {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--color-white);
+        }
+
+        .toc {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 16px;
+            background: var(--color-bg-soft);
+        }
+
+        .toc ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            font-size: 12px;
+            color: var(--color-muted);
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                max-width: none;
+                padding: 20mm 16mm;
+            }
+        }
+    </style> -->
+</head>
+<body>
+
+    <!-- PORTADA -->
+    <div class="page cover">
+        <div class="cover-top">
+            <div class="cover-title">
+                <h1>Reporte</h1>
+                <div class="subtitle">Proyecto Handwriting</div>
+
+                <div class="cover-meta">
+                    <p><strong>Autor:</strong> Lucas B.</p>
+                    <p><strong>Fecha:</strong> 2026-04-03</p>
+                    
+                    <p><strong>Institución:</strong> Nombre del laboratorio</p>
+                    
+                </div>
+            </div>
+
+            <div class="logo-box">
+                
+                    <img src="../styles/logo_lab.png" alt="Logo del laboratorio">
+                
+            </div>
+        </div>
+
+        
+
+        
+        <div class="toc">
+            <h3>Contenido</h3>
+            <ul>
+                <li>Resumen general</li>
+                <li>Resumen LSL</li>
+                <li>Resumen g.tec</li>
+                <li>Trazos realizados</li>
+                <li>Otros gráficos</li>
+            </ul>
+        </div>
+        
+    </div>
+
+    <!-- RESUMEN GENERAL -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Resumen general</h2>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">Sujeto</div>
+                    <div class="value">01</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Tipo de ronda</div>
+                    <div class="value">Ejecutada</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Cantidad de trials</div>
+                    <div class="value">80</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Duración de la ronda</div>
+                    <div class="value">800 segundos (~13.3 min)</div>
+                </div>
+            </div>
+
+            
+            <div class="block" style="margin-top: 24px;">
+                <h3>Comentarios</h3>
+                <p>Breve resumen automático de la sesión.</p>
+            </div>
+            
+        </section>
+
+        <!-- RESUMEN LSL -->
+        <section class="section">
+            <h2>Resumen LSL</h2>
+
+            
+            <div class="block">
+                <p>Resumen textual de streams, timestamps y eventos.</p>
+            </div>
+            
+
+            
+                
+                <div class="block">
+                    
+                        <h3>Streams detectados</h3>
+                    
+                    
+                        <p class="muted">Información general de streams LSL.</p>
+                    
+                    <div class="table-wrapper">
+                        df_lsl
+                    </div>
+                </div>
+                
+            
+        </section>
+
+        <!-- RESUMEN G.TEC -->
+        <section class="section">
+            <h2>Resumen g.tec</h2>
+
+            
+            <div class="block">
+                <p>Resumen de adquisición g.tec.</p>
+            </div>
+            
+
+            
+                
+                <div class="block">
+                    
+                        <h3>Canales y calidad</h3>
+                    
+                    
+                        <p class="muted">Tabla resumen del sistema.</p>
+                    
+                    <div class="table-wrapper">
+                        df_gte
+                    </div>
+                </div>
+                
+            
+        </section>
+    </div>
+
+    <!-- TRAZOS REALIZADOS -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Trazos realizados</h2>
+
+            
+            <div class="block">
+                <p>Visualización general de los trazos capturados.</p>
+            </div>
+            
+
+            
+            <div class="figure">
+                <img src="../figures/trazos.png" alt="Gráfico de trazos realizados">
+                
+                <div class="caption">Trazos agrupados por letra y trial.</div>
+                
+            </div>
+            
+
+            
+            <div class="figure-grid" style="margin-top: 24px;">
+                
+                <div class="figure-card">
+                    <h3>Letra A</h3>
+                    <img src="../figures/a.png" alt="Letra A">
+                    
+                    <div class="caption">Ejemplo de trazos</div>
+                    
+                </div>
+                
+                <div class="figure-card">
+                    <h3>Letra B</h3>
+                    <img src="../figures/b.png" alt="Letra B">
+                    
+                    <div class="caption">Ejemplo de trazos</div>
+                    
+                </div>
+                
+            </div>
+            
+        </section>
+    </div>
+
+    <!-- OTROS GRÁFICOS -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Otros gráficos</h2>
+
+            
+            <div class="block">
+                <p>Gráficos complementarios del experimento.</p>
+            </div>
+            
+
+            
+            <div class="figure-grid">
+                
+                <div class="figure-card">
+                    <h3>Distribución de duración</h3>
+                    <img src="../figures/duracion.png" alt="Distribución de duración">
+                    
+                    <div class="caption">Histograma de tiempos</div>
+                    
+                    
+                    <p>Distribución de la duración de los trials.</p>
+                    
+                </div>
+                
+            </div>
+            
+        </section>
+
+        <div class="footer-note">
+            Reporte generado automáticamente por Python.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ report_title | default("Reporte del experimento") }}</title>
+    <link rel="stylesheet" href="../styles/stylesheet.css">
+    <!-- <style>
+        :root {
+            --color-primary: #1f4e79;
+            --color-secondary: #2f2f2f;
+            --color-muted: #6b7280;
+            --color-border: #d9dee7;
+            --color-bg-soft: #f7f9fc;
+            --color-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--color-secondary);
+            background: var(--color-white);
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 50px;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--color-primary);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 14px;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 8px 0 14px 0;
+        }
+
+        .muted {
+            color: var(--color-muted);
+        }
+
+        .cover {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cover-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .cover-title {
+            flex: 1;
+        }
+
+        .cover-title h1 {
+            margin-bottom: 12px;
+        }
+
+        .cover-title .subtitle {
+            font-size: 22px;
+            color: var(--color-secondary);
+            margin-bottom: 20px;
+        }
+
+        .logo-box {
+            width: 180px;
+            min-height: 140px;
+            border: 2px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            background: var(--color-bg-soft);
+        }
+
+        .logo-box img {
+            max-width: 100%;
+            max-height: 120px;
+            display: block;
+        }
+
+        .cover-meta {
+            margin-top: 30px;
+            font-size: 16px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 14px 20px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 16px;
+            background: var(--color-bg-soft);
+        }
+
+        .summary-card .label {
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .summary-card .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--color-secondary);
+        }
+
+        .section {
+            margin-top: 34px;
+        }
+
+        .block {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 20px;
+            background: var(--color-white);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--color-border);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--color-bg-soft);
+        }
+
+        .figure {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .caption {
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-top: 8px;
+        }
+
+        .figure-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .figure-card {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--color-white);
+        }
+
+        .toc {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 16px;
+            background: var(--color-bg-soft);
+        }
+
+        .toc ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            font-size: 12px;
+            color: var(--color-muted);
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                max-width: none;
+                padding: 20mm 16mm;
+            }
+        }
+    </style> -->
+</head>
+<body>
+
+    <!-- PORTADA -->
+    <div class="page cover">
+        <div class="cover-top">
+            <div class="cover-title">
+                <h1>{{ report_title | default("Reporte") }}</h1>
+                <div class="subtitle">{{ project_name | default("Proyecto Handwriting") }}</div>
+
+                <div class="cover-meta">
+                    <p><strong>Autor:</strong> {{ author | default("Lucas B.") }}</p>
+                    <p><strong>Fecha:</strong> {{ report_date | default("Sin especificar") }}</p>
+                    {% if institution %}
+                    <p><strong>Institución:</strong> {{ institution }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="logo-box">
+                {% if logo_path %}
+                    <img src="{{ logo_path }}" alt="Logo del laboratorio">
+                {% else %}
+                    <span class="muted">Logo del laboratorio</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if report_description %}
+        <div>
+            <h2>Descripción</h2>
+            <p>{{ report_description }}</p>
+        </div>
+        {% endif %}
+
+        {% if include_toc %}
+        <div class="toc">
+            <h3>Contenido</h3>
+            <ul>
+                <li>Resumen general</li>
+                <li>Resumen LSL</li>
+                <li>Resumen g.tec</li>
+                <li>Trazos realizados</li>
+                <li>Otros gráficos</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RESUMEN GENERAL -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Resumen general</h2>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">Sujeto</div>
+                    <div class="value">{{ subject_id }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Tipo de ronda</div>
+                    <div class="value">{{ round_type }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Cantidad de trials</div>
+                    <div class="value">{{ trial_count }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Duración de la ronda</div>
+                    <div class="value">{{ round_duration }}</div>
+                </div>
+            </div>
+
+            {% if general_comments %}
+            <div class="block" style="margin-top: 24px;">
+                <h3>Comentarios</h3>
+                <p>{{ general_comments }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- RESUMEN LSL -->
+        <section class="section">
+            <h2>Resumen LSL</h2>
+
+            {% if lsl_text %}
+            <div class="block">
+                <p>{{ lsl_text }}</p>
+            </div>
+            {% endif %}
+
+            {% if lsl_tables %}
+                {% for table in lsl_tables %}
+                <div class="block">
+                    {% if table.title %}
+                        <h3>{{ table.title }}</h3>
+                    {% endif %}
+                    {% if table.description %}
+                        <p class="muted">{{ table.description }}</p>
+                    {% endif %}
+                    <div class="table-wrapper">
+                        {{ table.html | safe }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="block">
+                    <p class="muted">No hay tablas LSL para mostrar.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- RESUMEN G.TEC -->
+        <section class="section">
+            <h2>Resumen g.tec</h2>
+
+            {% if gtec_text %}
+            <div class="block">
+                <p>{{ gtec_text }}</p>
+            </div>
+            {% endif %}
+
+            {% if gtec_tables %}
+                {% for table in gtec_tables %}
+                <div class="block">
+                    {% if table.title %}
+                        <h3>{{ table.title }}</h3>
+                    {% endif %}
+                    {% if table.description %}
+                        <p class="muted">{{ table.description }}</p>
+                    {% endif %}
+                    <div class="table-wrapper">
+                        {{ table.html | safe }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="block">
+                    <p class="muted">No hay tablas g.tec para mostrar.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- TRAZOS REALIZADOS -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Trazos realizados</h2>
+
+            {% if traces_intro %}
+            <div class="block">
+                <p>{{ traces_intro }}</p>
+            </div>
+            {% endif %}
+
+            {% if trace_plot_path %}
+            <div class="figure">
+                <img src="{{ trace_plot_path }}" alt="Gráfico de trazos realizados para todos los trials">
+                {% if trace_plot_caption %}
+                <div class="caption">{{ trace_plot_caption }}</div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="block">
+                <p class="muted">No hay gráfico principal de trazos para mostrar.</p>
+            </div>
+            {% endif %}
+
+            {% if trace_extra_plots %}
+            <div class="figure-grid" style="margin-top: 24px;">
+                {% for fig in trace_extra_plots %}
+                <div class="figure-card">
+                    <h3>{{ fig.title }}</h3>
+                    <img src="{{ fig.path }}" alt="{{ fig.title }}">
+                    {% if fig.caption %}
+                    <div class="caption">{{ fig.caption }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- OTROS GRÁFICOS -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Otros gráficos</h2>
+
+            {% if other_graphs_intro %}
+            <div class="block">
+                <p>{{ other_graphs_intro }}</p>
+            </div>
+            {% endif %}
+
+            {% if other_graphs %}
+            <div class="figure-grid">
+                {% for fig in other_graphs %}
+                <div class="figure-card">
+                    <h3>{{ fig.title }}</h3>
+                    <img src="{{ fig.path }}" alt="{{ fig.title }}">
+                    {% if fig.caption %}
+                    <div class="caption">{{ fig.caption }}</div>
+                    {% endif %}
+                    {% if fig.description %}
+                    <p>{{ fig.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="block">
+                <p class="muted">No hay gráficos adicionales para mostrar.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="footer-note">
+            Reporte generado automáticamente por Python.
+        </div>
+    </div>
+
+</body>
+</html>
