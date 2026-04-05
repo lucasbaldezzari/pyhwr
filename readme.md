@@ -29,4 +29,4 @@ En este proyeco, para poder conectar la PC o Laptop a la tablet es necesario con
 
 Para instalar *adb* se debe ingresar a la página oficial de Android Developers y descargar la versión adecuada desde [acá](https://developer.android.com/tools/releases/platform-tools). Una vez descargado, descomprimir y agregar la carpeta a las Variables de Entorno de Windows, de esta manera, se podrá ejecutar *adb* desde consola.
 
-NOTA: Podes encontrar la versión utilizada en este proyecto dentro de la carpeta [adb]() de este repositorio.
+NOTA: Podes encontrar la versión utilizada en este proyecto dentro de la carpeta [adb](https://github.com/lucasbaldezzari/pyhwr/tree/main/adb) de este repositorio.
