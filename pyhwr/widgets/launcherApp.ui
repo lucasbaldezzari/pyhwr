@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>969</height>
+    <width>624</width>
+    <height>1048</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -63,7 +63,7 @@ NeuroIA LAB</string>
       <x>10</x>
       <y>100</y>
       <width>601</width>
-      <height>281</height>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="infoGeneral">
@@ -365,9 +365,9 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>410</y>
+      <y>440</y>
       <width>601</width>
-      <height>444</height>
+      <height>471</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="sanityCheck">
@@ -680,7 +680,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>890</y>
+      <y>950</y>
       <width>601</width>
       <height>56</height>
      </rect>
@@ -785,7 +785,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>860</y>
+      <y>920</y>
       <width>601</width>
       <height>16</height>
      </rect>
@@ -804,7 +804,7 @@ NeuroIA LAB</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>390</y>
+      <y>410</y>
       <width>601</width>
       <height>16</height>
      </rect>
