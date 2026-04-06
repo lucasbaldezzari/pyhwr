@@ -2,7 +2,6 @@ import time
 import numpy as np
 import logging
 import json
-from pylsl import local_clock
 from pyhwr.managers.TabletMessenger import TabletMessenger
 from pyhwr.managers.MarkerManager import MarkerManager
 from pyhwr.widgets import SquareWidget
@@ -164,7 +163,7 @@ class SessionManager(QWidget):
         Función para avanzar a la siguiente fase
         """
         
-        now = time.time() #local_clock()
+        now = time.time() #()
         # self.accumulated_time += now - self._last_phase_time
         self._last_phase_time = now
 
@@ -216,7 +215,7 @@ class SessionManager(QWidget):
         """
         Método para avanzar de fase solamente cuando se superen los tiempos de cada una.
         """
-        now = time.time()#local_clock()
+        now = time.time()#()
         if now > self.next_transition:
             self._advance_phase()
             self.handle_phase_transition()
@@ -236,8 +235,8 @@ class SessionManager(QWidget):
         """
         if phase_name in self.phases:
             self.in_phase = phase_name
-            self._last_phase_time = local_clock()
-            self.next_transition = local_clock() + self.phases[phase_name]["duration"]
+            self._last_phase_time = self.now# ()
+            self.next_transition = self.now + self.phases[phase_name]["duration"]
         else:
             logging.error(f"Fase '{phase_name}' no encontrada en las fases definidas.")
 
