@@ -6,7 +6,7 @@
 
 Se busca testear:
 
-- [ ] Que todos los eventos importantes generados en la tablet y la PC se almacenen correctamente para cada tipo de task (emg, eog, basal, entrenamiento/ejectuado/imaginado).
+- [x] Que todos los eventos importantes generados en la tablet y la PC se almacenen correctamente para cada tipo de task (emg, eog, basal, entrenamiento/ejectuado/imaginado).
 
 Files creados:
 
@@ -14,9 +14,17 @@ Files creados:
 2. sub-contrazos_ses-02_task-ejecutada_run-01_eeg y sub-contrazos_ses-02_task-ejecutada_run-02_eeg. Rondas de 40 trials cada una. Se realizaron trazos. Commit de handwritting app (7126d40e7652d4a649170119d1a9db3492c78bdc).
 3. sub-contrazos_ses-03_task-ejecutada_run-01_eeg contiene 20 trials donde para algunos no se dibujaron trazos. Se usa para corroborar funcionamiento de LSLDataManager.plot_traces() y LSLDataManager.plot_all_traces(). Commit de handwritting app (7126d40e7652d4a649170119d1a9db3492c78bdc).
 
+
+- [x] Que los triggers registrados en g.Recorder se registren y almacencen correctamente.
+
+Se realizaron 4 rondas, las cuales se describen a continuación:
+
+1. Los archivos hdf5 *sub-triggers_ses-01_task-ejecutada_run-* correspondientes a run 01, 02 y 04 tuvieron 40 trials cada uno (4 veces cada letra). Se registraron además los xdf de lsl en los archivos *sub-triggers_ses-01_task-ejecutada_run-* correspondientes a los run 01, 02 y 04.
+2. El run 03 contiene 61 trials. Se estaba ejecutando una ronda de 80 trials pero se freno sin querer.
+
 ### 2. Testeo de trazos y marcadores
 
-- [ ] Volver a evaluar el punto _Testeo de marcadores_ y además corroborar que todos los trazos generados en la tablet para cada letra (cada trial) se vean correctamente (se debe leer la información de cada trazo y plotearlo para evaluar visualmente).
+- [x] Volver a evaluar el punto _Testeo de marcadores_ y además corroborar que todos los trazos generados en la tablet para cada letra (cada trial) se vean correctamente (se debe leer la información de cada trazo y plotearlo para evaluar visualmente).
 
 ### 3. Testeo reonda de EMG
 
