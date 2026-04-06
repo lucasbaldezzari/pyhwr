@@ -220,14 +220,6 @@ La clase usa dos `QTimer`:
 - `trialRestTime`
 - `sessionFinalTime`
 
-### Observación importante
-La lógica de temporización mezcla `time.time()` y `local_clock()`:
-
-- `update_main()`, `_advance_phase()`, `_on_phase()`, `get_elapsed_time()` usan `time.time()`
-- `moveTo()` usa `local_clock()`
-
-Esto puede generar documentación importante sobre consistencia temporal: la máquina normal corre con reloj de sistema Python, mientras que `moveTo()` usa tiempo LSL.
-
 ---
 
 ## 8. Estructura de comunicación con la tablet
@@ -410,7 +402,7 @@ Ambos se configuran como:
 - `channel_format="string"`
 - `nominal_srate=0`
 
-`MarkerManager.sendMarker(...)` serializa a JSON si el payload es dict; si no, lo convierte a string y lo envía con timestamp `local_clock()`.
+`MarkerManager.sendMarker(...)` serializa a JSON si el payload es dict;
 
 ### 10.3 Contenido del marcador de laptop
 `laptop_marker_dict` contiene:
@@ -672,7 +664,7 @@ La laptop puede enviar `first_jump`, pero la tablet no muestra un caso específi
 `startSession()` envía un mensaje inicial y luego llama `handle_phase_transition()`, que vuelve a enviar mensaje de la fase actual.
 
 ### 18.4 Mezcla de relojes
-Se usan `time.time()` y `local_clock()` en distintos puntos.
+FIX ARRELGADO. (Se usan `time.time()` y `local_clock()` en distintos puntos.)
 
 ### 18.5 Reproducibilidad parcial
 El seed controla el shuffle de letras, pero no necesariamente la aleatorización de duraciones.
