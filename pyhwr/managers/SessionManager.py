@@ -396,6 +396,7 @@ class SessionManager(QWidget):
         self.launcher.start_session_signal.connect(self.startSession)
         self.launcher.stop_session_signal.connect(self.stopSession)
         self.launcher.quit_session_signal.connect(self.quitSession)
+        self.launcher.back_to_config_signal.connect(self.back_to_config)
 
         # Widgets de marcadores
         text = (
@@ -537,6 +538,45 @@ class SessionManager(QWidget):
         )
 
         self.information_label.change_text(texto)
+
+    def cleanup_windows(self):
+        """
+        Cierra timers y ventanas auxiliares creadas por este manager.
+        """
+        self.mainTimer.stop()
+        self.uiTimer.stop()
+        self.session_finished = True
+
+        for attr in ["information_label", "marcador_cue", "marcador_calibration"]:
+            widget = getattr(self, attr, None)
+            if widget is not None:
+                widget.close()
+
+        if getattr(self, "launcher", None) is not None:
+            self.launcher.close()
+
+        self.close()
+
+    def back_to_config(self):
+        """
+        Cierra widgets del manager y vuelve a RunConfigurationApp.
+        """
+        from pyhwr.widgets import RunConfigurationApp
+
+        config = {
+            "sub": self.sessioninfo.sub,
+            "ses": self.sessioninfo["ses"],
+            "task": self.experimento,
+            "run": self.sessioninfo["run"],
+            "root": self.sessioninfo["root_folder"],
+            "bids_file": self.sessioninfo["bids_file"],
+            "suffix": getattr(self.sessioninfo, "suffix", "eeg"),
+        }
+
+        self.cleanup_windows()
+
+        self.run_config_window = RunConfigurationApp(config=config)
+        self.run_config_window.show()
 
 if __name__ == "__main__":
     from pyhwr.utils import SessionInfo

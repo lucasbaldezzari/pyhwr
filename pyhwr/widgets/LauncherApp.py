@@ -10,6 +10,7 @@ class LauncherApp(QMainWindow):
     start_session_signal = pyqtSignal()
     stop_session_signal = pyqtSignal()
     quit_session_signal = pyqtSignal()
+    back_to_config_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -135,24 +136,19 @@ class LauncherApp(QMainWindow):
             Cierra la ventana actual y vuelve a RunConfigurationApp.
             """
             from pyhwr.widgets import RunConfigurationApp  # ajusta si la ruta es distinta
-
-            config = {
-            # "tipo_ronda": self.task_label.text(),
-            # "sub": self.sub_label.text(),
-            # "ses": ,
-            # "task": self.task_label.text(),
-            # "run": ,
-            # "suffix": ,
-            # "root": ,
-            # "bids_file": ,
-            }
-
-            self.run_config_window = RunConfigurationApp(config=config)
+            self.run_config_window = RunConfigurationApp()
             self.run_config_window.show()
 
             del RunConfigurationApp
 
             self.close()
+
+    def _volver_config(self):
+        """
+        Solicita volver a configuración.
+        El cierre real de ventanas auxiliares lo hace el manager.
+        """
+        self.back_to_config_signal.emit()
 
     def _copy_bids(self):
         clipboard = QApplication.clipboard()
