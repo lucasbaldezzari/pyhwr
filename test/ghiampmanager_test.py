@@ -3,9 +3,9 @@ import numpy as np
 from pyhwr.managers import GHiampDataManager
 
 path = "D:\\repos\\pyhwr\\test\\data\\gtec_recordings\\full_steup"
-lsl_filename = "full_setup_2.hdf5"
+gtec_filename = "full_setup_2.hdf5"
 
-gmanager = GHiampDataManager(os.path.join(path, lsl_filename), normalize_time=True)
+gmanager = GHiampDataManager(os.path.join(path, gtec_filename), normalize_time=True)
 
 print("Nombre de los marcadores:", gmanager.markers_info.keys())
 print("Tiempos de los marcadores:", gmanager.markers_info.values())
