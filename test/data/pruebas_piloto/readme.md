@@ -30,17 +30,15 @@ Se realizaron 4 rondas, las cuales se describen a continuación:
 
 Sólo registrar EMG.
 
-- [ ] Corroborar que se registran eventos para la ronda de EMG.
-- [ ] Corroborar que se registran correctamente las señales de EMG para cada canal.
+- [x] Corroborar que se registran eventos para la ronda de EMG.
+- [x] Corroborar que se registran correctamente las señales de EMG para cada canal.
 
-### 4. Testeo de ronda EOG
 
-Sólo registrar EOG.
+1. Los archivos sub-emgtrazos_ses-01_task-ejecutada_run-01_emg y sub-emgtrazos_ses-01_task-ejecutada_run-02_emg contienen el registro para extensor corto del pulgar y el extensor común de los dedos en la porción más proximal (cerca del codo) en los canales 1 y 2, respectivamente.
 
-- [ ] Corroborar que se registran eventos para la ronda de EOG.
-- [ ] Corroborar que se registran correctamente las señales de EOG para cada canal.
+2. Los archivos sub-emgtrazos_ses-01_task-ejecutada_run-03_emg y sub-emgtrazos_ses-01_task-ejecutada_run-04_emg contienen el registro para extensor corto del pulgar (canal 1).
 
-## 5. Testeo de ronda EEG, EMG y EOG
+## 4. Testeo de ronda EEG, EMG y EOG
 
 Registrar todas las señales para algunas rondas de entrenamiento (10 trials, una letra diferente en cada trial).
 
