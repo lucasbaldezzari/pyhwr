@@ -69,7 +69,7 @@ class SessionManager(QWidget):
         self.experimento = experimento.lower()
 
         # --- configuración de sesión/runs/trials/letras ---
-        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','t']
+        self.letters = letters or ['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd','m']
         self.trials_per_run = len(self.letters)
         self.total_trials = self.trials_per_run * n_runs
         self.n_runs = n_runs

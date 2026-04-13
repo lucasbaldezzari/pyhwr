@@ -1,70 +1,107 @@
-# API Documentation — `RunConfigurationApp`
+# `RunConfigurationApp`
 
-## Overview
+## Descripción general
 
-`RunConfigurationApp` is the second-stage configuration window of the desktop workflow. It receives the base metadata from `InitAPP`, exposes experiment-specific defaults, allows the operator to modify timing and randomization parameters, builds a `SessionInfo` object, and launches either `SessionManager` or `PreExperimentManager`.
+`RunConfigurationApp` es la ventana de parametrización operativa de una ronda experimental. Su función consiste en tomar la metadata base entregada por `InitAPP`, completar los parámetros de ejecución y lanzar el manager correspondiente: `SessionManager` para rondas principales de escritura o `PreExperimentManager` para rondas de preexperimento.
 
-It is therefore the bridge between:
-- session metadata,
-- experiment parameterization,
-- actual execution.
+Dentro de la arquitectura, esta clase actúa como **hub de configuración de runtime**. Es el punto donde el estado de la interfaz deja de ser solamente metadata descriptiva y se transforma en argumentos concretos de construcción para los managers de ejecución.
 
-## Class signature
+---
 
-```python
-class RunConfigurationApp(QMainWindow):
+## Rol dentro de la arquitectura
+
+`RunConfigurationApp` ocupa la segunda etapa del pipeline de interfaz:
+
+```text
+InitAPP -> RunConfigurationApp -> SessionManager / PreExperimentManager -> LauncherApp
 ```
 
-## Main responsibilities
+Recibe un diccionario `config` generado por `InitAPP`, expone valores por defecto según el tipo de ronda y, una vez confirmados los parámetros, crea el `SessionInfo` y el manager que tomará el control de la sesión.
 
-- Load the UI and stylesheet for run-level configuration.
-- Populate the form with defaults according to the selected task.
-- Enable/disable parameter fields based on checkboxes.
-- Convert UI state into runtime parameters.
-- Build a `SessionInfo` instance.
-- Launch either:
-  - `SessionManager`, or
-  - `PreExperimentManager`.
-- Allow returning to `InitAPP`.
+---
 
-## Constructor
+## Responsabilidades principales
+
+La clase concentra las siguientes responsabilidades:
+
+1. **Mostrar el tipo de ronda activo**
+   - ya sea tomado del `config` inicial o forzado desde la propia UI.
+
+2. **Cargar parámetros por defecto por paradigma**
+   - número de runs,
+   - duración base de `cue`,
+   - rango aleatorio de `cue`,
+   - duración base de `rest`,
+   - rango aleatorio de `rest`,
+   - aleatorización por run.
+
+3. **Habilitar o deshabilitar campos según el estado de checkboxes**
+   - fuerza de tipo de ronda,
+   - aleatorización,
+   - uso de semilla,
+   - edición del tablet ID.
+
+4. **Construir `SessionInfo`**
+   - a partir de `config` y del contexto de ronda seleccionado.
+
+5. **Instanciar el manager adecuado**
+   - `SessionManager` para `entrenamiento`, `ejecutada` e `imaginada`;
+   - `PreExperimentManager` para `basal`, `emg` y `eog`.
+
+---
+
+## Dependencias principales
+
+### `SessionInfo`
+
+La clase construye un objeto `SessionInfo` mediante `make_SessionInfo()` para encapsular la metadata de la sesión.
+
+### `SessionManager`
+
+Se utiliza para lanzar rondas principales de escritura y entrenamiento.
+
+### `PreExperimentManager`
+
+Se utiliza para lanzar rondas de preexperimento, como `basal`, `emg` y `eog`.
+
+### `InitAPP`
+
+La navegación hacia atrás se resuelve reabriendo `InitAPP` desde `volver_inicio()`.
+
+---
+
+## Firma del constructor
 
 ```python
 RunConfigurationApp(config: dict = None)
 ```
 
-### `config` contract
+### Parámetro de entrada
 
-The input configuration is expected to contain keys such as:
+- `config`: diccionario con metadata base de la ronda, normalmente generado por `InitAPP`.
 
-```python
-{
-    "sub": ...,
-    "ses": ...,
-    "task": ...,
-    "run": ...,
-    "suffix": ...,
-    "root": ...,
-    "bids_file": ...
-}
-```
+Si `config` es `None` o no contiene la clave `task`, la ventana asume `ejecutada` como valor inicial de referencia.
 
-This contract is produced upstream by `InitAPP`.
+---
 
-## Default experiment profiles
+## Configuración por defecto por paradigma
 
-The class stores per-task defaults in `self.experimento_defaults`.
+La clase mantiene un diccionario `experimento_defaults` que define perfiles de ejecución para distintos tipos de ronda.
 
-Supported keys include:
+### Rondas de preexperimento
 
 - `basal`
 - `emg`
 - `eog`
+
+### Rondas principales
+
 - `entrenamiento`
 - `ejecutada`
 - `imaginada`
 
-Each profile may define:
+Cada perfil define, al menos:
+
 - `n_runs`
 - `cue_base_duration`
 - `cue_tmin_random`
@@ -74,91 +111,68 @@ Each profile may define:
 - `rest_tmin_random`
 - `rest_tmax_random`
 - `randomize_rest_duration`
-- `randomize_per_run`
+- y, cuando corresponde, `randomize_per_run`.
 
-## Initialization behavior
+---
 
-During construction, the class:
+## Comportamiento de inicialización
 
-1. Loads `runConfigurationApp.ui`.
-2. Loads `styles/runconfiguration_styles.css`.
-3. Sets the window title.
-4. Stores `config`.
-5. Initializes `tipo_ronda_label` from `config["task"]` or falls back to `"ejecutada"`.
-6. Loads defaults for the current task.
-7. Connects stateful widgets to helper methods.
-8. Enables or disables fields according to checkbox state.
-9. Connects:
-   - launch button,
-   - round-type updates,
-   - return-to-start behavior,
-   - tablet ID field toggling.
+Durante la construcción, la clase realiza estas acciones:
 
-## Public API
+1. carga `runConfigurationApp.ui`;
+2. carga `styles/runconfiguration_styles.css`;
+3. fija el título de ventana;
+4. conserva el `config` recibido;
+5. actualiza `tipo_ronda_label` según `config["task"]` o un valor por defecto;
+6. inicializa `experimento_defaults`;
+7. posiciona `comboBox_task` en el tipo de ronda visible;
+8. conecta los checkboxes a la lógica de habilitación dinámica;
+9. conecta el botón de lanzamiento al dispatcher principal;
+10. sincroniza cambios de `comboBox_task` con el label, los defaults y el campo de letras;
+11. habilita por defecto `randomize_per_run_box`;
+12. conecta la lógica de edición opcional de tablet ID;
+13. conecta la navegación de vuelta a `InitAPP`.
 
-### `update_tipo_ronda_label()`
+---
 
-Copies the current combo box text into `tipo_ronda_label`.
+## Lógica de habilitación dinámica
 
 ### `toggle_task_combo()`
 
-Enables or disables the task combo box according to `forzar_ronda_box`.
-
-If enabled, it also refreshes the visible round label.
+Habilita `comboBox_task` sólo si `forzar_ronda_box` está activo. Esto permite bloquear o liberar el cambio manual del tipo de ronda respecto al `config` inicial.
 
 ### `toggle_cue_random()`
 
-Enables or disables the cue randomization min/max inputs based on the state of `randomize_cue_duration`.
+Activa o desactiva los campos `in_cue_tmin_random` e `in_cue_tmax_random` según el estado de `randomize_cue_duration`.
 
 ### `toggle_rest_random()`
 
-Enables or disables the rest randomization min/max inputs based on the state of `randomize_rest_duration`.
+Activa o desactiva los campos `in_rest_tmin_random` e `in_rest_tmax_random` según el estado de `randomize_rest_duration`.
 
 ### `toggle_semilla()`
 
-Enables or disables the seed input according to `semilla_box`.
-
-### `get_semilla() -> int | None`
-
-Returns:
-- an integer seed if the checkbox is enabled and the input is a valid integer,
-- `None` otherwise.
-
-This makes the seed optional and safely suppresses invalid values.
+Activa o desactiva `in_semilla` según el estado de `semilla_box`.
 
 ### `change_in_letters()`
 
-Enables `in_letters` only for:
+Habilita `in_letters` únicamente para paradigmas que requieren conjunto explícito de letras:
+
 - `entrenamiento`
 - `ejecutada`
 - `imaginada`
 
-This reflects the fact that those paradigms require an explicit letter set.
-
 ### `toggle_tabletid()`
 
-Enables or disables the tablet ID field depending on `change_tabid_cbox`.
+Activa o desactiva el campo `in_tabletid` según `change_tabid_cbox`.
 
-### `fill_form_with_defaults()`
+---
 
-Loads the current task profile from `self.experimento_defaults` and populates the timing/randomization fields.
+## Construcción de `SessionInfo`
 
-### `lanzar_btn_clicked()`
+`make_SessionInfo()` crea un objeto `SessionInfo` con los datos disponibles en `self.config` y con `session_id` derivado del tipo de ronda actualmente visible en `comboBox_task`.
 
-Dispatches execution according to the selected task:
+Los campos construidos incluyen:
 
-- `basal`, `emg`, `eog` → `lanzar_preexperiment()`
-- `entrenamiento`, `ejecutada`, `imaginada` → `lanzar_experimento_completo()`
-
-If the task is not recognized, the method prints a warning and returns.
-
-The window is closed after a valid launch path.
-
-### `make_SessionInfo() -> SessionInfo`
-
-Builds a `SessionInfo` instance from the stored configuration and the current task context.
-
-Generated fields include:
 - `sub`
 - `ses`
 - `task`
@@ -169,30 +183,145 @@ Generated fields include:
 - `root_folder`
 - `session_id`
 
+La fecha se obtiene con:
+
+```python
+time.strftime("%Y-%m-%d")
+```
+
+---
+
+## Dispatch de lanzamiento
+
+La función `lanzar_btn_clicked()` decide qué manager instanciar en función del contenido de `comboBox_task`.
+
+### Se lanza `PreExperimentManager` para:
+
+- `basal`
+- `emg`
+- `eog`
+
+### Se lanza `SessionManager` para:
+
+- `entrenamiento`
+- `ejecutada`
+- `imaginada`
+
+Una vez creado el manager, la ventana se cierra.
+
+---
+
+## Lanzamiento de `SessionManager`
+
+`lanzar_experimento_completo()` realiza las siguientes tareas:
+
+1. crea `SessionInfo`;
+2. lee desde la UI:
+   - `n_runs`,
+   - tiempos de `cue`,
+   - tiempos de `rest`,
+   - flags de aleatorización,
+   - lista de letras,
+   - semilla,
+   - tablet ID,
+   - nivel de logging;
+3. convierte el campo `in_letters` desde texto CSV a lista de strings;
+4. configura `logging.basicConfig(...)`;
+5. instancia `SessionManager` con los argumentos de runtime.
+
+### Formato esperado para letras
+
+`in_letters` debe contener una lista separada por comas, por ejemplo:
+
+```text
+a,d,e,l,m,n,o,r,s,u
+```
+
+que se convierte en:
+
+```python
+["a", "d", "e", "l", "m", "n", "o", "r", "s", "u"]
+```
+
+---
+
+## Lanzamiento de `PreExperimentManager`
+
+`lanzar_preexperiment()` realiza una secuencia análoga, pero orientada a rondas de preexperimento:
+
+1. crea `SessionInfo`;
+2. obtiene `task = comboBox_task.currentText().lower()`;
+3. lee runs, tiempos, aleatorización y logging;
+4. instancia `PreExperimentManager` con `pre_experiment=task`.
+
+A diferencia del flujo principal, aquí no se leen letras ni tablet ID para la lógica de sesión.
+
+---
+
+## API pública relevante
+
+### `update_tipo_ronda_label()`
+
+Copia el texto actual de `comboBox_task` hacia `tipo_ronda_label`.
+
+### `toggle_task_combo()`
+
+Controla si el combo de tareas puede editarse manualmente.
+
+### `toggle_cue_random()`
+
+Controla la habilitación de los parámetros aleatorios de `cue`.
+
+### `toggle_rest_random()`
+
+Controla la habilitación de los parámetros aleatorios de `rest`.
+
+### `toggle_semilla()`
+
+Controla la habilitación del campo de semilla.
+
+### `get_semilla()`
+
+Devuelve:
+
+- un entero, si `semilla_box` está activo y el valor es válido;
+- `None`, en cualquier otro caso.
+
+### `change_in_letters()`
+
+Habilita o deshabilita el campo de letras según el tipo de ronda.
+
+### `toggle_tabletid()`
+
+Controla la edición del ID de la tablet.
+
+### `fill_form_with_defaults()`
+
+Carga en la UI el perfil temporal y de aleatorización correspondiente al tipo de ronda actual.
+
+### `lanzar_btn_clicked()`
+
+Despacha la ejecución hacia `lanzar_preexperiment()` o `lanzar_experimento_completo()`.
+
+### `make_SessionInfo()`
+
+Construye la instancia de `SessionInfo` a partir del `config` y del contexto actual.
+
 ### `lanzar_experimento_completo()`
 
-Builds a `SessionInfo`, parses all runtime parameters from the UI, and instantiates `SessionManager`.
-
-It extracts:
-- run count,
-- cue timing and randomization,
-- rest timing and randomization,
-- letter list,
-- optional seed,
-- tablet ID,
-- logging level.
+Instancia `SessionManager` con parámetros tomados desde la UI.
 
 ### `lanzar_preexperiment()`
 
-Builds a `SessionInfo`, parses shared runtime parameters, and instantiates `PreExperimentManager`.
+Instancia `PreExperimentManager` con parámetros tomados desde la UI.
 
 ### `volver_inicio()`
 
-Closes the current window and reopens `InitAPP`.
+Cierra la ventana actual y reabre `InitAPP`.
 
-## Example usage
+---
 
-### Typical lifecycle
+## Ejemplo de uso
 
 ```python
 config = {
@@ -205,54 +334,38 @@ config = {
     "bids_file": "sub-01_ses-01_task-ejecutada_run-01_eeg",
 }
 
+app = QApplication(sys.argv)
 window = RunConfigurationApp(config=config)
 window.show()
+sys.exit(app.exec_())
 ```
 
-### Letter list parsing
+---
 
-If `in_letters` contains:
+## Observaciones de diseño
 
-```text
-a,d,e,l,m,n,o,r,s,u
-```
+### 1. Esta clase es el puente real entre UI y ejecución
 
-then the launch method converts it into:
+Es el primer componente que traduce el estado de la interfaz en argumentos concretos para los managers.
 
-```python
-["a", "d", "e", "l", "m", "n", "o", "r", "s", "u"]
-```
+### 2. `safe_float` está declarado pero no se usa
 
-## Design observations
+El método existe como helper potencial, pero actualmente no participa en la lectura de parámetros.
 
-### 1. This window is the parameterization hub
+### 3. Puede existir desalineación entre `task` y `session_id`
 
-It is the first component that translates UI state into actual manager constructor arguments.
+`make_SessionInfo()` construye `session_id` a partir del tipo de ronda visible en el combo, pero `task` se toma desde `self.config`. Si el operador fuerza una ronda distinta desde la UI, ambos campos pueden divergir.
 
-### 2. `safe_float` is currently unused
+### 4. El `match` de `lanzar_btn_clicked()` contiene una rama redundante
 
-The method exists as a helper idea but is not wired into the current parsing path.
+La rama `case "entrenamiento":` aparece antes de `case "entrenamiento" | "ejecutada" | "imaginada":`, por lo que la primera queda absorbida por la lógica general del mismo destino.
 
-### 3. There is a task consistency risk in `make_SessionInfo()`
+### 5. El lanzador no valida semánticamente los rangos temporales
 
-`session_id` is built from the current combo selection, but `task` inside `SessionInfo` is read from the original `config` dictionary. If the operator forces a different round through the UI, `SessionInfo.task` and `SessionInfo.session_id` can diverge.
+La clase convierte textos a `float` e `int`, pero no verifica consistencia experimental adicional, como mínimos, máximos o relaciones entre duraciones.
 
-### 4. The `match` in `lanzar_btn_clicked()` contains a redundant branch
+---
 
-There is one branch for `"entrenamiento"` and another for `"entrenamiento" | "ejecutada" | "imaginada"`. The second one still works, but `"entrenamiento"` is already handled earlier.
+## Resumen
 
-### 5. Manager instances are created but not explicitly shown here
-
-The code assumes manager construction is sufficient to bootstrap the next execution stage.
-
-## Recommendations
-
-- Make `make_SessionInfo()` derive both `task` and `session_id` from the same current UI source.
-- Replace manual parsing with robust helper functions or validator-backed widgets.
-- Remove or use `safe_float`.
-- Simplify the `match` statement to avoid redundancy.
-- Consider validating that the letters list is non-empty for paradigms that require it.
-
-## Summary
-
-`RunConfigurationApp` is the run-time configuration hub of the application. It transforms a simple session descriptor into a fully parameterized experiment or pre-experiment execution request. In the current desktop workflow, it is the most important UI bridge between configuration and execution.
+`RunConfigurationApp` es la ventana de configuración operativa del sistema. Recibe la metadata base desde `InitAPP`, carga perfiles por defecto según el tipo de ronda, permite ajustar parámetros de runtime y lanza el manager adecuado (`SessionManager` o `PreExperimentManager`). Se trata del componente que transforma una configuración de interfaz en una sesión ejecutable.

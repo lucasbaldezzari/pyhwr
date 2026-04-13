@@ -1,173 +1,241 @@
-# API Documentation — `InitAPP`
+# `InitAPP`
 
-## Overview
+## Descripción general
 
-`InitAPP` is the entry-point configuration window for the experimental GUI workflow. It collects the base session metadata, derives a BIDS-style filename, validates the form, optionally creates the directory structure, and hands control to `RunConfigurationApp`.
+`InitAPP` es la ventana de entrada al flujo de configuración del proyecto. Su función consiste en recoger la metadata mínima de una ronda experimental, construir un identificador BIDS preliminar y derivar el control hacia `RunConfigurationApp`, donde se definen los parámetros operativos de la sesión.
 
-This class does not launch acquisition directly. Its role is to gather the minimal run-independent metadata required to define the session context.
+Dentro de la arquitectura general, esta clase cumple el rol de **punto de arranque de la interfaz de escritorio**. No ejecuta sesiones, no administra timers ni se comunica con hardware; su responsabilidad se limita a validar datos iniciales, preparar la estructura de salida y abrir la siguiente ventana del pipeline.
 
-## Class signature
+---
 
-```python
-class InitAPP(QMainWindow):
+## Rol dentro de la arquitectura
+
+`InitAPP` ocupa la primera etapa del flujo de interfaz:
+
+```text
+InitAPP -> RunConfigurationApp -> SessionManager / PreExperimentManager -> LauncherApp
 ```
 
-## Main responsibilities
+Desde esta ventana se definen los campos base que luego serán consumidos por `RunConfigurationApp` para construir un `SessionInfo` y lanzar el manager correspondiente.
 
-- Load the initial Qt Designer UI and stylesheet.
-- Initialize the default root folder.
-- Constrain the task selector according to experiment type.
-- Keep the filename preview synchronized with the form.
-- Validate that the form is complete before enabling continuation.
-- Optionally create a minimal BIDS-like folder structure.
-- Create and open `RunConfigurationApp` with a `config` dictionary.
+---
 
-## Constructor
+## Responsabilidades principales
+
+`InitAPP` concentra las siguientes responsabilidades:
+
+1. **Seleccionar el tipo general de experimento**
+   - `pre-experimento`
+   - `experimento`
+
+2. **Seleccionar el tipo de ronda compatible con ese experimento**
+   - por ejemplo `EMG`, `EOG`, `BASAL`, `ENTRENAMIENTO`, `EJECUTADA` o `IMAGINADA`.
+
+3. **Recoger metadata inicial de sesión**
+   - sujeto (`sub`),
+   - sesión (`ses`),
+   - tarea (`task`),
+   - run (`run`),
+   - sufijo (`suffix`),
+   - directorio raíz (`root`).
+
+4. **Construir un nombre BIDS preliminar en tiempo real**
+   - siguiendo el patrón `sub-XX_ses-YY_task-Z_run-AA_suffix`.
+
+5. **Validar el formulario antes de permitir avanzar**
+   - todos los campos requeridos deben estar completos,
+   - el tipo de ronda debe ser válido,
+   - y el directorio raíz debe existir.
+
+6. **Crear opcionalmente la estructura mínima de carpetas BIDS**
+   - `sub-<id>/ses-<id>/eeg/`.
+
+---
+
+## Dependencias principales
+
+### PyQt5
+
+La clase hereda de `QMainWindow`, carga una interfaz `.ui` y aplica una hoja de estilos CSS desde disco.
+
+### `RunConfigurationApp`
+
+Una vez validado el formulario, `InitAPP` construye un diccionario `config` y delega el flujo a `RunConfigurationApp`, que será el encargado de parametrizar la ejecución real.
+
+### Sistema de archivos local
+
+La clase utiliza `os.path.isdir(...)` para validar el directorio raíz y `os.makedirs(..., exist_ok=True)` para crear la estructura BIDS cuando se solicita.
+
+---
+
+## Firma del constructor
 
 ```python
 InitAPP()
 ```
 
-## Initialization behavior
+No recibe parámetros externos. Toda la configuración inicial se obtiene desde los widgets cargados en `initAPP.ui`.
 
-During construction, the class:
+---
 
-1. Loads `initAPP.ui`.
-2. Loads `styles/initapp_styles.css`.
-3. Sets the window title.
-4. Sets the current working directory as the default root folder.
-5. Clears and repopulates `combo_tipo_task` according to `combo_experimento`.
-6. Connects text fields to `update_filename()`.
-7. Forces `input_suffix` to `"eeg"` by default.
-8. Connects validation callbacks to all relevant fields.
-9. Connects:
-   - `browseBtn` → `select_root_folder`
-   - `btn_continue` → `continuar`
-   - `btn_reset` → `resetear`
-10. Disables the continue button until the form is valid.
+## Comportamiento de inicialización
 
-## User-facing workflow
+Durante la construcción, la clase realiza estas acciones:
 
-The window guides the user through these steps:
+1. carga `initAPP.ui`;
+2. carga `styles/initapp_styles.css`;
+3. establece el título de ventana;
+4. fija `os.getcwd()` como directorio raíz por defecto;
+5. inicializa `combo_tipo_task` según el experimento seleccionado;
+6. conecta cambios de texto al generador de nombre BIDS;
+7. fija `eeg` como sufijo por defecto;
+8. conecta la validación del formulario a todos los campos relevantes;
+9. conecta el selector de carpeta raíz;
+10. conecta la lógica de continuidad, reinicio y sincronización entre combos;
+11. deja deshabilitado el botón de continuar hasta que el formulario sea válido.
 
-1. Choose whether the workflow is for `pre-experimento` or `experimento`.
-2. Select the type of round.
-3. Enter `sub`, `ses`, `task`, `run`, and `suffix`.
-4. Choose or keep a root folder.
-5. Optionally request creation of the BIDS directory structure.
-6. Continue to `RunConfigurationApp`.
+---
 
-## Public API
+## Lógica de selección de tipo de ronda
+
+El contenido de `combo_tipo_task` depende de `combo_experimento`.
+
+### Para `pre-experimento`
+
+Se ofrecen las opciones:
+
+- `Ronda EMG`
+- `Ronda EOG`
+- `Ronda BASAL`
+- `Ronda ENTRENAMIENTO`
+
+### Para `experimento`
+
+Se ofrecen las opciones:
+
+- `Ronda EJECUTADA`
+- `Ronda IMAGINADA`
+
+La opción índice `0` se reserva para el placeholder `Seleccionar tipo de ronda` y se considera inválida para avanzar.
+
+---
+
+## Construcción del nombre BIDS
+
+La función `update_filename()` actualiza automáticamente `self.fileName` a partir de los campos del formulario.
+
+### Formato aplicado
+
+```text
+sub-<sub>_ses-<ses>_task-<task>_run-<run>_<suffix>
+```
+
+### Reglas relevantes
+
+- `sub`, `ses` y `run` se normalizan con padding de dos dígitos cuando contienen enteros.
+- si `task` está vacío, se usa `[task]`.
+- si `suffix` está vacío, se usa `[suffix]`.
+
+Este nombre se utiliza luego como valor inicial de `bids_file` en el diccionario `config` entregado a la ventana siguiente.
+
+---
+
+## Validación del formulario
+
+La función `validate_form()` habilita el botón `btn_continue` únicamente cuando se cumplen simultáneamente las siguientes condiciones:
+
+- `combo_tipo_task` no está en el índice `0`;
+- `sub`, `ses`, `task`, `run` y `suffix` no están vacíos;
+- `input_rootfolder` apunta a un directorio existente.
+
+La validación se ejecuta de forma reactiva frente a cambios en campos de texto, cambios de combo y cambios del directorio raíz.
+
+---
+
+## Creación de estructura BIDS
+
+Si `crearBIDSCheck` está activo, `continuar()` invoca `create_bids_structure()` antes de abrir `RunConfigurationApp`.
+
+La estructura creada es:
+
+```text
+<root>/sub-<sub>/ses-<ses>/eeg/
+```
+
+La operación es idempotente, ya que se utiliza:
+
+```python
+os.makedirs(modality_path, exist_ok=True)
+```
+
+---
+
+## Flujo de continuación
+
+Cuando el formulario es válido y se presiona continuar, la clase construye un diccionario `config` con las claves:
+
+- `tipo_ronda`
+- `sub`
+- `ses`
+- `task`
+- `run`
+- `suffix`
+- `root`
+- `bids_file`
+
+Ese diccionario se entrega a `RunConfigurationApp`, se muestra la nueva ventana y `InitAPP` se cierra.
+
+---
+
+## API pública relevante
 
 ### `update_combo_tipo_task()`
 
-Rebuilds the task selector according to `combo_experimento.currentText()`.
-
-Supported modes:
-
-- `pre-experimento`
-  - `Ronda EMG`
-  - `Ronda EOG`
-  - `Ronda BASAL`
-  - `Ronda ENTRENAMIENTO`
-
-- `experimento`
-  - `Ronda EJECUTADA`
-  - `Ronda IMAGINADA`
-
-After reloading the combo box:
-- the selection is reset to index `0`,
-- the form is revalidated.
+Actualiza el contenido de `combo_tipo_task` según el experimento seleccionado y revalida el formulario.
 
 ### `continuar()`
 
-Validates that a round type was selected and, if requested, creates the directory structure.
-
-Then it builds a configuration dictionary with keys:
-
-```python
-{
-    "tipo_ronda": ...,
-    "sub": ...,
-    "ses": ...,
-    "task": ...,
-    "run": ...,
-    "suffix": ...,
-    "root": ...,
-    "bids_file": ...
-}
-```
-
-That dictionary is passed to:
-
-```python
-RunConfigurationApp(config)
-```
-
-The new window is shown and the current window is closed.
+Valida la selección de tipo de ronda, crea opcionalmente la estructura BIDS, construye `config`, abre `RunConfigurationApp` y cierra la ventana actual.
 
 ### `resetear()`
 
-Resets all editable fields to a clean state:
-- clears `sub`, `ses`, `task`, `run`,
-- resets `suffix` to `"eeg"`,
-- clears the root folder and restores the current working directory,
-- resets the round selector.
+Restaura el formulario a un estado inicial razonable:
+
+- limpia `sub`, `ses`, `task` y `run`;
+- restablece `suffix = "eeg"`;
+- vuelve a fijar el directorio de trabajo actual como raíz;
+- reinicia la selección de tipo de ronda.
 
 ### `update_filename()`
 
-Builds the filename preview in BIDS-like style:
-
-```python
-sub-XX_ses-YY_task-<task>_run-ZZ_<suffix>
-```
-
-Behavior:
-- numeric `sub`, `ses`, and `run` are padded to two digits,
-- empty `task` and `suffix` are replaced with placeholders.
-
-This method writes the result into `self.fileName`.
+Reconstruye en tiempo real el nombre BIDS preliminar.
 
 ### `update_task_from_combo(text)`
 
-Maps human-readable combo values to internal task labels:
+Mapea el texto legible de `combo_tipo_task` a la representación interna de `task`:
 
-- `Ronda EMG` → `emg`
-- `Ronda EOG` → `eog`
-- `Ronda BASAL` → `basal`
-- `Ronda ENTRENAMIENTO` → `entrenamiento`
-- `Ronda EJECUTADA` → `ejecutada`
-- `Ronda IMAGINADA` → `imaginada`
-
-It updates `input_task` only if the current value differs, preventing unnecessary signal loops.
+- `Ronda EMG` -> `emg`
+- `Ronda EOG` -> `eog`
+- `Ronda BASAL` -> `basal`
+- `Ronda ENTRENAMIENTO` -> `entrenamiento`
+- `Ronda EJECUTADA` -> `ejecutada`
+- `Ronda IMAGINADA` -> `imaginada`
 
 ### `validate_form()`
 
-Enables the Continue button only when:
-- a valid round type is selected,
-- all required text fields are non-empty,
-- the root folder points to an existing directory.
+Habilita o deshabilita el botón de avance según la validez global del formulario.
 
 ### `select_root_folder()`
 
-Opens a `QFileDialog` and writes the selected directory to `input_rootfolder`.
+Abre un `QFileDialog` para seleccionar el directorio raíz.
 
 ### `create_bids_structure()`
 
-Creates the directory tree:
+Crea la estructura mínima `sub/ses/eeg` bajo la raíz indicada.
 
-```text
-<root>/
-  sub-XX/
-    ses-YY/
-      eeg/
-```
+---
 
-The operation is idempotent because it uses `os.makedirs(..., exist_ok=True)`.
-
-## Example usage
-
-### Start the GUI
+## Ejemplo de uso
 
 ```python
 app = QApplication(sys.argv)
@@ -176,58 +244,35 @@ window.show()
 sys.exit(app.exec_())
 ```
 
-### What `continuar()` effectively produces
+Uso esperado en el flujo:
 
-```python
-config = {
-    "tipo_ronda": "ejecutada",
-    "sub": "01",
-    "ses": "01",
-    "task": "ejecutada",
-    "run": "01",
-    "suffix": "eeg",
-    "root": "D:/data",
-    "bids_file": "sub-01_ses-01_task-ejecutada_run-01_eeg",
-}
-```
+1. se completa la metadata base;
+2. se selecciona el tipo de ronda;
+3. se valida el formulario;
+4. se abre `RunConfigurationApp` con el `config` generado.
 
-## Design observations
+---
 
-### 1. This class defines the first formal contract of the workflow
+## Observaciones de diseño
 
-`InitAPP` produces the `config` dictionary later consumed by `RunConfigurationApp`.
+### 1. `InitAPP` no construye `SessionInfo`
 
-### 2. Validation is UI-centric, not domain-centric
+La clase sólo produce un diccionario intermedio. La creación formal de `SessionInfo` ocurre en `RunConfigurationApp`.
 
-The validation checks:
-- completeness,
-- existing root directory,
-- combo selection.
+### 2. La UI sincroniza el tipo de ronda con `input_task`
 
-It does not validate:
-- semantic correctness of `task`,
-- positive integer constraints for `sub`, `ses`, `run`,
-- compatibility between experiment mode and task if the text fields are edited manually.
+El campo `task` no se rellena manualmente en el flujo nominal, sino que se deriva del texto legible de `combo_tipo_task`.
 
-### 3. Filename generation is a preview, not a filesystem write
+### 3. La estructura BIDS creada es mínima
 
-`update_filename()` only updates a visible label or line edit. The actual filesystem effect happens only in `create_bids_structure()`.
+Sólo se crea el árbol `sub/ses/eeg`. No se generan archivos BIDS auxiliares ni validaciones adicionales del estándar.
 
-### 4. The root folder defaults to `os.getcwd()`
+### 4. El directorio raíz por defecto depende del directorio de ejecución
 
-This is practical, but it means the default storage path depends on where the process is launched from.
+`input_rootfolder` se inicializa con `os.getcwd()`. Esto resulta práctico para desarrollo, pero implica que el valor por defecto cambia según desde dónde se lance la aplicación.
 
-## Recommendations
+---
 
-- Add stronger domain validation for `sub`, `ses`, and `run`.
-- Consider making `input_task` read-only if task selection should come exclusively from the combo box.
-- Consider splitting BIDS filename generation into a pure helper function for easier testing.
-- Consider validating that `suffix` belongs to an allowed set when appropriate.
+## Resumen
 
-## Summary
-
-`InitAPP` is the metadata bootstrap window of the desktop workflow. It is intentionally simple and mainly serves to:
-- collect session metadata,
-- derive a standardized filename,
-- create the next-step configuration payload,
-- hand control to `RunConfigurationApp`.
+`InitAPP` es la ventana de entrada del flujo de escritorio. Su propósito es recoger la metadata mínima de una ronda, construir un nombre BIDS preliminar, validar el formulario y derivar la ejecución hacia `RunConfigurationApp`. Se trata de un componente de preparación y navegación, no de un gestor de sesión ni de adquisición.

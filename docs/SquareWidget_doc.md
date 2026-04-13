@@ -1,26 +1,43 @@
-# API Documentation — `SquareWidget`
+# SquareWidget
 
-## Overview
+## Descripción general
 
-`SquareWidget` is a lightweight `QWidget` subclass designed to display a colored rectangular overlay with centered HTML text. It is used in the experimental control UI as an auxiliary visual widget rather than as a layout-managed application panel.
+`SquareWidget` es un componente visual liviano basado en `QWidget` que implementa un rectángulo o cuadrado flotante, sin marco, con fondo coloreado y contenido textual centrado. El widget está pensado para funcionar como overlay de apoyo dentro de la interfaz experimental, especialmente para mostrar estados de sesión, marcadores visuales y mensajes breves de alto contraste. fileciteturn31file0
 
-In the current architecture, `SessionManager` uses `SquareWidget` to render external floating indicators such as the session information panel, the cue marker, and the calibration marker. Because the widget is frameless, translucent, and independently positioned, it behaves more like a movable overlay than a standard child widget in a Qt layout.
+Dentro de la arquitectura del proyecto, `SquareWidget` se utiliza como bloque de UI reutilizable en gestores como `SessionManager` y `PreExperimentManager`, donde aparece como panel informativo y como indicador visual de fases o calibración. fileciteturn30file4 fileciteturn30file5
 
-## Class signature
+## Responsabilidad del módulo
+
+La clase encapsula cuatro responsabilidades principales:
+
+1. renderizar una superficie rectangular con color de fondo configurable;
+2. mostrar texto enriquecido en HTML centrado verticalmente dentro del widget;
+3. permitir modificación dinámica de texto, color, tamaño y geometría durante la ejecución;
+4. ofrecer una interacción manual simple mediante arrastre con mouse y administración global de instancias activas. fileciteturn31file0
+
+No implementa lógica experimental, sincronización temporal ni comunicación con otros componentes. Su función es puramente visual y de soporte para otras clases de nivel superior. fileciteturn31file0
+
+## Dependencias principales
+
+El widget depende de PyQt5 y utiliza las siguientes piezas:
+
+- `QWidget` como clase base;
+- `QPainter`, `QFont` y `QPen` para el renderizado;
+- `QColor` para el manejo de color;
+- `QTextDocument` para dibujar texto HTML;
+- `QPoint` para gestionar el desplazamiento durante el arrastre. fileciteturn31file0
+
+## Clase principal
+
+### `SquareWidget`
 
 ```python
-class SquareWidget(QWidget):
+class SquareWidget(QWidget)
 ```
 
-## Main responsibilities
+Clase que representa un widget rectangular o cuadrado de apariencia flotante.
 
-- Render a rectangular or square colored surface.
-- Render centered HTML-formatted text inside the rectangle.
-- Allow dynamic updates of color, text, text color, font size, and geometry.
-- Support drag-and-drop repositioning with the mouse.
-- Track all living instances through a class-level registry to allow mass closing.
-
-## Constructor
+### Constructor
 
 ```python
 SquareWidget(
@@ -34,211 +51,186 @@ SquareWidget(
     text="",
     text_color="white",
     show_on_init=True,
-    auto_font_resize=False
+    auto_font_resize=False,
 )
 ```
 
-### Parameters
+#### Parámetros
 
-- `x`, `y` (`int`): Initial screen position of the widget.
-- `width` (`int`): Initial width of the widget.
-- `height` (`int | None`): Initial height. If `None`, the widget becomes square and uses `width`.
-- `color` (`str | QColor-compatible`): Background color.
-- `parent` (`QWidget | None`): Optional Qt parent.
-- `font_size` (`int`): Base font size used when `auto_font_resize=False`.
-- `text` (`str`): HTML-capable text content rendered inside the widget.
-- `text_color` (`str | QColor-compatible`): Foreground text color.
-- `show_on_init` (`bool`): If `True`, the widget is shown immediately after construction.
-- `auto_font_resize` (`bool`): If `True`, font size is derived from widget size.
+- `x`, `y`: posición inicial del widget en pantalla.
+- `width`: ancho inicial del widget.
+- `height`: alto inicial. Si es `None`, se utiliza el mismo valor que `width`, generando un cuadrado.
+- `color`: color de fondo del widget.
+- `parent`: widget padre opcional.
+- `font_size`: tamaño base de fuente.
+- `text`: contenido textual inicial.
+- `text_color`: color del texto.
+- `show_on_init`: controla si el widget se muestra inmediatamente al construirse.
+- `auto_font_resize`: habilita el cálculo automático del tamaño de fuente según la geometría del widget. fileciteturn31file0
 
-## Stored state
+### Estado interno relevante
 
-### Geometry and appearance
+La implementación mantiene los siguientes atributos principales:
 
-- `self.width`
-- `self.height`
-- `self.square_color`
-- `self.text`
-- `self.text_color`
-- `self.font_size`
-- `self.auto_font_resize`
+- `self.width` y `self.height`: dimensiones internas usadas para dibujo y resize;
+- `self.square_color`: color de fondo (`QColor`);
+- `self.text`: texto renderizado;
+- `self.text_color`: color del texto (`QColor`);
+- `self.font_size`: tamaño base de fuente;
+- `self.auto_font_resize`: bandera de autoajuste tipográfico;
+- `self.active`: estado lógico de visibilidad/renderizado;
+- `self.dragging`: bandera de arrastre;
+- `self.offset`: desplazamiento relativo del mouse;
+- `SquareWidget.instances`: registro de instancias vivas de la clase. fileciteturn31file0
 
-### Interaction state
+## Comportamiento visual
 
-- `self.active`: Enables or disables painting and dragging behavior.
-- `self.dragging`: Indicates whether the widget is currently being dragged.
-- `self.offset`: Mouse offset used to compute dragging motion.
+El constructor fija la geometría inicial con `setGeometry(...)`, establece flags de ventana `Qt.FramelessWindowHint | Qt.SubWindow` y activa `Qt.WA_TranslucentBackground`, por lo que el widget se comporta como una ventana liviana, sin decoración, útil para overlays o paneles auxiliares. fileciteturn31file0
 
-### Class-level registry
+El método `paintEvent(...)` dibuja un rectángulo sólido con borde negro y luego renderiza el contenido textual mediante `QTextDocument`, lo que permite utilizar HTML simple para aplicar tamaño, color, negrita, cursiva o alineación. El texto se posiciona con centrado vertical respecto de la altura del widget. fileciteturn31file0
 
-- `SquareWidget.instances`: List of all currently alive `SquareWidget` instances.
-
-## Public API
-
-### `paintEvent(event)`
-
-Handles painting. It fills the rectangle, computes the effective font size, and renders HTML text through `QTextDocument`.
-
-Important implementation details:
-- If `self.active` is `False`, the method returns immediately.
-- Background is drawn using `QPainter.drawRect(...)`.
-- Text is vertically centered by translating the painter before calling `doc.drawContents(...)`.
-- HTML rendering means content may include styled spans, line breaks, and inline formatting.
+## Métodos públicos
 
 ### `change_text(text)`
 
-Updates the displayed text and triggers repaint.
+Actualiza el contenido textual y fuerza repintado con `update()`. fileciteturn31file0
 
 ### `change_text_color(color)`
 
-Updates text color and triggers repaint.
+Actualiza el color del texto y solicita repintado. fileciteturn31file0
 
 ### `change_font_size(size)`
 
-Updates the base font size and triggers repaint.
+Modifica el tamaño de fuente base. fileciteturn31file0
 
 ### `set_font_size(size)`
 
-Readable alias for `change_font_size(...)`.
+Alias semántico de `change_font_size(...)`. fileciteturn31file0
 
-### `get_font_size() -> int`
+### `get_font_size()`
 
-Returns the current base font size.
+Devuelve el tamaño de fuente actual. fileciteturn31file0
 
 ### `enable_auto_font_resize(enable=True)`
 
-Turns automatic font resizing on or off.
+Activa o desactiva el cálculo automático del tamaño de fuente en función del lado menor del widget. fileciteturn31file0
 
 ### `change_color(color)`
 
-Updates the background color and triggers repaint.
+Cambia el color de fondo. fileciteturn31file0
 
 ### `resize_rectangle(new_width, new_height)`
 
-Changes the widget dimensions and applies the new fixed size.
-
-Note that this method updates both internal attributes and Qt size constraints.
+Redimensiona el widget, actualiza las dimensiones internas y fija el nuevo tamaño con `setFixedSize(...)`. fileciteturn31file0
 
 ### `activate()`
 
-Marks the widget as active, shows it, and repaints it.
+Marca el widget como activo, lo muestra y solicita repintado. fileciteturn31file0
 
 ### `deactivate()`
 
-Marks the widget as inactive and hides it.
+Marca el widget como inactivo y lo oculta. fileciteturn31file0
 
 ### `move_to(x, y)`
 
-Moves the widget to the given screen coordinates.
+Reposiciona el widget usando coordenadas absolutas. fileciteturn31file0
 
-### `close_all()` (class method)
+### `close_all()`
 
-Closes every tracked instance and clears the registry.
+Método de clase que cierra todas las instancias registradas en `SquareWidget.instances` y limpia el registro global. fileciteturn31file0
 
-This is useful when the experiment creates multiple floating widgets and they all need to be cleaned up reliably.
+## Eventos relevantes
 
-## Interaction events
+### `paintEvent(event)`
+
+Implementa el dibujo del fondo y del texto. El evento no se invoca manualmente; Qt lo dispara cuando corresponde redibujar el widget. fileciteturn31file0
 
 ### `mousePressEvent(event)`
 
-Starts dragging when the left mouse button is pressed and the widget is active.
+Inicia el arrastre si se presiona el botón izquierdo y el widget está activo. fileciteturn31file0
 
 ### `mouseMoveEvent(event)`
 
-Moves the widget while dragging is active.
+Desplaza el widget mientras el estado de arrastre permanece activo. fileciteturn31file0
 
 ### `mouseReleaseEvent(event)`
 
-Stops dragging.
+Finaliza el arrastre. fileciteturn31file0
 
 ### `closeEvent(event)`
 
-Removes the instance from `SquareWidget.instances` before delegating to the parent implementation.
+Elimina la instancia del registro global antes de delegar al comportamiento estándar de Qt. fileciteturn31file0
 
-## Example usage
+## Integración en la arquitectura
 
-### Minimal example
+En `SessionManager`, la clase se utiliza para construir al menos tres overlays:
+
+- un panel de información de sesión (`information_label`),
+- un marcador visual de cue (`marcador_cue`),
+- un widget de calibración (`marcador_calibration`). fileciteturn30file4
+
+En `PreExperimentManager`, además del panel de información, se agrega un widget específico para marcar el inicio de ronda (`marcador_inicio`), junto con los widgets de cue y calibración. fileciteturn30file5
+
+Esta reutilización muestra que `SquareWidget` se concibe como un componente base de overlays configurables dentro del front-end experimental. fileciteturn30file4turn30file5
+
+## Ejemplo de uso
 
 ```python
+from PyQt5.QtWidgets import QApplication
+from pyhwr.widgets import SquareWidget
+import sys
+
+app = QApplication(sys.argv)
+
 widget = SquareWidget(
     x=200,
     y=200,
     width=300,
-    height=150,
-    color="#ebebeb",
-    text="<b>Información</b><br>Run 1",
-    text_color="black"
-)
-```
-
-### Dynamic updates
-
-```python
-widget.change_text("<b>CUE</b>")
-widget.change_color("black")
-widget.change_text_color("white")
-widget.set_font_size(20)
-widget.resize_rectangle(250, 250)
-```
-
-### Integration with `SessionManager`
-
-```python
-self.information_label = SquareWidget(
-    x=200,
-    y=200,
-    width=650,
-    height=400,
-    color="#ebebeb",
-    text=text
+    height=120,
+    color="#202020",
+    text="<div style='font-size:24px; text-align:center;'><b>CUE</b></div>",
+    text_color="white",
+    show_on_init=True,
 )
 
-self.marcador_cue = SquareWidget(
-    x=200,
-    y=650,
-    width=250,
-    height=250,
-    color="black",
-    text=text,
-    text_color="white"
-)
+widget.change_color("#000000")
+widget.change_text("<div style='font-size:20px; text-align:center;'>Estado activo</div>")
+
+sys.exit(app.exec_())
 ```
 
-## Design observations
+## Observaciones de diseño
 
-### 1. The widget is overlay-oriented, not layout-oriented
+### 1. Uso de `self.width` y `self.height`
 
-Because it uses:
-- `Qt.FramelessWindowHint | Qt.SubWindow`
-- `Qt.WA_TranslucentBackground`
+La clase define atributos llamados `width` y `height`, lo que puede generar ambigüedad conceptual con los métodos heredados `width()` y `height()` de `QWidget`. Aunque el código funciona porque accede a atributos y no a métodos, conviene tenerlo presente al extender la clase o integrarla con otras utilidades de Qt. fileciteturn31file0
 
-and explicit geometry positioning, it is best understood as a free-floating overlay widget.
+### 2. Renderizado de texto HTML
 
-### 2. HTML text support is a strong feature
+El uso de `QTextDocument` permite textos ricos, pero implica que el widget no se limita a texto plano. El contenido debe considerarse como HTML renderizable, no como una simple cadena a pintar con `drawText(...)`. fileciteturn31file0
 
-Using `QTextDocument.setHtml(...)` makes it suitable for rich status panels without introducing extra `QLabel` or layout complexity.
+### 3. Gestión global de instancias
 
-### 3. The class stores `width` and `height` as instance attributes
+El atributo de clase `instances` facilita el cierre masivo mediante `close_all()`. Esta decisión es útil para overlays transitorios, aunque introduce estado global compartido entre instancias. fileciteturn31file0
 
-This is convenient internally, but it shadows the semantic role of inherited Qt geometry accessors such as `width()` and `height()`. Although the current implementation works, it is not ideal API design for a Qt subclass.
+### 4. Interacción manual incorporada
 
-### 4. `deactivate()` hides the widget entirely
+La clase permite arrastre con el mouse por defecto. Esto la vuelve práctica para pruebas visuales o reajustes manuales en ejecución, aunque puede no ser deseable en contextos de producción cerrada si se requiere una UI estrictamente fija. fileciteturn31file0
 
-This means inactive widgets are not merely skipped during painting; they also disappear from view.
+## Limitaciones actuales
 
-## Recommendations
+- No existe soporte explícito para bordes configurables, esquinas redondeadas o padding avanzado.
+- No se implementa layout interno; todo el contenido se dibuja manualmente.
+- El cálculo automático de fuente utiliza una heurística simple basada en el lado menor del widget.
+- La clase no expone señales Qt propias para notificar cambios de estado o interacción. fileciteturn31file0
 
-- Rename `self.width` and `self.height` to `rect_width` and `rect_height` to avoid confusion with inherited QWidget geometry methods.
-- Consider adding a border color and border thickness API for more flexible marker rendering.
-- If these widgets are always children of another window, consider documenting coordinate semantics explicitly.
-- If drag support is only for debugging, make it optional through a constructor flag.
+## Recomendaciones de mejora
 
-## Summary
+1. Renombrar `self.width` y `self.height` por nombres menos ambiguos, por ejemplo `rect_width` y `rect_height`.
+2. Incorporar opciones de borde, radio de esquina y alineación horizontal explícita.
+3. Agregar una política opcional para deshabilitar arrastre en entornos de ejecución bloqueados.
+4. Separar la representación visual del registro global de instancias si se busca una clase más desacoplada. fileciteturn31file0
 
-`SquareWidget` is a small but useful utility widget for experimental UI overlays. Its strengths are:
-- fast instantiation,
-- HTML text rendering,
-- direct visual manipulation,
-- simple runtime mutation.
+## Resumen
 
-It is well suited for temporary markers and floating information panels, especially in the current `SessionManager` workflow.
+`SquareWidget` constituye un componente utilitario de UI para mostrar overlays rectangulares con texto HTML, color configurable y manipulación dinámica en tiempo de ejecución. Su diseño es simple, directo y funcional para paneles auxiliares dentro del pipeline experimental, especialmente en los gestores que controlan sesiones y pre-experimentos. fileciteturn31file0turn30file4turn30file5

@@ -1,296 +1,134 @@
-# Documentación API — `MarkerManager`
+# MarkerManager
 
-## Resumen
+## Descripción general
 
-`MarkerManager` es una clase ligera para **publicar marcadores/eventos en un outlet LSL** (`Lab Streaming Layer`). Su responsabilidad no es almacenar eventos, resolver streams ni leer datos ya grabados, sino **serializar un payload y empujarlo inmediatamente a un `StreamOutlet`** con timestamp de `local_clock()`.  
+`MarkerManager` implementa una capa mínima para la creación de un **outlet de marcadores en Lab Streaming Layer (LSL)** y el envío de eventos serializados hacia otros consumidores del ecosistema experimental. La clase centraliza la configuración del stream, la construcción del `StreamOutlet`, el manejo básico de logging y la conversión del contenido enviado a un formato compatible con un canal LSL de tipo `string`. fileciteturn27file0
 
-En la arquitectura actual del proyecto, `SessionManager` la usa para crear dos outlets de eventos separados:
+En la arquitectura del proyecto, `MarkerManager` funciona como el componente responsable de exponer eventos de sincronización y metadatos de trial. `SessionManager` crea dos instancias, una para `Laptop_Markers` y otra para `Tablet_Markers`, mientras que `PreExperimentManager` utiliza una única instancia para `Laptop_Markers`. De esta forma, la clase actúa como el punto común de publicación de marcadores para rondas de escritura y preexperimentos. fileciteturn27file2 fileciteturn27file4
 
-- `Laptop_Markers`
-- `Tablet_Markers`
+## Responsabilidad dentro del sistema
 
-Esto permite que los eventos de laptop y tablet queden publicados como streams LSL independientes y luego puedan ser reconstruidos por `LSLDataManager`.
+La responsabilidad de `MarkerManager` no consiste en interpretar la semántica de los eventos, sino en publicarlos sobre LSL con un contrato uniforme. La semántica concreta de cada marcador —por ejemplo, `trialStartTime`, `trialCueTime`, `sessionFinalTime`, letras o acciones— se define en los gestores de sesión que construyen los diccionarios antes de invocar `sendMarker(...)`. `MarkerManager` sólo se ocupa de transportar esos datos al stream correspondiente. fileciteturn27file0 fileciteturn27file2 fileciteturn27file4
 
----
+## Dependencias principales
 
-## Importaciones y dependencias
+El módulo depende de los siguientes componentes:
 
-```python
-import json
-import random
-import logging
-from pylsl import StreamInfo, StreamOutlet, local_clock
-from typing import Any, Optional, Union
-```
+- `pylsl.StreamInfo` para describir el stream.
+- `pylsl.StreamOutlet` para publicar las muestras.
+- `pylsl.local_clock` para asignar el timestamp LSL de cada envío.
+- `json` para serializar diccionarios antes de enviarlos.
+- `logging` para registrar eventos y errores.
+- `random` para generar un `source_id` aleatorio cuando no se provee uno explícitamente. fileciteturn27file0
 
-### Dependencia externa crítica
+## Clase principal
 
-La clase depende de `pylsl`. Si `pylsl` no está instalado o el entorno no puede inicializar LSL, la clase no podrá crear el outlet.
+### `class MarkerManager`
 
----
+Clase encargada de crear y mantener un outlet LSL de marcadores.
 
-## Clase: `MarkerManager`
+#### Constructor
 
 ```python
-class MarkerManager:
-```
-
-### Propósito
-
-Encapsular la creación de un stream LSL de eventos y exponer un método simple, `sendMarker(...)`, para enviar marcadores al flujo.
-
-### Diseño general
-
-La implementación actual asume el patrón más común de tu proyecto:
-
-- **1 canal**
-- **formato string**
-- **sample rate nominal 0** (event stream irregular)
-- serialización de `dict` a JSON
-- serialización del resto de objetos mediante `str(...)`
-
----
-
-## Constructor
-
-```python
-def __init__(
-    self,
+MarkerManager(
     stream_name: str = "Generic_Markers",
     stream_type: str = "Events",
     source_id: Optional[str] = None,
     channel_count: int = 1,
     channel_format: str = "string",
     nominal_srate: float = 0.0,
-    logger: Optional[logging.Logger] = None
-) -> None:
-```
-
-### Parámetros
-
-#### `stream_name: str = "Generic_Markers"`
-Nombre lógico del stream LSL.
-
-Ejemplos en tu arquitectura:
-- `"Laptop_Markers"`
-- `"Tablet_Markers"`
-
-#### `stream_type: str = "Events"`
-Tipo del stream LSL. En tu código suele usarse `"Markers"` o `"Events"`.
-
-#### `source_id: Optional[str] = None`
-Identificador único del origen del stream.  
-Si no se provee, la clase genera uno automáticamente como:
-
-```python
-f"{stream_name}_{random.randint(1000, 9999)}"
-```
-
-Esto evita colisiones triviales, pero no garantiza unicidad global absoluta.
-
-#### `channel_count: int = 1`
-Cantidad de canales del stream.  
-La implementación de `sendMarker(...)` empuja siempre una lista de longitud 1:
-
-```python
-[payload]
-```
-
-Por eso, aunque este parámetro sea configurable, el diseño real del método está orientado a **un solo canal**.
-
-#### `channel_format: str = "string"`
-Formato de los datos del stream.  
-El uso normal en tu proyecto es `"string"`.
-
-#### `nominal_srate: float = 0.0`
-Frecuencia nominal del stream.  
-Para marcadores/eventos irregulares, `0.0` es la configuración natural.
-
-#### `logger: Optional[logging.Logger] = None`
-Logger opcional.  
-Si no se pasa uno, se crea/configura uno con nombre `"MarkerManager"`.
-
----
-
-## Atributos generados
-
-Tras instanciar la clase, los atributos principales son:
-
-### `self.stream_name`
-Nombre del stream LSL.
-
-### `self.stream_type`
-Tipo del stream LSL.
-
-### `self.source_id`
-ID de fuente efectivo, ya sea el provisto por el usuario o el autogenerado.
-
-### `self.outlet_info`
-Objeto `pylsl.StreamInfo` con la metadata del outlet.
-
-### `self.outlet`
-Objeto `pylsl.StreamOutlet` utilizado para empujar muestras.
-
-### `self.logger`
-Logger asociado a la instancia.
-
----
-
-## Configuración interna del outlet
-
-El constructor crea el `StreamInfo` así:
-
-```python
-self.outlet_info = StreamInfo(
-    name=self.stream_name,
-    type=self.stream_type,
-    nominal_srate=nominal_srate,
-    channel_format=channel_format,
-    channel_count=channel_count,
-    source_id=self.source_id
+    logger: Optional[logging.Logger] = None,
 )
 ```
 
-Luego crea el outlet:
+#### Parámetros
+
+- `stream_name`: nombre lógico del stream LSL.
+- `stream_type`: tipo del stream. En el proyecto suele usarse `Markers` o `Events`.
+- `source_id`: identificador único del outlet. Si no se provee, se genera automáticamente a partir del nombre del stream y un entero aleatorio.
+- `channel_count`: cantidad de canales del stream. La implementación está pensada, en la práctica, para `1`.
+- `channel_format`: tipo de dato del canal. La implementación actual opera sobre `string`.
+- `nominal_srate`: frecuencia nominal del stream. Para marcadores event-based se utiliza `0.0`.
+- `logger`: logger externo opcional. Si no se pasa uno, la clase crea y configura uno propio llamado `MarkerManager`. fileciteturn27file0
+
+#### Atributos relevantes
+
+- `stream_name`: nombre configurado para el outlet.
+- `stream_type`: tipo lógico del stream.
+- `source_id`: identificador del origen.
+- `outlet_info`: objeto `StreamInfo` con la metadata del stream.
+- `outlet`: objeto `StreamOutlet` utilizado para el envío de muestras.
+- `logger`: logger activo de la instancia. fileciteturn27file0
+
+## Comportamiento de inicialización
+
+Durante la construcción de la instancia se crea un `StreamInfo` con los parámetros recibidos y, a continuación, un `StreamOutlet` asociado. Si no se suministra un `logger`, se configura uno con `StreamHandler`, formato de mensaje explícito, nivel `INFO` y `propagate=False`. Tras la inicialización, se emite un mensaje de log que informa el nombre del outlet, el tipo del stream y el `source_id` asociado. fileciteturn27file0
+
+## API pública
+
+### `sendMarker(message)`
 
 ```python
-self.outlet = StreamOutlet(self.outlet_info)
+sendMarker(message: Union[str, dict, Any]) -> None
 ```
 
-### Consecuencia práctica
+Envía un marcador al outlet LSL activo.
 
-La creación del objeto `MarkerManager` **ya crea y publica** el outlet LSL.  
-No existe un método posterior tipo `connect()`, `start()` o `open()`.
+#### Reglas de comportamiento
 
----
+- Si `message` es `None` o una cadena vacía, el marcador se ignora y se registra una advertencia.
+- Si `message` es un `dict`, se serializa con `json.dumps(...)` antes del envío.
+- Si `message` no es un diccionario, se convierte con `str(...)`.
+- El envío se realiza mediante `self.outlet.push_sample([payload], timestamp=local_clock())`.
+- Si ocurre una excepción, ésta se registra con `exc_info=True`. fileciteturn27file0
 
-## Logging
+#### Contrato efectivo del payload
 
-Si no se inyecta un logger, el constructor configura uno:
+Aunque la firma acepta `Any`, el contrato real de uso del proyecto se reduce a dos casos:
 
-```python
-self.logger = logger or logging.getLogger("MarkerManager")
-```
+1. **Cadenas simples**, útiles para pruebas o señales puntuales.
+2. **Diccionarios JSON-serializables**, que constituyen el caso principal de uso en la arquitectura experimental. fileciteturn27file0
 
-y, si el logger no tiene handlers, agrega:
+En `SessionManager` y `PreExperimentManager` los marcadores se construyen como diccionarios que contienen identificadores de trial, run, letra o acción y marcas temporales en milisegundos absolutos. Esos diccionarios son luego enviados por `MarkerManager` sin reinterpretación adicional. fileciteturn27file2 fileciteturn27file4
 
-- `StreamHandler`
-- formato: `"[%(name)s] %(levelname)s: %(message)s"`
-- nivel: `INFO`
-- `propagate = False`
+## Integración con otros módulos
 
-### Implicación
+### Integración con `SessionManager`
 
-Si reutilizas el mismo logger entre varias instancias, la clase evita duplicar handlers.  
-Si inyectas un logger externo ya configurado, ese logger queda bajo tu control.
+`SessionManager` utiliza dos outlets diferenciados:
 
----
+- `Laptop_Markers`, destinado a los eventos generados por la aplicación de escritorio.
+- `Tablet_Markers`, destinado a registrar en LSL la información recuperada desde la tablet o asociada a ella. fileciteturn27file2
 
-## Método público: `sendMarker`
+Esta separación permite que el archivo `.xdf` contenga streams semánticamente distintos, lo que después es aprovechado por `LSLDataManager`, que espera nombres de streamer como `Laptop_Markers` y `Tablet_Markers` para reconstruir la información de los trials y sus timestamps. fileciteturn27file8 fileciteturn27file11
 
-```python
-def sendMarker(self, message: Union[str, dict, Any]) -> None:
-```
+### Integración con `PreExperimentManager`
 
-### Propósito
+`PreExperimentManager` crea únicamente el stream `Laptop_Markers`, ya que no interviene la mensajería con la tablet. Los eventos del preexperimento se publican con la misma mecánica de diccionarios serializados. fileciteturn27file4
 
-Serializar el mensaje de entrada y enviarlo al stream LSL actual.
+### Relación con Android
 
-### Comportamiento
-
-#### Caso 1: marcador vacío o nulo
-
-Si `message is None` o `message == ""`, el método:
-
-- registra un warning,
-- no envía nada,
-- retorna inmediatamente.
-
-```python
-if message is None or message == "":
-    self.logger.warning("Intento de enviar marcador vacío o nulo — ignorado.")
-    return
-```
-
-#### Caso 2: `message` es `dict`
-
-Se serializa con `json.dumps(...)`:
-
-```python
-payload = json.dumps(message)
-```
-
-Esto es especialmente útil cuando el marcador lleva estructura, por ejemplo:
-
-- `trialID`
-- `runID`
-- `letter`
-- timestamps
-- estado de fase
-
-#### Caso 3: cualquier otro tipo
-
-Se convierte a string:
-
-```python
-payload = str(message)
-```
-
-Esto permite enviar:
-- strings simples,
-- números,
-- objetos con `__str__`,
-- enums o estructuras livianas convertibles a texto.
-
-#### Envío efectivo
-
-El payload se envía como una muestra de un único canal:
-
-```python
-self.outlet.push_sample([payload], timestamp=local_clock())
-```
-
-### Timestamp usado
-
-El método usa explícitamente:
-
-```python
-local_clock()
-```
-
-Por lo tanto, el timestamp del marcador queda en la escala temporal interna de LSL del host que publica el evento.
-
----
+`MarkerManager` no se comunica directamente con Android. Su rol se limita al ecosistema LSL. La integración con la tablet se produce en otra capa: `SessionManager` utiliza `TabletMessenger` para enviar mensajes por ADB/Broadcast, mientras que el lado Android registra su propia información y la hace disponible para posterior análisis. `MarkerManager` participa sólo en el registro LSL de los eventos del lado PC y de la semántica asociada al lado tablet cuando esos datos ya están disponibles en Python. fileciteturn27file2 fileciteturn27file14
 
 ## Ejemplos de uso
 
-### 1) Outlet genérico simple
+### Ejemplo mínimo
 
 ```python
 from pyhwr.managers.MarkerManager import MarkerManager
 
-marker = MarkerManager()
-marker.sendMarker("inicio_sesion")
-```
-
-### 2) Marcador estructurado en JSON
-
-```python
 marker = MarkerManager(
-    stream_name="Laptop_Markers",
-    stream_type="Markers",
-    source_id="Laptop"
+    stream_name="Generic_Markers",
+    stream_type="Events",
+    source_id="Test_Source",
 )
 
-marker.sendMarker({
-    "trialID": 4,
-    "runID": 1,
-    "letter": "a",
-    "trialCueTime": 1712345678.123
-})
+marker.sendMarker({"event": "session_started", "timestamp": 1710000000000})
 ```
 
-### 3) Patrón real dentro de `SessionManager`
+Este patrón coincide con el caso de uso esperado: un stream de un canal tipo `string` que recibe diccionarios serializados como JSON. fileciteturn27file0
+
+### Ejemplo en una sesión experimental
 
 ```python
 self.laptop_marker = MarkerManager(
@@ -299,240 +137,47 @@ self.laptop_marker = MarkerManager(
     source_id="Laptop",
     channel_count=1,
     channel_format="string",
-    nominal_srate=0
+    nominal_srate=0,
 )
 
-self.tablet_marker = MarkerManager(
-    stream_name="Tablet_Markers",
-    stream_type="Markers",
-    source_id="Tablet",
-    channel_count=1,
-    channel_format="string",
-    nominal_srate=0
-)
+self.laptop_marker.sendMarker(self.laptop_marker_dict)
 ```
 
----
+Ese es el patrón empleado por los gestores de sesión del proyecto. fileciteturn27file2 fileciteturn27file4
 
-## Integración con el resto de la arquitectura
+## Consideraciones de diseño
 
-### Con `SessionManager`
+### 1. Canal y formato efectivamente fijos
 
-`SessionManager` crea dos instancias de `MarkerManager` para separar eventos de laptop y tablet.  
-Eso implica que los consumers aguas abajo pueden distinguir ambas fuentes por nombre de stream y/o `source_id`.
+Aunque el constructor permite parametrizar `channel_count` y `channel_format`, la implementación y los consumidores del proyecto están alineados con un único canal de tipo `string`. El método `sendMarker(...)` siempre envía una lista con un único elemento (`[payload]`), por lo que la flexibilidad expuesta por la firma es mayor que la soportada de hecho por el resto de la arquitectura. fileciteturn27file0
 
-### Con `LSLDataManager`
+### 2. Timestamp en tiempo LSL
 
-`LSLDataManager` reconstruye información del experimento a partir de streams XDF y depende de nombres de streamers concretos. En esa arquitectura, que `MarkerManager` publique streams con nombres estables es importante para la carga posterior.
+El timestamp usado en `push_sample(...)` proviene de `local_clock()`, es decir, del reloj interno de LSL. Esto es correcto para sincronización entre streams, pero convive con timestamps absolutos en milisegundos (`time.time()*1000`) incluidos dentro del payload JSON construido por `SessionManager` y `PreExperimentManager`. En consecuencia, los archivos `.xdf` combinan dos referencias temporales: el timestamp de muestra del stream LSL y los tiempos absolutos almacenados dentro del contenido del marcador. fileciteturn27file0 fileciteturn27file2 fileciteturn27file15
 
-### Con `TabletMessenger`
+### 3. Serialización sin validación semántica
 
-Un patrón útil del proyecto es:
+`MarkerManager` no valida la estructura del diccionario antes de serializarlo. Esto simplifica la clase, pero desplaza la responsabilidad de consistencia a los módulos que construyen los marcadores. Cualquier clave faltante, campo inconsistente o mezcla de unidades temporales se propaga tal como fue producida por el emisor. fileciteturn27file0
 
-1. enviar una instrucción a la tablet vía ADB/JSON (`TabletMessenger`),
-2. actualizar estado/fase en la app Android,
-3. publicar en LSL el marcador correspondiente con `MarkerManager`.
+### 4. Logger autocontenido
 
-De ese modo quedan dos planos:
-- **control**: broadcast ADB
-- **registro sincronizable**: marcador LSL
+La clase puede operar de forma autónoma en contextos de prueba porque configura un logger propio si no recibe uno externo. Esto evita dependencias adicionales, aunque también puede duplicar salidas de log si la aplicación principal configura logging de forma paralela. fileciteturn27file0
 
----
+## Limitaciones actuales
 
-## Contrato real de datos
+1. **No existe recepción ni consulta de estado del stream.** La clase sólo publica marcadores.
+2. **No existe validación estructural del payload.** La serialización de diccionarios se realiza sin esquema ni validación previa.
+3. **La generalidad de la firma es mayor que la del comportamiento real.** La arquitectura asume un canal único tipo `string`.
+4. **El ejemplo del bloque `__main__` está desactualizado respecto al contrato actual de `TabletMessenger`.** Allí se desempaquetan dos valores desde `read_trial_json(...)`, pero la implementación actual de `TabletMessenger` no garantiza consistentemente ese retorno. fileciteturn27file0
 
-Aunque la firma acepta `Union[str, dict, Any]`, en la práctica hay dos formas sanas de uso:
+## Recomendaciones de mejora
 
-### A. `str`
-Para eventos simples y compactos:
+- Restringir o documentar explícitamente que el uso soportado es un stream de un solo canal tipo `string`.
+- Agregar validación opcional de payload para detectar diccionarios mal formados antes del envío.
+- Definir una convención formal de esquema para los marcadores de laptop y tablet.
+- Actualizar o eliminar el bloque `__main__` para alinearlo con la implementación actual de `TabletMessenger`.
+- Considerar métodos auxiliares para envío de eventos tipados, por ejemplo `send_trial_marker(...)` o `send_session_marker(...)`, si se quisiera endurecer la API. fileciteturn27file0
 
-```python
-marker.sendMarker("rest_start")
-```
+## Resumen
 
-### B. `dict`
-Para eventos ricos y reconstruibles:
-
-```python
-marker.sendMarker({
-    "trialID": 7,
-    "phase": "cue",
-    "letter": "n",
-    "sessionStartTime": 1234567890.0
-})
-```
-
-### Recomendación
-
-En esta arquitectura conviene preferir `dict`, porque luego los datos pueden parsearse con más robustez que un string libre.
-
----
-
-## Manejo de errores
-
-`sendMarker(...)` encapsula el envío en un `try/except`:
-
-```python
-except Exception as e:
-    self.logger.error(f"Error enviando marcador: {e}", exc_info=True)
-```
-
-### Implicación
-
-- El método **no relanza** la excepción.
-- Si falla el envío, el error se registra, pero el flujo del programa continúa.
-
-Esto puede ser deseable para no romper una sesión experimental, pero también significa que un fallo de publicación LSL puede pasar desapercibido si no se monitorean logs.
-
----
-
-## Limitaciones de la implementación actual
-
-### 1) API orientada de hecho a un solo canal
-Aunque `channel_count` es configurable, `sendMarker(...)` siempre empuja una lista de un solo elemento:
-
-```python
-[payload]
-```
-
-Si se quisiera soportar `channel_count > 1`, habría que cambiar también la lógica de serialización/envío.
-
-### 2) No hay método de cierre o liberación
-La clase no expone algo como:
-- `close()`
-- `shutdown()`
-- `disconnect()`
-
-En muchos casos esto no es grave para LSL, pero es una omisión de API.
-
-### 3) No hay validación fuerte del payload
-- un `dict` se serializa a JSON,
-- todo lo demás se convierte con `str(...)`.
-
-Eso es flexible, pero puede ocultar errores semánticos si un objeto complejo termina convertido a una string poco útil.
-
-### 4) No hay control explícito del timestamp externo
-Siempre se usa `local_clock()`.  
-No existe la opción de enviar un timestamp suministrado por el llamador.
-
-### 5) No hay metadatos adicionales en `StreamInfo`
-La clase no agrega descriptores al stream (`desc()`), por ejemplo:
-- versión del protocolo,
-- origen experimental,
-- descripción del payload,
-- codificación JSON,
-- sujeto/sesión.
-
----
-
-## Observación importante sobre el bloque `__main__`
-
-El ejemplo final del archivo contiene:
-
-```python
-trial_data, _ = tablet_messenger.read_trial_json("test_subject", 1, 2, 1)
-marker_gen.sendMarker(trial_data)
-```
-
-Sin embargo, la implementación actual de `TabletMessenger.read_trial_json(...)` **no devuelve consistentemente una tupla de dos elementos**; su contrato real es distinto y puede devolver un objeto JSON decodificado, listas vacías o `None` según el caso.
-
-### Conclusión
-
-Ese ejemplo debe considerarse **desactualizado o inconsistente con la implementación actual de `TabletMessenger`**.  
-Si se quiere mantener un ejemplo ejecutable, conviene reemplazarlo por algo como:
-
-```python
-trial_data = tablet_messenger.read_trial_json("test_subject", "1", "2", 1)
-if trial_data:
-    marker_gen.sendMarker(trial_data)
-```
-
----
-
-## Buenas prácticas de uso
-
-### Recomendadas
-
-- usar `stream_name` estables y explícitos,
-- usar `source_id` deterministas cuando importe la trazabilidad,
-- preferir `dict` frente a strings libres,
-- revisar logs durante la sesión,
-- documentar el schema JSON de los marcadores.
-
-### Evitar
-
-- enviar objetos arbitrarios esperando que luego sean parseables,
-- depender de `str(obj)` para payloads críticos,
-- asumir que un outlet multi-canal está soportado solo porque `channel_count` existe.
-
----
-
-## Ejemplo recomendado para tu proyecto
-
-```python
-from pyhwr.managers.MarkerManager import MarkerManager
-
-laptop_marker = MarkerManager(
-    stream_name="Laptop_Markers",
-    stream_type="Markers",
-    source_id="Laptop",
-    channel_count=1,
-    channel_format="string",
-    nominal_srate=0
-)
-
-tablet_marker = MarkerManager(
-    stream_name="Tablet_Markers",
-    stream_type="Markers",
-    source_id="Tablet",
-    channel_count=1,
-    channel_format="string",
-    nominal_srate=0
-)
-
-laptop_marker.sendMarker({
-    "runID": 1,
-    "trialID": 3,
-    "phase": "cue",
-    "letter": "s"
-})
-```
-
----
-
-## Recomendaciones de mejora de la API
-
-1. **Agregar soporte explícito para timestamps externos**
-   ```python
-   def sendMarker(self, message, timestamp=None):
-       ts = local_clock() if timestamp is None else timestamp
-   ```
-
-2. **Agregar validación opcional del payload**
-   - exigir `dict | str`,
-   - rechazar objetos arbitrarios,
-   - opcionalmente validar un schema.
-
-3. **Agregar método de cierre**
-   Aunque LSL no siempre lo exige, una API explícita suele mejorar legibilidad.
-
-4. **Agregar metadatos al stream**
-   Incluir en `StreamInfo.desc()` información útil para parsing posterior.
-
-5. **Separar serialización de envío**
-   Un método como `_serialize_marker(...)` facilitaría testeo unitario.
-
-6. **Corregir el ejemplo del bloque `__main__`**
-   Para alinearlo con `TabletMessenger.read_trial_json(...)`.
-
----
-
-## Resumen ejecutivo
-
-`MarkerManager` es una clase pequeña pero estratégica: hace de puente entre el control experimental y el registro sincronizable por LSL. Su implementación es correcta para el caso dominante de tu proyecto —event streams de un canal con payload string/JSON—, pero conviene documentar explícitamente que:
-
-- el outlet se crea en el constructor,
-- los `dict` se serializan a JSON,
-- el timestamp siempre sale de `local_clock()`,
-- el diseño real es de un solo canal,
-- el ejemplo `__main__` actual no está alineado con `TabletMessenger`.
+`MarkerManager` constituye el componente de publicación LSL de la arquitectura. Su diseño es deliberadamente simple: crea un `StreamOutlet`, convierte el mensaje a texto, asigna un timestamp LSL y publica el marcador. La simplicidad de la clase facilita su reutilización en `SessionManager` y `PreExperimentManager`, pero también hace que la corrección semántica de los datos dependa completamente de los gestores que construyen los payloads. fileciteturn27file0 fileciteturn27file2 fileciteturn27file4

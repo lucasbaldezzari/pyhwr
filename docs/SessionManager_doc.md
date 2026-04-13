@@ -1,709 +1,645 @@
-# Documentación técnica de `SessionManager`
+# `SessionManager`
 
-## 1. Propósito general
+## Descripción general
 
-`SessionManager` es una clase basada en `QWidget` cuyo objetivo es coordinar una sesión experimental completa. 
-Controla:
+`SessionManager` es el componente encargado de manejar y administrar una ronda experimental completa de escritura a mano alzada dentro de la arquitectura `pyhwr`. Su responsabilidad principal consiste en coordinar la progresión temporal del experimento, la secuencia de runs y trials, la comunicación con la tablet Android, la emisión de marcadores LSL y la actualización de la interfaz local de control.
 
-- la máquina de estados de fases del experimento,
-- la secuencia run/trial/letra,
-- el envío de mensajes hacia la tablet Android,
-- la generación y emisión de marcadores LSL de laptop y tablet,
-- la interfaz local de control mediante `LauncherApp`,
-- y un conjunto de widgets visuales auxiliares para seguimiento del estado de la sesión.
+La clase hereda de `QWidget` y actúa como punto de integración entre los siguientes subsistemas:
 
-La clase está pensada como el orquestador central entre la PC/laptop, la app Android y los flujos LSL.
+- metadata de sesión (`SessionInfo`),
+- mensajería PC → tablet (`TabletMessenger`),
+- emisión de marcadores LSL (`MarkerManager`),
+- interfaz de control local (`LauncherApp`),
+- widgets auxiliares de estado (`SquareWidget`),
+- y la app Android que persiste la información trial a trial.
 
----
-
-## 2. Dependencias directas
-
-`SessionManager` depende de los siguientes componentes:
-
-### 2.1 `SessionInfo`
-Provee la metadata de la sesión: sujeto, sesión, task, run, nombre BIDS y carpeta raíz.
-La clase admite acceso tanto por atributo como por índice (`__getitem__`), lo que explica que `SessionManager` use expresiones como:
-
-- `self.sessioninfo.session_id`
-- `self.sessioninfo.subject_id`
-- `self.sessioninfo["bids_file"]`
-- `self.sessioninfo["root_folder"]`
-
-### 2.2 `TabletMessenger`
-Responsable de:
-
-- construir mensajes JSON con `make_message(...)`,
-- enviarlos por ADB broadcast a la tablet con `send_message(...)`,
-- leer el JSON del trial desde la tablet con `read_trial_json(...)`,
-- listar y descargar trials guardados en `/storage/emulated/0/Documents/<subject>/<session>/<run>/`.
-
-### 2.3 `MarkerManager`
-Encapsula un `StreamOutlet` LSL y permite enviar marcadores serializados en formato string/JSON usando `sendMarker(...)`.
-
-### 2.4 `LauncherApp`
-Es la interfaz de control local de la sesión. Expone señales PyQt:
-
-- `start_session_signal`
-- `stop_session_signal`
-- `quit_session_signal`
-
-Además, muestra información BIDS, root folder, run, sesión y checkboxes de prerequisitos.
-
-### 2.5 `SquareWidget`
-Se usa para construir widgets visuales simples con texto HTML y color variable:
-
-- `information_label`
-- `marcador_cue`
-- `marcador_calibration`
+En términos de diseño, `SessionManager` funciona como el **orquestador central** del experimento completo.
 
 ---
 
-## 3. Responsabilidad funcional de la clase
+## Responsabilidades principales
 
-A nivel alto, `SessionManager` hace lo siguiente:
+`SessionManager` concentra cinco responsabilidades operativas:
 
-1. Inicializa parámetros experimentales y el orden de trials.
-2. Configura duraciones de fases, con o sin aleatorización.
-3. Instancia los canales de comunicación:
-   - ADB/JSON hacia la tablet
-   - LSL para marcadores de laptop
-   - LSL para marcadores leídos desde la tablet
-4. Prepara la UI de control local.
-5. Cuando se inicia la sesión:
-   - fija un tiempo absoluto de inicio,
-   - prepara el primer trial,
-   - notifica a la tablet,
-   - entra al ciclo temporizado de fases.
-6. En cada transición de fase:
-   - actualiza tiempos internos,
-   - envía un mensaje a la tablet,
-   - actualiza marcadores locales,
-   - ejecuta acciones asociadas a la fase.
-7. Al final de cada trial:
-   - lee el JSON generado en la tablet,
-   - lo reemite como marcador LSL de tablet,
-   - emite el marcador LSL de laptop,
-   - prepara el siguiente trial o finaliza la sesión.
+1. **Configurar la sesión experimental**
+   - letras por trial,
+   - número de runs,
+   - orden de presentación,
+   - duraciones de `cue` y `rest`,
+   - aleatorización y semilla.
+
+2. **Administrar la máquina de estados temporal**
+   - avanzar automáticamente entre fases,
+   - actualizar el tiempo objetivo de transición,
+   - ejecutar acciones específicas en cada fase.
+
+3. **Sincronizar la laptop con la tablet**
+   - enviar mensajes JSON por ADB broadcast,
+   - informar la fase actual,
+   - proporcionar `sessionStartTime` para sincronización temporal,
+   - solicitar el cierre de sesión en Android.
+
+4. **Emitir marcadores LSL**
+   - un stream para eventos reconstruidos en la laptop,
+   - un stream para el contenido persistido por la tablet.
+
+5. **Actualizar la interfaz de control local**
+   - mostrar metadata de la sesión,
+   - exponer controles de inicio, detención y cierre,
+   - visualizar el estado del cue y el avance temporal.
 
 ---
 
-## 4. Máquina de estados de fases
+## Dependencias directas
 
-La máquina de estados está definida por el diccionario `PHASES`:
+### `SessionInfo`
+
+`SessionManager` recibe un objeto `SessionInfo` que encapsula la metadata de la sesión. Ese objeto se consume de forma mixta:
+
+- por atributo, por ejemplo `sessioninfo.session_id` o `sessioninfo.subject_id`,
+- y por indexación, por ejemplo `sessioninfo["bids_file"]` o `sessioninfo["root_folder"]`.
+
+Esto es posible porque `SessionInfo` implementa `__getitem__()` como fachada sobre `to_dict()`.
+
+### `TabletMessenger`
+
+`TabletMessenger` se utiliza para:
+
+- construir mensajes con `make_message(...)`,
+- enviarlos a Android con `send_message(...)`,
+- leer `trial_<id>.json` con `read_trial_json(...)`,
+- y listar/descargar JSONs almacenados por la tablet.
+
+### `MarkerManager`
+
+`MarkerManager` encapsula un `StreamOutlet` de LSL y permite enviar payloads de tipo `dict` o `str` como muestras de un stream de marcadores.
+
+### `LauncherApp`
+
+`LauncherApp` provee la interfaz local de operación. Expone señales para iniciar, detener y cerrar la sesión.
+
+### `SquareWidget`
+
+`SquareWidget` se utiliza como widget auxiliar para mostrar:
+
+- información textual de la sesión,
+- estado del cue,
+- y un bloque visual reservado para calibración.
+
+---
+
+## Firma del constructor
 
 ```python
-PHASES = {
-    "first_jump": {"next": "start", "duration": 5.},
-    "start": {"next": "precue", "duration": 2.0},
-    "precue": {"next": "cue", "duration": 1.0},
-    "cue": {"next": "rest", "duration": 5.0},
-    "fadeoff": {"next": "rest", "duration": 1.0},
-    "rest": {"next": "trialInfo", "duration": 1.},
-    "trialInfo": {"next": "sendMarkers", "duration": 0.2},
-    "sendMarkers": {"next": "start", "duration": 0.2},
-}
+SessionManager(
+    sessioninfo,
+    mainTimerDuration=50,
+    tabid="com.handwriting.ACTION_MSG",
+    experimento="ejecutada",
+    n_runs=1,
+    letters=None,
+    randomize_per_run=True,
+    seed=None,
+    cue_base_duration=4.5,
+    cue_tmin_random=1.0,
+    cue_tmax_random=2.0,
+    rest_base_duration=1,
+    rest_tmin_random=0.0,
+    rest_tmax_random=1.0,
+    randomize_cue_duration=True,
+    randomize_rest_duration=True,
+    tabletID="R52Y50AG4FF",
+)
 ```
 
-### Observaciones importantes
+### Parámetros relevantes
 
-- La fase inicial real es `first_jump`.
-- La fase `fadeoff` existe en la definición, pero la transición por defecto de `cue` va a `rest`, no a `fadeoff`.
-- Por lo tanto, en la configuración actual, `fadeoff` no forma parte del flujo normal salvo que se fuerce manualmente con `moveTo(...)`.
-
-### Flujo nominal actual
-
-```text
-first_jump -> start -> precue -> cue -> rest -> trialInfo -> sendMarkers -> start ...
-```
-
-Cuando se terminan los trials/runs, la sesión entra en finalización mediante `_finish_session()`.
+- `sessioninfo`: instancia de `SessionInfo` con la metadata de la sesión.
+- `mainTimerDuration`: período del timer principal, en milisegundos.
+- `tabid`: action Android usada para el broadcast ADB.
+- `experimento`: etiqueta textual del tipo de experimento.
+- `n_runs`: cantidad de runs.
+- `letters`: lista de letras por run. Si es `None`, se usa el set por defecto.
+- `randomize_per_run`: si es `True`, mezcla el orden de letras en cada run.
+- `seed`: semilla para el generador pseudoaleatorio usado en el orden por run.
+- `cue_base_duration`: duración base de la fase `cue`.
+- `cue_tmin_random`, `cue_tmax_random`: rango adicional aleatorio para `cue`.
+- `rest_base_duration`: duración base de la fase `rest`.
+- `rest_tmin_random`, `rest_tmax_random`: rango adicional aleatorio para `rest`.
+- `randomize_cue_duration`: habilita o no la aleatorización de `cue`.
+- `randomize_rest_duration`: habilita o no la aleatorización de `rest`.
+- `tabletID`: serial ADB del dispositivo Android.
 
 ---
 
-## 5. Configuración experimental
+## Configuración experimental
 
-## 5.1 Letras
-Si el usuario no entrega una lista, se usan por defecto:
+### Letras por defecto
+
+Si no se entrega una lista explícita, la sesión usa el siguiente conjunto:
 
 ```python
-['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd', 't']
+['e', 'a', 'o', 's', 'n', 'r', 'u', 'l', 'd', 'm']
 ```
 
-## 5.2 Runs y trials
-- `trials_per_run = len(self.letters)`
+### Runs y trials
+
+La estructura de repetición queda definida por:
+
+- `trials_per_run = len(letters)`
 - `total_trials = trials_per_run * n_runs`
 
-La clase mantiene:
+El estado discreto de avance se mantiene con:
 
-- `current_run`
-- `current_trial`
-- `trials_acummulated`
-- `current_letter`
+- `current_run`,
+- `current_trial`,
+- `trials_acummulated`,
+- `current_letter`,
+- `session_finished`.
 
-## 5.3 Aleatorización
-El orden por run se genera con `_make_run_order()`.
+### Orden de presentación
 
-Si `randomize_per_run=True`, se mezcla el orden de letras dentro de cada run usando `self.rng.shuffle(base)`.
+El orden por run se construye con `_make_run_order()`. Si `randomize_per_run=True`, cada run contiene una copia de `letters` mezclada con `self.rng.shuffle(...)`.
 
-### Importante
-Aunque la clase crea un generador reproducible con:
+---
+
+## Reproducibilidad y aleatorización
+
+La clase instancia un generador reproducible con:
 
 ```python
 self.rng = np.random.default_rng(seed)
 ```
 
-las funciones `_set_random_cue_duration()` y `_set_random_rest_duration()` usan:
-
-```python
-np.random.uniform(...)
-```
-
-y no `self.rng.uniform(...)`.
-
-Eso significa que la semilla pasada a `default_rng(seed)` no controla de manera reproducible las duraciones aleatorias de `cue` y `rest`; sólo controla el orden de las letras si se usa `self.rng.shuffle(...)`.
+Ese generador controla el **orden de letras por run** y también para las duraciones extra de `cue` y `rest`.
 
 ---
 
-## 6. Duraciones de fases
+## Máquina de estados
 
-## 6.1 Cue
-Puede ser fija o aleatoria.
-
-- Si `randomize_cue_duration=False`, la duración de `cue` es `cue_base_duration`.
-- Si `randomize_cue_duration=True`, la duración se calcula como:
+La máquina de fases se define así:
 
 ```python
-cue_base_duration + U(cue_tmin_random, cue_tmax_random)
-```
-
-con validación de que:
-
-- `cue_tmin_random >= 0`
-- `cue_tmax_random >= 0`
-- `cue_tmin_random < cue_tmax_random`
-
-## 6.2 Rest
-Análogo a `cue`:
-
-```python
-rest_base_duration + U(rest_tmin_random, rest_tmax_random)
-```
-
-con las mismas validaciones de consistencia.
-
----
-
-## 7. Temporización
-
-La clase usa dos `QTimer`:
-
-### 7.1 `mainTimer`
-- Intervalo configurable por `mainTimerDuration`
-- Ejecuta `update_main()`
-- Controla el avance temporal de fases
-
-### 7.2 `uiTimer`
-- Intervalo fijo de 50 ms
-- Ejecuta `_update_information_label()`
-- Sólo actualiza la información visual de la UI
-
-## 7.3 Variables temporales relevantes
-
-- `creation_time`
-- `_last_phase_time`
-- `next_transition`
-- `sessionStartTime`
-- `trialStartTime`
-- `precueTime`
-- `trialCueTime`
-- `trialFadeOffTime`
-- `trialRestTime`
-- `sessionFinalTime`
-
----
-
-## 8. Estructura de comunicación con la tablet
-
-`TabletMessenger.make_message(...)` arma un mensaje con esta estructura:
-
-```json
-{
-  "sesionStatus": "...",
-  "session_id": "...",
-  "run_id": "...",
-  "subject_id": "...",
-  "trialInfo": {
-    "trialID": ...,
-    "trialPhase": "...",
-    "letter": "...",
-    "duration": ...
-  }
+PHASES = {
+    "first_jump": {"next": "start", "duration": 5.0},
+    "start": {"next": "precue", "duration": 2.0},
+    "precue": {"next": "cue", "duration": 1.0},
+    "cue": {"next": "rest", "duration": 5.0},
+    "fadeoff": {"next": "rest", "duration": 1.0},
+    "rest": {"next": "trialInfo", "duration": 1.0},
+    "trialInfo": {"next": "sendMarkers", "duration": 0.2},
+    "sendMarkers": {"next": "start", "duration": 0.2},
 }
 ```
 
-Además admite claves extra mediante `**extra`, por ejemplo `sessionStartTime`.
+### Flujo nominal
 
-Luego `send_message(...)` lo serializa a JSON y lo envía por ADB broadcast usando la action Android dada por `tabid`, típicamente:
+En su forma actual, la secuencia efectiva es:
+
+```text
+first_jump -> start -> precue -> cue -> rest -> trialInfo -> sendMarkers -> start
+```
+
+---
+
+## Temporización
+
+La clase usa dos `QTimer`:
+
+### `mainTimer`
+
+- frecuencia configurable mediante `mainTimerDuration`,
+- responsable de decidir cuándo cambiar de fase,
+- ejecuta `update_main()`.
+
+### `uiTimer`
+
+- intervalo fijo de 50 ms,
+- actualiza la información visible en la UI,
+- ejecuta `_update_information_label()`.
+
+### Variables temporales internas
+
+Se mantienen, entre otras, las siguientes referencias temporales:
+
+- `creation_time`,
+- `_last_phase_time`,
+- `next_transition`,
+- `sessionStartTime`,
+- `trialStartTime`,
+- `precueTime`,
+- `trialCueTime`,
+- `trialFadeOffTime`,
+- `trialRestTime`,
+- `sessionFinalTime`.
+
+### Nota sobre la base temporal
+
+La lógica principal de `SessionManager` utiliza `time.time()` para temporización y sellado temporal. Sólo `moveTo()` usa `local_clock()` de LSL. Esto introduce una mezcla de referencias temporales que no afecta el flujo nominal, pero sí conviene tener presente al interpretar operaciones manuales de cambio de fase.
+
+---
+
+## Comunicación con la tablet
+
+### Canal de comunicación
+
+La comunicación PC → tablet se realiza con `TabletMessenger.send_message(...)`, que construye un comando `adb shell am broadcast` sobre la action configurada en `tabid`, por defecto:
 
 ```python
 "com.handwriting.ACTION_MSG"
 ```
 
----
+### Estructura del mensaje
 
-## 9. Contrato observado con `MainActivity.kt`
+El payload sigue esta forma general:
 
-La app Android escucha mensajes con `sesionStatus` y `trialInfo.trialPhase`. 
-Según `MainActivity.kt`, interpreta al menos:
-
-- `sesionStatus`: `on`, `off`, `standby`, `final`
-- `trialPhase`: `start`, `precue`, `cue`, `fadeoff`, `rest`, `trialInfo`
-
-### 9.1 Sincronización temporal PC-tablet
-La tablet espera explícitamente `sessionStartTime` cuando recibe el inicio de sesión. Si no llega, reporta error y no puede sincronizar tiempos.
-
-La sincronización se hace así:
-
-- la laptop envía `sessionStartTime` absoluto en ms,
-- la tablet guarda ese valor como `t0Laptop`,
-- fija su `t0TabletNano = System.nanoTime()`,
-- y luego computa tiempos relativos absolutos con:
-
-```kotlin
-nowRelativeToT0() = t0Laptop + (System.nanoTime() - t0TabletNano) / 1_000_000
+```json
+{
+  "sesionStatus": "on",
+  "session_id": "...",
+  "run_id": 1,
+  "subject_id": "...",
+  "trialInfo": {
+    "trialID": 1,
+    "trialPhase": "cue",
+    "letter": "a",
+    "duration": 5.0
+  }
+}
 ```
 
-Esto permite que eventos como `trialStartTime`, `trialCueTime` y timestamps de coordenadas/penDown queden en la misma escala temporal de la laptop.
+El método `make_message(...)` admite además claves extra en nivel superior, por ejemplo `sessionStartTime`.
 
-### 9.2 Fases en Android
-En la tablet:
+### Inicio de sesión
 
-- `start`: limpia pantalla, muestra estado del trial, mantiene el círculo central.
-- `precue`: registra tiempo y reproduce sonido de precue.
-- `cue`: muestra la letra, oculta el círculo central, habilita dibujo y activa `touchView.startSampling()`.
-- `fadeoff`: limpia pantalla y vuelve a mostrar el círculo central.
-- `rest`: limpia pantalla y muestra mensaje de descanso.
-- `trialInfo`: no usa el buffer de muestreo periódico, sino `consumeNewPoints()`, `getPenUpTimestamps()` y `getPenDownTimestamps()` para construir el JSON persistido del trial.
+Al comenzar la sesión, `startSession()`:
 
-### 9.3 Persistencia del trial en Android
-Cada trial se guarda como:
+1. fija `creation_time`,
+2. calcula `t0_abs` en milisegundos,
+3. guarda `sessionStartTime` en `laptop_marker_dict`,
+4. prepara el primer trial,
+5. envía a la tablet un mensaje inicial con `sessionStartTime=t0_abs`,
+6. establece `next_transition`,
+7. llama a `handle_phase_transition()`,
+8. arranca los timers.
+
+### Observaciones sobre el arranque
+
+En el momento del primer envío, `in_phase` todavía vale `first_jump`. Eso significa que el primer broadcast de sesión incluye `trialPhase="first_jump"`.
+
+En la implementación Android disponible, `MainActivity.kt` no define una rama explícita para `first_jump`. Por tanto, esa fase funciona más como estado interno del controlador que como fase operativa con efectos visibles definidos en Android.
+
+Además, `startSession()` envía un mensaje inicial y, acto seguido, `handle_phase_transition()` vuelve a enviar otro mensaje con la fase actual. En consecuencia, el arranque puede producir un doble envío de la fase inicial.
+
+---
+
+## Contrato operativo observado en Android
+
+La app Android recibe el broadcast con `PCMessenger`, que almacena el JSON en `latestMessage`. Luego `MainActivity.kt` interpreta `sesionStatus` y `trialInfo.trialPhase` para actualizar el flujo visual y persistir la información del trial.
+
+### Fases reconocidas en Android
+
+En el código observado, Android implementa comportamiento explícito para:
+
+- `start`,
+- `precue`,
+- `cue`,
+- `fadeoff`,
+- `rest`,
+- `trialInfo`.
+
+### Comportamiento por fase
+
+- **`start`**: limpia la pantalla, mantiene el círculo central visible y actualiza el estado del trial.
+- **`precue`**: registra tiempo y dispara el sonido de precue.
+- **`cue`**: oculta el círculo central, muestra la letra, habilita el dibujo y comienza el muestreo.
+- **`fadeoff`**: limpia la pantalla y vuelve a mostrar el círculo central.
+- **`rest`**: limpia la pantalla y muestra un mensaje de descanso.
+- **`trialInfo`**: consume puntos, eventos `penDown`/`penUp`, construye el JSON del trial y lo guarda en almacenamiento.
+
+### Sincronización temporal PC ↔ tablet
+
+La tablet espera recibir `sessionStartTime` al comienzo de la sesión. Ese valor se usa como referencia para alinear los tiempos Android con la base temporal de la laptop.
+
+Según `MainActivity.kt`, los tiempos relativos de trial se obtienen a partir de una referencia compartida derivada de:
+
+- `t0Laptop = sessionStartTime` recibido desde la PC,
+- `t0TabletNano = System.nanoTime()` capturado en Android.
+
+Con esa convención, eventos como `trialStartTime`, `trialCueTime`, `trialRestTime`, `penDownMarkers` y la mayoría de los timestamps de coordenadas quedan expresados sobre una escala temporal alineada con la laptop.
+
+---
+
+## Persistencia del trial en la tablet
+
+Durante `trialInfo`, Android construye y guarda un JSON con el siguiente esquema conceptual:
+
+```json
+{
+  "trialID": 1,
+  "letter": "a",
+  "runID": "1",
+  "sessionStartTime": 0,
+  "trialStartTime": 0,
+  "trialPrecueTime": 0,
+  "trialCueTime": 0,
+  "trialFadeOffTime": 0,
+  "trialRestTime": 0,
+  "penDownMarkers": [],
+  "penUpMarkers": [],
+  "coordinates": [[x, y, t], ...],
+  "sessionFinalTime": 0
+}
+```
+
+Los archivos se almacenan como:
 
 ```text
 /storage/emulated/0/Documents/<subject>/<session>/<run>/trial_<id>.json
 ```
 
-El JSON incluye:
-
-- `trialID`
-- `letter`
-- `runID`
-- `sessionStartTime`
-- `trialStartTime`
-- `trialPrecueTime`
-- `trialCueTime`
-- `trialFadeOffTime`
-- `trialRestTime`
-- `penDownMarkers`
-- `penUpMarkers`
-- `coordinates`
-- `sessionFinalTime`
-
-Las coordenadas se guardan como listas tipo:
-
-```json
-[x, y, timestamp]
-```
-
-### 9.4 Rol de `PCMessenger`, `EventManager` y `TouchView`
-
-#### `PCMessenger`
-Actúa como receptor Android del broadcast `com.handwriting.ACTION_MSG`.
-
-Responsabilidades observadas:
-
-- registra/desregistra un `BroadcastReceiver`,
-- parsea el extra `payload` como `JSONObject`,
-- mantiene el último mensaje en `latestMessage`,
-- opcionalmente puede reenviar información al host vía Logcat con `sendToHost(...)` o `sendTrialInfo(...)`.
-
-En el flujo actual de `MainActivity`, `pcMessenger.start()` se llama en `onCreate()`, y luego el loop de estado consulta repetidamente `pcMessenger.latestMessage`.
-
-#### `EventManager`
-No es usado directamente por `SessionManager`, pero sí por la app Android durante `trialInfo`.
-Su rol es el de acumulador interno de eventos y datos por trial.
-
-Almacena:
-
-- inicio y final de sesión,
-- listas de `trialID`,
-- tiempos de `start`, `precue`, `cue`, `fadeoff`, `rest`,
-- listas de listas para `penDown` y `penUp`,
-- listas de coordenadas `DrawPoint`.
-
-Esto sirve como respaldo estructural de los datos del trial antes o además del guardado en JSON.
-
-#### `TouchView`
-`TouchView` define la estructura `DrawPoint(x, y, timestamp)` y mantiene tres buffers conceptualmente distintos:
-
-1. `pathPoints`: trayectoria dibujada en pantalla,
-2. `pendingPoints`: puntos nuevos consumibles por trial mediante `consumeNewPoints()`,
-3. `sampledPoints`: muestreo periódico cada ~2 ms generado por `startSampling()`.
-
-Además mantiene:
-
-- `penDownTimestamps`,
-- `penUpTimestamps`,
-- el círculo central visual (`showCenterCircle`),
-- y la capacidad de sincronizar timestamps de eventos táctiles mediante `timeProvider`.
-
-### 9.5 Implicancia temporal importante en Android
-
-`MainActivity` asigna:
-
-```kotlin
-touchView.timeProvider = { nowRelativeToT0() }
-```
-
-Por lo tanto, los timestamps asociados a `ACTION_DOWN`, `ACTION_MOVE`, `ACTION_UP` y a los `DrawPoint` producidos en `onTouchEvent(...)` quedan en la misma base temporal sincronizada con la laptop.
-
-Sin embargo, el muestreo periódico de `startSampling()` usa `System.currentTimeMillis()` y no `timeProvider`.
-
-Consecuencia:
-
-- `pendingPoints`, `penDownTimestamps` y `penUpTimestamps` sí quedan alineados con `sessionStartTime` enviado por la PC,
-- `sampledPoints` puede quedar en otra base temporal.
-
-En la implementación actual, esto no rompe el JSON persistido del trial porque `trialInfo` usa `consumeNewPoints()` y no `consumeSampledPoints()`. Pero es un punto importante para documentar, porque afecta cualquier análisis futuro que pretenda usar `sampledPoints` como fuente principal de coordenadas.
+Posteriormente, `SessionManager` relee ese JSON usando `TabletMessenger.read_trial_json(...)` y lo reemite por LSL.
 
 ---
 
-## 10. Marcadores LSL
+## Marcadores LSL
 
-`SessionManager` crea dos emisores LSL:
+`SessionManager` crea dos outlets de LSL.
 
-### 10.1 `laptop_marker`
-Stream de nombre:
+### `Laptop_Markers`
+
+Se inicializa con:
+
+- `stream_name="Laptop_Markers"`,
+- `stream_type="Markers"`,
+- `source_id="Laptop"`,
+- `channel_count=1`,
+- `channel_format="string"`,
+- `nominal_srate=0`.
+
+El payload se arma con `laptop_marker_dict`, que contiene:
+
+- `trialID`,
+- `letter`,
+- `runID`,
+- `sessionStartTime`,
+- `trialStartTime`,
+- `trialPrecueTime`,
+- `trialCueTime`,
+- `trialFadeOffTime`,
+- `trialRestTime`,
+- `sessionFinalTime`.
+
+### `Tablet_Markers`
+
+Se inicializa con los mismos parámetros operativos, pero con:
+
+- `stream_name="Tablet_Markers"`,
+- `source_id="Tablet"`.
+
+El payload enviado por este stream corresponde al JSON del trial recuperado desde la tablet.
+
+### Momento de emisión
+
+Ambos marcadores se envían durante la fase `sendMarkers`:
+
+1. se intenta leer `trial_<id>.json` desde Android,
+2. si la lectura es exitosa, el contenido se reenvía por `Tablet_Markers`,
+3. luego se serializa `laptop_marker_dict` y se envía por `Laptop_Markers`.
+
+---
+
+## Flujo interno de ejecución
+
+### Preparación del siguiente trial
+
+`_prepare_next_trial()` se encarga de:
+
+- avanzar dentro del run,
+- pasar al siguiente run cuando corresponde,
+- marcar `session_finished=True` cuando no quedan trials,
+- y actualizar `current_letter`.
+
+### Avance automático
+
+`update_main()` compara `time.time()` contra `next_transition`. Cuando el tiempo actual supera ese umbral:
+
+1. se avanza a la siguiente fase con `_advance_phase()`,
+2. se ejecuta `handle_phase_transition()`.
+
+### Lógica por transición
+
+`handle_phase_transition()` realiza, en este orden:
+
+1. logging de fase actual,
+2. reconfiguración aleatoria de `cue` y/o `rest` si corresponde,
+3. envío del estado actualizado a la tablet,
+4. actualización de `laptop_marker_dict`,
+5. ejecución de la acción específica de la fase.
+
+### Acción de fase estándar
+
+`_on_phase(...)` se utiliza para fases simples. Su comportamiento consiste en:
+
+- registrar el tiempo de la fase en `laptop_marker_dict`,
+- actualizar `sessionFinalTime` con el timestamp actual,
+- cambiar el color del widget `marcador_cue`,
+- y ejecutar una acción opcional adicional.
+
+---
+
+## Interfaz gráfica local
+
+La inicialización de la UI se realiza en `initUI()`.
+
+### `LauncherApp`
+
+Se crea una instancia de `LauncherApp` y se actualiza con:
+
+- sujeto,
+- task,
+- cantidad de runs,
+- archivo BIDS,
+- carpeta raíz,
+- sesión,
+- run.
+
+Además, se conectan las señales:
+
+- `start_session_signal` → `startSession`,
+- `stop_session_signal` → `stopSession`,
+- `quit_session_signal` → `quitSession`.
+
+### `information_label`
+
+Es un `SquareWidget` que presenta información dinámica del bloque:
+
+- run actual,
+- trial acumulado,
+- letra actual,
+- duración de cue,
+- tiempo transcurrido.
+
+### `marcador_cue`
+
+Es un `SquareWidget` visual que cambia de color según la fase. En la implementación actual:
+
+- negro en `start`, `precue`, `fadeoff` y `rest`,
+- blanco en `cue`.
+
+### `marcador_calibration`
+
+Es un bloque visual con el texto “Para calibrar sensores”. En el estado actual del código se crea y se muestra, pero no participa en la lógica temporal del experimento.
+
+---
+
+## Finalización de sesión
+
+Cuando ya no hay más trials, `_finish_session()`:
+
+1. actualiza `sessionFinalTime`,
+2. fuerza `letter="fin"`,
+3. fuerza `trialID="fin"`,
+4. cambia `in_phase` a `"final"`,
+5. intenta enviar un mensaje final a la tablet,
+6. muestra el mensaje de ronda finalizada,
+7. detiene los timers y cierra el widget.
+
+El mensaje final hacia Android usa:
+
+- `sesionStatus="final"`,
+- `run_id="final"`,
+- `trialPhase="final"`,
+- `letter="fin"`.
+
+---
+
+## Ejemplo mínimo de uso
+
+```python
+import sys
+import time
+import logging
+from PyQt5.QtWidgets import QApplication
+from pyhwr.utils import SessionInfo
+from pyhwr.managers import SessionManager
+
+logging.basicConfig(level=logging.INFO)
+
+app = QApplication(sys.argv)
+
+session_info = SessionInfo(
+    sub=1,
+    ses=1,
+    task="entrenamiento",
+    run=1,
+    suffix="eeg",
+    session_date=time.strftime("%Y-%m-%d"),
+    bids_file="sub-01_ses-01_task-entrenamiento_run-01_eeg.bdf",
+    root_folder="data/",
+    session_id="entrenamiento",
+    subject_id="sub-01",
+)
+
+manager = SessionManager(
+    session_info,
+    n_runs=2,
+    letters=["a", "e", "l", "n"],
+    randomize_per_run=True,
+    seed=42,
+    cue_base_duration=4.5,
+    cue_tmin_random=0.0,
+    cue_tmax_random=1.0,
+    rest_base_duration=1.0,
+    rest_tmin_random=0.0,
+    rest_tmax_random=1.0,
+    randomize_cue_duration=True,
+    randomize_rest_duration=True,
+    tabletID="R52Y50AG4FF",
+)
+
+sys.exit(app.exec_())
+```
+
+---
+
+## Métodos relevantes
+
+### `startSession()`
+Inicia la sesión, prepara el primer trial, envía el mensaje inicial a la tablet y arranca los timers.
+
+### `stopSession()`
+Detiene la ejecución temporal y marca la sesión como finalizada.
+
+### `quitSession()`
+Detiene la ejecución, cierra el launcher y finaliza la aplicación Qt.
+
+### `update_main()`
+Controla el avance automático entre fases en función del tiempo.
+
+### `handle_phase_transition()`
+Centraliza la lógica ejecutada al entrar en cada fase.
+
+### `_send_markers_phase()`
+Lee el trial persistido por la tablet, lo envía por `Tablet_Markers`, envía el estado de laptop por `Laptop_Markers` y prepara el siguiente trial.
+
+### `moveTo(phase_name)`
+Permite mover manualmente la sesión a una fase concreta.
+
+### `show_final_message()`
+Reemplaza el contenido de `information_label` por un mensaje de finalización.
+
+---
+
+## Limitaciones y observaciones de diseño
+
+### 1. `fadeoff` no integra el flujo nominal
+Aunque existe como fase definida y Android sabe interpretarla, la transición normal de `cue` apunta directamente a `rest`.
+
+### 2. Reproducibilidad incompleta de duraciones
+La semilla del constructor no gobierna las duraciones aleatorias de `cue` y `rest`.
+
+### 3. Mezcla de referencias temporales
+La clase combina `time.time()` y `local_clock()` según el método utilizado.
+
+### 4. Doble envío posible al inicio
+`startSession()` emite un mensaje inicial y luego `handle_phase_transition()` vuelve a emitir el estado.
+
+### 5. `first_jump` no tiene semántica operativa explícita en Android
+La fase existe en el controlador de laptop, pero no aparece tratada de forma específica en `MainActivity.kt`.
+
+### 6. `marcador_calibration` es actualmente decorativo
+El widget se crea y muestra, pero no interviene en la lógica experimental.
+
+### 7. `sessionFinalTime` se actualiza durante fases intermedias
+En `_on_phase(...)`, `sessionFinalTime` se reescribe en cada entrada de fase. Por nombre semántico, ese campo sugiere un tiempo de fin de sesión, pero en la implementación también actúa como timestamp de última actualización.
+
+### 8. Dependencia fuerte del contrato Android actual
+La clase no es un scheduler experimental genérico. Está acoplada al formato JSON, a la action Android configurada y al esquema de persistencia de la app de tablet.
+
+---
+
+## Ubicación dentro de la arquitectura
+
+El flujo general observado en la aplicación es:
 
 ```text
-Laptop_Markers
+InitAPP
+  -> RunConfigurationApp
+      -> SessionInfo
+      -> SessionManager
+          -> LauncherApp
+          -> TabletMessenger
+          -> MarkerManager (Laptop_Markers / Tablet_Markers)
+          -> MainActivity.kt en Android
 ```
 
-### 10.2 `tablet_marker`
-Stream de nombre:
-
-```text
-Tablet_Markers
-```
-
-Ambos se configuran como:
-
-- `stream_type="Markers"`
-- `channel_count=1`
-- `channel_format="string"`
-- `nominal_srate=0`
-
-`MarkerManager.sendMarker(...)` serializa a JSON si el payload es dict;
-
-### 10.3 Contenido del marcador de laptop
-`laptop_marker_dict` contiene:
-
-- `trialID`
-- `letter`
-- `runID`
-- `sessionStartTime`
-- `trialStartTime`
-- `trialPrecueTime`
-- `trialCueTime`
-- `trialFadeOffTime`
-- `trialRestTime`
-- `sessionFinalTime`
-
-Estos tiempos se completan progresivamente durante el flujo de fases.
-
-### 10.4 Emisión de marcadores
-La fase `sendMarkers` hace dos cosas:
-
-1. Lee el JSON del trial desde la tablet y lo reemite por `tablet_marker`.
-2. Serializa `laptop_marker_dict` y lo emite por `laptop_marker`.
+Dentro de ese flujo, `SessionManager` es el componente que conecta configuración, ejecución temporal, UI local, mensajería Android y emisión LSL.
 
 ---
 
-## 11. Interfaz gráfica local
+## Resumen
 
-`initUI()` crea y configura:
+`SessionManager` implementa un controlador de sesión experimental orientado a adquisición sincronizada PC–tablet para tareas de escritura. Su diseño articula una máquina de estados temporizada, una interfaz local de control, un contrato de mensajería Android y dos streams de marcadores LSL.
 
-### 11.1 `LauncherApp`
-Ventana principal de control de sesión.
-
-Se usa para:
-
-- mostrar metadata de sesión,
-- iniciar,
-- detener,
-- salir.
-
-`SessionManager` conecta sus señales a:
-
-- `startSession`
-- `stopSession`
-- `quitSession`
-
-### 11.2 `information_label`
-Widget tipo `SquareWidget` que muestra información dinámica:
-
-- run actual
-- trial actual
-- letra actual
-- duración actual de cue
-- tiempo transcurrido
-
-### 11.3 `marcador_cue`
-Indicador visual cuyo color cambia según la fase:
-
-- negro en `start`, `precue`, `fadeoff`, `rest`
-- blanco en `cue`
-
-### 11.4 `marcador_calibration`
-Widget estático visual con texto “Para calibrar sensores”.
-
----
-
-## 12. Inicio de sesión
-
-`startSession()` realiza la secuencia de arranque:
-
-1. fija `creation_time = time.time()*1000`
-2. fija `t0_abs = time.time()*1000`
-3. guarda `sessionStartTime` en `laptop_marker_dict`
-4. prepara el primer trial con `_prepare_next_trial()`
-5. envía mensaje inicial a la tablet con:
-   - `sesionStatus="on"`
-   - `trialPhase=self.in_phase`
-   - `sessionStartTime=t0_abs`
-6. fija `next_transition`
-7. llama `handle_phase_transition()`
-8. inicia `mainTimer` y `uiTimer`
-
-### Observación importante
-En el instante del arranque, `self.in_phase` sigue siendo `first_jump`, porque esa es la fase inicial definida por la máquina de estados.
-
-Eso significa que el primer mensaje de inicio enviado a la tablet usa `trialPhase="first_jump"`.
-
-Sin embargo, en `MainActivity.kt` no aparece un caso explícito para `first_jump`.
-Por lo tanto, ese mensaje no tiene una acción específica en la tablet, salvo la lógica general de entrada en `sesionStatus="on"`.
-
-Además, `startSession()` envía un mensaje inicial y luego llama `handle_phase_transition()`, que vuelve a enviar un mensaje con la fase actual. 
-En el inicio, eso puede implicar doble envío de la fase inicial hacia la tablet.
-
----
-
-## 13. Avance de fases
-
-El ciclo principal funciona así:
-
-### 13.1 `update_main()`
-Compara `time.time()` con `next_transition`.  
-Si el tiempo actual supera el umbral:
-
-- llama `_advance_phase()`
-- llama `handle_phase_transition()`
-
-### 13.2 `_advance_phase()`
-Actualiza:
-
-- `last_phase`
-- `in_phase`
-- `next_transition`
-
-tomando la transición `next` del diccionario `PHASES`.
-
-### 13.3 `handle_phase_transition()`
-1. re-randomiza duración de `cue` si corresponde,
-2. re-randomiza duración de `rest` si corresponde,
-3. envía mensaje a la tablet,
-4. actualiza `laptop_marker_dict`,
-5. ejecuta la acción asociada a la fase.
-
----
-
-## 14. Preparación del siguiente trial
-
-`_prepare_next_trial()`:
-
-- avanza dentro del run actual,
-- si terminó el run, pasa al siguiente,
-- si no hay más runs, marca `session_finished=True` y retorna `False`,
-- actualiza:
-  - `current_run`
-  - `current_trial`
-  - `trials_acummulated`
-  - `current_letter`
-
-Esta función es la responsable directa del avance discreto run/trial.
-
----
-
-## 15. Lógica de finalización del trial
-
-La fase `sendMarkers` cumple el cierre efectivo de cada trial:
-
-1. intenta leer `trial_<id>.json` desde la tablet,
-2. si puede, lo emite como marcador LSL,
-3. emite el marcador de laptop,
-4. prepara el siguiente trial,
-5. si no existe siguiente trial, finaliza la sesión.
-
----
-
-## 16. Finalización de sesión
-
-`_finish_session()`:
-
-1. actualiza `sessionFinalTime` en el marcador de laptop,
-2. fuerza:
-   - `letter = "fin"`
-   - `trialID = "fin"`
-3. pone `self.in_phase = "final"`
-4. intenta avisar a la tablet enviando:
-   - `sesionStatus="final"`
-   - `run_id="final"`
-   - `trialPhase="final"`
-   - `letter="fin"`
-5. muestra el mensaje final en la UI
-6. llama `stop()`
-
-### En la tablet
-`MainActivity.kt` sí contempla `sesionStatus="final"` y:
-- guarda un JSON final,
-- reproduce sonido de éxito,
-- ejecuta limpieza de procesos.
-
----
-
-## 17. Métodos principales
-
-## 17.1 `__init__(...)`
-Configura todo el estado interno, timers, mensajería, marcadores y UI.
-
-## 17.2 `_advance_phase()`
-Avanza al siguiente estado y recalcula el próximo instante de transición.
-
-## 17.3 `_prepare_next_trial()`
-Selecciona el próximo trial/letra. Devuelve `False` si la sesión terminó.
-
-## 17.4 `_set_random_cue_duration()`
-Calcula duración aleatoria del cue con validación de parámetros.
-
-## 17.5 `_set_random_rest_duration()`
-Calcula duración aleatoria del rest con validación de parámetros.
-
-## 17.6 `update_main()`
-Bucle temporizado que decide si hay que cambiar de fase.
-
-## 17.7 `nextPhase()`
-Permite forzar el avance de fase manualmente.
-
-## 17.8 `moveTo(phase_name)`
-Permite mover manualmente a una fase dada y recalcula `next_transition`.
-
-## 17.9 `handle_phase_transition()`
-Método central de transición de estado.
-
-## 17.10 `_on_phase(time_key, color, extra_action=None, log=None)`
-Rutina auxiliar para:
-- guardar un tiempo de fase en `laptop_marker_dict`,
-- cambiar color del indicador de cue,
-- ejecutar acciones extra opcionales.
-
-## 17.11 `_update_information_label()`
-Actualiza el panel informativo de la sesión.
-
-## 17.12 `_send_markers_phase()`
-Lee JSON de la tablet, envía marcadores LSL y prepara el siguiente trial.
-
-## 17.13 `get_elapsed_time()`
-Devuelve tiempo transcurrido desde `creation_time` en ms.
-
-## 17.14 `initUI()`
-Crea y conecta la UI local.
-
-## 17.15 `startSession()`
-Inicia la sesión, notifica a la tablet y arranca timers.
-
-## 17.16 `_finish_session()`
-Cierra la sesión de manera ordenada.
-
-## 17.17 `stopSession()`
-Detiene la sesión sin cerrar la aplicación.
-
-## 17.18 `quitSession()`
-Detiene timers, cierra launcher y sale de la aplicación.
-
-## 17.19 `stop()`
-Detiene timers, muestra mensaje final y cierra el widget.
-
-## 17.20 `_make_run_order()`
-Genera el orden de letras para un run.
-
-## 17.21 `show_final_message()`
-Reemplaza el contenido del panel informativo por el mensaje “RONDA FINALIZADA”.
-
----
-
-## 18. Ambigüedades y puntos a documentar explícitamente
-
-Para una documentación honesta, conviene dejar asentados estos puntos:
-
-### 18.1 `fadeoff` no está en el flujo normal
-Aunque existe una acción en Android para `fadeoff`, el flujo Python actual pasa de `cue` a `rest`.
-
-### 18.2 `first_jump` no tiene manejo explícito en Android
-La laptop puede enviar `first_jump`, pero la tablet no muestra un caso específico para esa fase en el `when (newTrialPhase)` compartido.
-
-### 18.3 Posible doble envío al inicio
-`startSession()` envía un mensaje inicial y luego llama `handle_phase_transition()`, que vuelve a enviar mensaje de la fase actual.
-
-### 18.4 Mezcla de relojes
-FIX ARRELGADO. (Se usan `time.time()` y `local_clock()` en distintos puntos.)
-
-### 18.5 Reproducibilidad parcial
-El seed controla el shuffle de letras, pero no necesariamente la aleatorización de duraciones.
-
-### 18.6 Dos bases temporales dentro de `TouchView`
-Los eventos táctiles usan `timeProvider` cuando está configurado, pero `startSampling()` usa `System.currentTimeMillis()`.
-Eso implica que no todos los timestamps generados por `TouchView` comparten necesariamente la misma referencia temporal.
-
-### 18.7 `sessionFinalTime` del JSON de trial puede quedar en otra escala temporal
-En `MainActivity`, durante `trialInfo`, el campo `sessionFinalTime` se asigna con `System.currentTimeMillis()`, mientras que otros tiempos de trial se calculan con `nowRelativeToT0()`.
-Eso puede introducir una inconsistencia temporal dentro del JSON persistido del trial.
-
-### 18.8 Error potencial en `TabletMessenger.read_trial_json()`
-Dentro del `except`, el código usa `logger.error(...)`, pero en el archivo mostrado no existe una variable local/global `logger`; debería ser `self.logger.error(...)`.
-
-### 18.9 Método `runSession()` incompleto
-El método existe pero no implementa una lógica real de ejecución.
-
----
-
-## 19. Archivos todavía opcionales para una documentación de ecosistema completo
-
-Con los archivos ya revisados, la documentación funcional de `SessionManager` y de su contrato con Android es suficiente y consistente.
-
-Lo único que seguiría siendo opcional si quisieras una documentación todavía más amplia del proyecto completo es:
-
-- `launcherApp.ui` y estilos CSS, para describir la UI local a nivel visual y no sólo funcional,
-- recursos Android (`layout XML`, `drawables`, `raw/`), si se quiere documentar también la capa de presentación y no sólo la lógica.
-
----
-
-## 20. Conclusión
-
-Con los archivos revisados, `SessionManager` puede documentarse como el coordinador principal del experimento. 
-Su diseño une cuatro subsistemas:
-
-1. **control experimental** (fases, runs, trials, letras),
-2. **mensajería PC → tablet** (ADB + JSON),
-3. **persistencia y retrolectura de trial data** (JSON por trial),
-4. **marcadores LSL** (laptop y tablet).
-
-La clase es funcionalmente clara y bien delimitada, aunque presenta algunos detalles de consistencia temporal y de flujo que conviene dejar explícitos en cualquier documentación formal. Con `EventManager`, `PCMessenger` y `TouchView` ya revisados, esos detalles quedan mejor caracterizados y la documentación resultante es bastante más fiel al comportamiento real del sistema.
+La clase resulta adecuada como núcleo operativo del experimento, aunque presenta varios acoplamientos y decisiones de implementación que conviene mantener explícitos en cualquier mantenimiento futuro: reproducibilidad parcial, coexistencia de bases temporales, doble envío inicial, fase `fadeoff` fuera del flujo nominal y dependencia estrecha del esquema JSON persistido por la tablet.
