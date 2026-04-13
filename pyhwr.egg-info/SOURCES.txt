@@ -1,6 +1,5 @@
 README.md
 pyproject.toml
-setup.py
 pyhwr/__init__.py
 pyhwr/version.py
 pyhwr.egg-info/PKG-INFO
@@ -26,5 +25,11 @@ pyhwr/widgets/LauncherApp.py
 pyhwr/widgets/RunConfigurationApp.py
 pyhwr/widgets/SquareWidget.py
 pyhwr/widgets/StimuliWindow.py
+pyhwr/widgets/StimuliWindow.ui
 pyhwr/widgets/__init__.py
-test/test_sueltos.py
+pyhwr/widgets/initAPP.ui
+pyhwr/widgets/launcherApp.ui
+pyhwr/widgets/runConfigurationApp.ui
+pyhwr/widgets/styles/initapp_styles.css
+pyhwr/widgets/styles/launcherapp_styles.css
+pyhwr/widgets/styles/runconfiguration_styles.css

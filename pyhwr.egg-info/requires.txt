@@ -5,3 +5,4 @@ pylsl>=1.16
 PyQt5>=5.15
 keyboard>=0.13
 pyxdf>=1.17.0
+h5py>=3.10
