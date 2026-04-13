@@ -1,12 +1,15 @@
 import os
 from pyhwr.managers import LSLDataManager
 
-path = "test\\data\\pruebas_piloto\\testeo_marcadores\\"
-lsl_filename = "sub-contrazos_ses-03_task-ejecutada_run-01_eeg.xdf"
+path = "test\\data\\pruebas_piloto\\emgeog\\"
+lsl_filename = "sub-emgeogtrazos_ses-01_task-ejecutada_run-01_emgeog.xdf"
 
 lsl_manager = LSLDataManager(os.path.join(path, lsl_filename))
 
 print(lsl_manager.streamers_names)
+fecha_registro, timestamp_registro = lsl_manager.fecha_registro, lsl_manager.timestamp_registro
+start_time_tablet = lsl_manager.trials_info["Tablet_Markers"][1]["sessionStartTime"]/1000
+start_time_laptop = lsl_manager.trials_info["Laptop_Markers"][1]["sessionStartTime"]/1000
 print(lsl_manager.describe_trials())  
 print(lsl_manager.pendown_delays)
 lsl_manager.coordinates_info[1]["letter"] #"coordinates" o "letter"
