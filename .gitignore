@@ -11,24 +11,19 @@ __pycache__/
 
 hwr.egg-info/
 
-# Packaging
 *.egg-info/
 *.egg
 dist/
 build/
 
-# Editable installs (muy importante)
 pip-wheel-metadata/
 
-# Python cache
 __pycache__/
 *.pyc
 
-# Virtual envs (opcional pero recomendado)
 .env
 .venv
 env/
 venv/
 
-# Jupyter (si usás)
 .ipynb_checkpoints/
