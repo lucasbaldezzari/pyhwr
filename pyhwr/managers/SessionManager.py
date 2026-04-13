@@ -198,7 +198,7 @@ class SessionManager(QWidget):
         #chequeo que tmin y tmax sean válidos
         if self.cue_tmin_random < 0 or self.cue_tmax_random < 0 or self.cue_tmin_random >= self.cue_tmax_random:
             raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del cue.")
-        extra = np.random.uniform(self.cue_tmin_random, self.cue_tmax_random)
+        extra = self.rng.uniform(self.cue_tmin_random, self.cue_tmax_random)
         self.phases["cue"]["duration"] = self.cue_base_duration + extra
         logging.info(f"Nueva duración del CUE: {self.phases['cue']['duration']:.2f} s")
 
@@ -207,7 +207,7 @@ class SessionManager(QWidget):
         #chequeo que tmin y tmax sean válidos
         if self.rest_tmin_random < 0 or self.rest_tmax_random < 0 or self.rest_tmin_random >= self.rest_tmax_random:
             raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del rest time.")
-        extra = np.random.uniform(self.rest_tmin_random, self.rest_tmax_random)
+        extra = self.rng.uniform(self.rest_tmin_random, self.rest_tmax_random)
         self.phases["rest"]["duration"] = self.rest_base_duration + extra
         logging.info(f"Nueva duración de REST: {self.phases['rest']['duration']:.2f} s")
 
