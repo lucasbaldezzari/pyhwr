@@ -6,22 +6,12 @@
   "institution": "Nombre del laboratorio",
   "logo_path": "../styles/logo_lab.png",
   "include_toc": true,
-
   "subject_id": "01",
   "round_type": "Ejecutada",
   "trial_count": 80,
   "round_duration": "800 segundos (~13.3 min)",
   "general_comments": "Breve resumen automático de la sesión.",
-
-  "lsl_text": "Resumen textual de streams, timestamps y eventos.",
-  "lsl_tables": [
-    {
-      "title": "Streams detectados",
-      "description": "Información general de streams LSL.",
-      "html": "df_lsl"
-    }
-  ],
-
+  "lsl_text": "Resumen para LSL",
   "gtec_text": "Resumen de adquisición g.tec.",
   "gtec_tables": [
     {
@@ -30,11 +20,9 @@
       "html": "df_gte"
     }
   ],
-
   "traces_intro": "Visualización general de los trazos capturados.",
   "trace_plot_path": "../figures/trazos.png",
   "trace_plot_caption": "Trazos agrupados por letra y trial.",
-
   "trace_extra_plots": [
     {
       "title": "Letra A",
@@ -47,7 +35,6 @@
       "caption": "Ejemplo de trazos"
     }
   ],
-
   "other_graphs_intro": "Gráficos complementarios del experimento.",
   "other_graphs": [
     {
@@ -55,6 +42,20 @@
       "path": "../figures/duracion.png",
       "caption": "Histograma de tiempos",
       "description": "Distribución de la duración de los trials."
+    }
+  ],
+  "lsl_summary_tables": [
+    {
+      "title": "Descripción de trials",
+      "html": "<table class=\"dataframe\"><thead><tr><th></th><th>Tablet_Markers</th><th>Laptop_Markers</th></tr></thead><tbody><tr><th>duration</th><td>398.571</td><td>397.929</td></tr><tr><th>trials</th><td>40</td><td>40</td></tr><tr><th>trials_avg_time</th><td>9.872</td><td>9.872</td></tr><tr><th>trials_time_std</th><td>0.269</td><td>0.270</td></tr><tr><th>cues_avg_time</th><td>4.761</td><td>4.760</td></tr><tr><th>cues_time_std</th><td>0.150</td><td>0.149</td></tr><tr><th>letters</th><td>[a, d, e, l, m, n, o, r, s, u]</td><td>[a, d, e, l, m, n, o, r, s, u]</td></tr></tbody></table>"
+    },
+    {
+      "title": "Resumen duración de trazos",
+      "html": "<table class=\"dataframe\"><thead><tr><th></th><th>letter</th><th>mean</th><th>std</th><th>max</th><th>min</th><th>count</th></tr></thead><tbody><tr><th>0</th><td>a</td><td>1.52800</td><td>0.017493</td><td>1.543</td><td>1.510</td><td>4</td></tr><tr><th>1</th><td>d</td><td>2.03775</td><td>0.435913</td><td>2.568</td><td>1.558</td><td>4</td></tr><tr><th>2</th><td>e</td><td>1.39300</td><td>0.269828</td><td>1.620</td><td>1.059</td><td>4</td></tr><tr><th>3</th><td>l</td><td>0.73775</td><td>0.120782</td><td>0.867</td><td>0.582</td><td>4</td></tr><tr><th>4</th><td>m</td><td>2.62800</td><td>0.362017</td><td>3.166</td><td>2.386</td><td>4</td></tr><tr><th>5</th><td>n</td><td>1.63400</td><td>0.201663</td><td>1.923</td><td>1.455</td><td>4</td></tr><tr><th>6</th><td>o</td><td>1.99875</td><td>0.776278</td><td>3.133</td><td>1.407</td><td>4</td></tr><tr><th>7</th><td>r</td><td>1.51900</td><td>0.283877</td><td>1.894</td><td>1.242</td><td>4</td></tr><tr><th>8</th><td>s</td><td>0.82850</td><td>0.155839</td><td>1.050</td><td>0.701</td><td>4</td></tr><tr><th>9</th><td>u</td><td>1.66375</td><td>0.241406</td><td>1.975</td><td>1.390</td><td>4</td></tr></tbody></table>"
+    },
+    {
+      "title": "Resumen delays entre inicio de cue y el primer pendown",
+      "html": "<table class=\"dataframe\"><thead><tr><th></th><th>letter</th><th>mean</th><th>std</th><th>max</th><th>min</th><th>count</th></tr></thead><tbody><tr><th>0</th><td>a</td><td>0.65275</td><td>0.031426</td><td>0.698</td><td>0.630</td><td>4</td></tr><tr><th>1</th><td>d</td><td>0.83150</td><td>0.128620</td><td>0.988</td><td>0.673</td><td>4</td></tr><tr><th>2</th><td>e</td><td>0.81425</td><td>0.068398</td><td>0.875</td><td>0.718</td><td>4</td></tr><tr><th>3</th><td>l</td><td>0.73675</td><td>0.059483</td><td>0.822</td><td>0.687</td><td>4</td></tr><tr><th>4</th><td>m</td><td>0.88200</td><td>0.081240</td><td>0.984</td><td>0.808</td><td>4</td></tr><tr><th>5</th><td>n</td><td>0.89375</td><td>0.040590</td><td>0.937</td><td>0.840</td><td>4</td></tr><tr><th>6</th><td>o</td><td>0.63350</td><td>0.075333</td><td>0.733</td><td>0.550</td><td>4</td></tr><tr><th>7</th><td>r</td><td>0.82825</td><td>0.083436</td><td>0.920</td><td>0.720</td><td>4</td></tr><tr><th>8</th><td>s</td><td>0.73150</td><td>0.089445</td><td>0.858</td><td>0.663</td><td>4</td></tr><tr><th>9</th><td>u</td><td>0.78250</td><td>0.069256</td><td>0.849</td><td>0.698</td><td>4</td></tr></tbody></table>"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-    "python.REPL.enableREPLSmartSend": false,
+    "python.REPL.enableREPLSmartSend": true,
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda"
 }

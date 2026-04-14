@@ -274,6 +274,7 @@ class LSLDataManager():
         self.coordinates_info = self.get_coordinates_info()
         self.pendown_delays = self.get_pendownDelays()
         self.trials_times = self.trialsTimes()
+        self.traces_duration = self.get_tracesDuration()
         ##agregar método para obtener tiempo promedio entre triasl, duración total de la sesión,
         ##tiempo promedio entre cues y otras cosas relevantes.
 
@@ -500,8 +501,8 @@ class LSLDataManager():
         ##duraciones de ronda por cada dispositivo
         tablet_duration = tablet_trials_info[lkt]["sessionFinalTime"] - tablet_trials_info[fkt]["sessionStartTime"]
         laptop_duration = laptop_trials_info[lkl]["sessionFinalTime"] - laptop_trials_info[fkl]["sessionStartTime"]
-        tablet_dict["duration"] = tablet_duration/1000 #paso a segundos
-        laptop_dict["duration"] = laptop_duration/1000 #paso a segundos
+        tablet_dict["duration"] = round(float(tablet_duration/1000),2) #paso a segundos
+        laptop_dict["duration"] = round(float(laptop_duration/1000),2) #paso a segundos
 
         #cantidad de trials
         tablet_dict["trials"] = len(tablet_trials_info)
@@ -512,10 +513,10 @@ class LSLDataManager():
         laptop_trial_times = [trial["trialStartTime"] for trial in laptop_trials_info.values()]
         tablet_trial_times_diff = np.abs(np.diff(tablet_trial_times))
         laptop_trial_times_diff = np.abs(np.diff(laptop_trial_times))
-        tablet_dict["trials_avg_time"] = round(float(np.mean(tablet_trial_times_diff) / 1000), 3)
-        tablet_dict["trials_time_std"] = round(float(np.std(tablet_trial_times_diff) / 1000), 3)
-        laptop_dict["trials_avg_time"] = round(float(np.mean(laptop_trial_times_diff) / 1000), 3)
-        laptop_dict["trials_time_std"] = round(float(np.std(laptop_trial_times_diff) / 1000), 3)
+        tablet_dict["trials_avg_time"] = round(float(np.mean(tablet_trial_times_diff) / 1000), 2)
+        tablet_dict["trials_time_std"] = round(float(np.std(tablet_trial_times_diff) / 1000), 2)
+        laptop_dict["trials_avg_time"] = round(float(np.mean(laptop_trial_times_diff) / 1000), 2)
+        laptop_dict["trials_time_std"] = round(float(np.std(laptop_trial_times_diff) / 1000), 2)
 
         ##tiempos entre cues. Es la diferencia entre trialRestTime y trialCueTime
         tablet_cue_times = [trial["trialCueTime"] for trial in tablet_trials_info.values()]
@@ -525,10 +526,10 @@ class LSLDataManager():
         #calculo las diferencias entre trialRestTime y trialCueTime para cada trial
         tablet_cue_durations = np.abs(np.array(tablet_resttime) - np.array(tablet_cue_times))
         laptop_cue_durations = np.abs(np.array(laptop_resttime) - np.array(laptop_cue_times))
-        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 3)
-        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 3)
-        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 3)
-        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 3)
+        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 2)
+        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 2)
+        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 2)
+        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 2)
 
         ##letras mostradas
         tablet_dict["letters"] = list(set([trial["letter"] for trial in tablet_trials_info.values()]))
@@ -554,11 +555,10 @@ class LSLDataManager():
             if len(pendownmarker) > 0: #hubo un evento de penDown registrado
                 penDownTime = pendownmarker[0] #tiempo del primer penDown registrado
                 trialCueTime = trial["trialCueTime"] #tiempo del cue
-                print(f"trialCueTime {trialCueTime}, penDownTime {penDownTime}")
                 delay = penDownTime - trialCueTime #diferencia entre ambos tiempos
                 delays[trial["trialID"]] = {
                     "letter": trial["letter"],
-                    "delay": delay/1000 #paso a segundos
+                    "delay": round(float(delay)/1000,2) #segundos
                 }
                 
             else:
@@ -569,6 +569,67 @@ class LSLDataManager():
                 continue
 
         return delays
+    
+    def penDown_delays_resume(self):
+        """
+        Retorna un dataframe con datos estadísticos del delay de trazos
+        """
+        df = pd.DataFrame.from_dict(self.pendown_delays, orient="index")
+        stats_df = (
+            df.groupby("letter")["delay"].agg(
+                mean = "mean",
+                std = "std",
+                max = "max",
+                min = "min",
+                count = "count"
+            ).reset_index().sort_values("letter")
+        )
+
+        return stats_df
+
+    def get_tracesDuration(self):
+        """
+        Retorna un diccionario con la duración de cada trazo para cada letra. Los keys son los trialID y
+        cada valor es otro diccionario con el valor de duración del trazo. 
+        La duración del trazo se obtiene a partir del último punto registrado del trazo dibujado en la
+        tablet.
+        """
+        durations = {}
+        for trial in self.trials_info["Tablet_Markers"].values():
+            traces = np.array(trial["coordinates"])
+            if len(traces) > 0: #se registró al menos un punto de trazado
+                first_point = traces[0,2] #tiempo del último penDown registrado
+                last_point = traces[-1,2] #tiempo del último penDown registrado
+                durations[trial["trialID"]] = {
+                    "letter": trial["letter"],
+                    "duration": round(float((last_point-first_point)/1000),2) #segundos
+                }
+
+            else:
+                durations[trial["trialID"]] = {
+                    "letter": trial["letter"],
+                    "duration": None
+                }
+                continue
+
+        return durations
+    
+    def tracesDuration_resume(self):
+            """
+            Retorna un dataframe con estadísticos de la duración de los trazos
+            """
+            df = pd.DataFrame.from_dict(self.traces_duration, orient="index")
+            stats_df = (
+                df.groupby("letter")["duration"].agg(
+                    mean = "mean",
+                    std = "std",
+                    max = "max",
+                    min = "min",
+                    count = "count"
+                ).reset_index().sort_values("letter")
+            )
+            
+            return stats_df
     
     def infoTrial(self, trialID):
         """

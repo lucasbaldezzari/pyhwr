@@ -1,19 +1,20 @@
 :root {
     --color-primary: #1f4e79;
-    --color-secondary: #2f2f2f;
+    --color-secondary: #22303c;
     --color-muted: #6b7280;
     --color-border: #d9dee7;
     --color-bg-soft: #f7f9fc;
     --color-white: #ffffff;
+    --color-table-head: #eaf1f8;
+    --color-table-stripe: #f9fbfd;
 }
 
-/* RESET BÁSICO */
 * {
     box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 0;
     color: var(--color-secondary);
@@ -21,12 +22,11 @@ body {
     line-height: 1.5;
 }
 
-/* CONTENEDOR DE PÁGINA */
 .page {
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 40px 50px;
+    padding: 32px 40px;
 }
 
 .page-break {
@@ -34,7 +34,6 @@ body {
     break-before: page;
 }
 
-/* TIPOGRAFÍA */
 h1, h2, h3 {
     margin-top: 0;
     color: var(--color-primary);
@@ -65,17 +64,6 @@ p {
     color: var(--color-muted);
 }
 
-/* =========================
-   PORTADA
-========================= */
-
-.cover {
-    min-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
 .cover-top {
     display: flex;
     justify-content: space-between;
@@ -97,24 +85,11 @@ p {
     font-size: 16px;
 }
 
-.logo-box {
-    width: 180px;
-    min-height: 140px;
-    border: 2px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-bg-soft);
-}
-
-.logo-box img {
-    max-width: 100%;
+.logo-clean img {
+    max-width: 160px;
     max-height: 120px;
+    display: block;
 }
-
-/* =========================
-   RESUMEN GENERAL
-========================= */
 
 .summary-grid {
     display: grid;
@@ -142,10 +117,6 @@ p {
     font-weight: bold;
 }
 
-/* =========================
-   SECCIONES
-========================= */
-
 .section {
     margin-top: 34px;
 }
@@ -158,39 +129,68 @@ p {
     background: var(--color-white);
 }
 
-/* =========================
-   TABLAS
-========================= */
-
 .table-wrapper {
     overflow-x: auto;
     margin-top: 12px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
+.centered-table-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-x: auto;
 }
 
-th, td {
-    border: 1px solid var(--color-border);
-    padding: 8px 10px;
-    text-align: left;
+.table-section-title {
+    text-align: center;
+    margin-top: 22px;
+    margin-bottom: 10px;
 }
 
-th {
-    background: var(--color-bg-soft);
+.lsl-table-block {
+    margin-top: 18px;
 }
 
-/* OPCIONAL: mejora visual de DataFrame */
 .dataframe {
-    font-size: 13px;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: auto;
+    min-width: 520px;
+    margin: 0 auto;
+    font-size: 14px;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    color: var(--color-secondary);
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(31, 78, 121, 0.05);
 }
 
-/* =========================
-   FIGURAS
-========================= */
+.dataframe thead th {
+    background: var(--color-table-head);
+    color: var(--color-primary);
+    font-weight: 600;
+    text-align: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dataframe tbody th,
+.dataframe tbody td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #e9eef5;
+    text-align: center;
+}
+
+.dataframe tbody tr:nth-child(even) {
+    background: var(--color-table-stripe);
+}
+
+.dataframe tbody tr:last-child th,
+.dataframe tbody tr:last-child td {
+    border-bottom: none;
+}
 
 .figure {
     margin: 20px 0;
@@ -210,8 +210,6 @@ th {
     margin-top: 8px;
 }
 
-/* GRID DE FIGURAS */
-
 .figure-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -225,26 +223,6 @@ th {
     background: var(--color-white);
 }
 
-/* =========================
-   TABLA DE CONTENIDO
-========================= */
-
-.toc {
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    padding: 16px;
-    background: var(--color-bg-soft);
-}
-
-.toc ul {
-    margin: 0;
-    padding-left: 18px;
-}
-
-/* =========================
-   FOOTER
-========================= */
-
 .footer-note {
     margin-top: 40px;
     font-size: 12px;
@@ -252,31 +230,9 @@ th {
     text-align: center;
 }
 
-/* =========================
-   IMPRESIÓN (PDF)
-========================= */
-
 @media print {
-
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-    }
-
-    .page {
-        max-width: none;
-        padding: 20mm 16mm;
-    }
-
-    h2 {
-        page-break-after: avoid;
-    }
-
-    .block, .figure, table {
-        page-break-inside: avoid;
-    }
-
-    .figure-grid {
-        page-break-inside: avoid;
     }
 }

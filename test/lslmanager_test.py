@@ -1,5 +1,6 @@
 import os
 from pyhwr.managers import LSLDataManager
+import numpy as np
 
 path = "test\\data\\pruebas_piloto\\emgeog\\"
 lsl_filename = "sub-emgeogtrazos_ses-01_task-ejecutada_run-01_emgeog.xdf"
@@ -12,8 +13,12 @@ start_time_tablet = lsl_manager.trials_info["Tablet_Markers"][1]["sessionStartTi
 start_time_laptop = lsl_manager.trials_info["Laptop_Markers"][1]["sessionStartTime"]/1000
 print(lsl_manager.describe_trials())  
 print(lsl_manager.pendown_delays)
+print(lsl_manager.penDown_delays_resume())
+print(lsl_manager.traces_duration)
+print(lsl_manager.tracesDuration_resume())
 lsl_manager.coordinates_info[1]["letter"] #"coordinates" o "letter"
 lsl_manager.getTrialCoordinates(2)
+np.array(lsl_manager.coordinates_info[1]["coordinates"])[0,2]
 
 lsl_manager.trialsTimes()
 
