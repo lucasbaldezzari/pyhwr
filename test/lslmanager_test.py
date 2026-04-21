@@ -34,3 +34,33 @@ fig, axes = lsl_manager.plot_all_traces(figsize=(25, 10),
                                         hide_labels=True, hide_spines=True, show=False)
 fig.show()
 del fig, axes
+
+
+import numpy as np
+
+from biosignals.info.info import Info
+from biosignals.signals.raw import RawSignal
+
+data = np.random.randn(3, 1000)
+info = Info(
+ch_names=["C3", "Cz", "C4"],
+ch_types=["eeg", "eeg", "eeg"],
+sfreq=250,
+)
+raw = RawSignal(data=data, info=info)
+out = raw.get_data()
+
+assert out.shape == (3, 1000)
+
+
+data = np.random.randn(3, 1000)
+info = Info(
+ch_names=["C3", "Cz", "C4"],
+ch_types=["eeg", "eeg", "eeg"],
+sfreq=250,
+)
+raw = RawSignal(data=data, info=info)
+raw.drop_channels(["Cz"])
+
+assert raw.info["ch_names"] == ["C3", "C4"]
+assert raw.get_data().shape == (2, 1000)

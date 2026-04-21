@@ -55,9 +55,10 @@ class PreExperimentManager(QObject):
         super().__init__()
 
         self.pre_experiment = pre_experiment.lower()
+        self.basal_actions = ["mira la cruz","cerra los ojos"]
         self.emg_actions = emg_actions or ["cerrar las manos",
-                                           "mover brazos",
-                                           "morder y contraer músculos del cuello"]
+                                           "morder/bruxismo",
+                                           "traga saliba"]
         
         self.eog_actions = ["cruz_arriba","cruz_abajo","cruz_izquierda","cruz_derecha"]
 
@@ -77,7 +78,7 @@ class PreExperimentManager(QObject):
             self.actions = self.eog_actions
 
         elif self.pre_experiment == "basal":
-            self.actions = ["basal"]
+            self.actions = self.basal_actions# ["basal"]
         else:
             raise ValueError(f"Tipo de pre-experimento '{self.pre_experiment}' no reconocido para actualizar estímulos.")
             
@@ -321,11 +322,23 @@ class PreExperimentManager(QObject):
         ## Ronda BASAL
         elif self.pre_experiment == "basal":
 
-            self.stimuli_window.label_orden.setVisible(False)
-            self.stimuli_window.cruz.setVisible(True)
+            if phase == "cue":
+                self.stimuli_window.label_orden.setVisible(True)
+                self.stimuli_window.cruz.setVisible(True)
 
-            self.stimuli_window.current_state = "cruz_centrada"
-            self.stimuli_window.update_positions()
+                self.stimuli_window.update_order(action)
+                self.stimuli_window.current_state = "orden_arriba_cruz_centrada"
+                self.stimuli_window.update_positions()
+
+            else:
+                self.stimuli_window.label_orden.setVisible(False)
+                self.stimuli_window.cruz.setVisible(False)
+
+            # self.stimuli_window.label_orden.setVisible(False)
+            # self.stimuli_window.cruz.setVisible(True)
+
+            # self.stimuli_window.current_state = "cruz_centrada"
+            # self.stimuli_window.update_positions()
 
         else:
             logging.warning(f"Tipo de pre-experimento '{self.pre_experiment}' no reconocido para actualizar estímulos.")
@@ -654,7 +667,7 @@ if __name__ == "__main__":
     n_runs = 1,
     randomize_per_run = True,  # False para siempre el mismo orden o True caso contrario
     seed = None, # fijo el seed para reproducibilidad
-    cue_base_duration = 1.,
+    cue_base_duration = 5.,
     cue_tmin_random = 0.1,
     cue_tmax_random =  0.5,
     randomize_cue_duration = True,

@@ -41,6 +41,10 @@ class StimuliWindow(QMainWindow):
                 self.cruz: (0.95, 0.5),},
             "orden_centrada":{
                 self.label_orden: (0.5, 0.5),},
+            "orden_arriba_cruz_centrada": {
+                self.label_orden: (0.5, 0.44),
+                self.cruz: (0.5, 0.5),
+            },
                     }
         
         self.widgetsDict = {"label_orden": self.label_orden,
