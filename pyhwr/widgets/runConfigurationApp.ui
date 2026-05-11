@@ -207,6 +207,11 @@ Proyecto Handwritting</string>
             </item>
             <item>
              <property name="text">
+              <string>basalpreimaginada</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>imaginada</string>
              </property>
             </item>

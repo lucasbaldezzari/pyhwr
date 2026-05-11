@@ -41,7 +41,7 @@ class PreExperimentManager(QObject):
         
         Parámetros:
         - sessioninfo: Objeto SessionInfo con detalles de la sesión.
-        - pre_experiment: string con el tipo de pre-experimento ("emg", "eog", "basal")
+        - pre_experiment: string con el tipo de pre-experimento ("emg", "eog", "basal", "basalpreimaginada")
         - mainTimerDuration: Intervalo del timer principal en ms.
         - n_runs: Número de runs en la sesión.
         - actions: Lista de acciones para trials. Si es None, se usa una lista por defecto.
@@ -77,7 +77,7 @@ class PreExperimentManager(QObject):
         elif self.pre_experiment == "eog":
             self.actions = self.eog_actions
 
-        elif self.pre_experiment == "basal":
+        elif self.pre_experiment == "basal" or self.pre_experiment == "basalpreimaginada":
             self.actions = self.basal_actions# ["basal"]
         else:
             raise ValueError(f"Tipo de pre-experimento '{self.pre_experiment}' no reconocido para actualizar estímulos.")
@@ -320,7 +320,7 @@ class PreExperimentManager(QObject):
                 self.stimuli_window.update_positions()
 
         ## Ronda BASAL
-        elif self.pre_experiment == "basal":
+        elif self.pre_experiment == "basal" or self.pre_experiment == "basalpreimaginada":
 
             if phase == "cue":
                 self.stimuli_window.label_orden.setVisible(True)
@@ -649,7 +649,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     ### SessionInfo
-    task = "basal"
+    task = "basalpreimaginada"
     bidsf_file = f"sub-01_ses-01_task-{task}_run-01_eeg.bdf"
     session_info = SessionInfo(
     sub = 1,

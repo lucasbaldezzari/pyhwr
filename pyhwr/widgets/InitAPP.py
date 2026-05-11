@@ -70,6 +70,7 @@ class InitAPP(QMainWindow):
                 "Ronda EOG",
                 "Ronda BASAL",
                 "Ronda ENTRENAMIENTO",
+                "Ronda BASALPREIMAGINADA"
             ])
 
         elif experimento == "experimento":
@@ -157,6 +158,7 @@ class InitAPP(QMainWindow):
             "Ronda EOG": "eog",
             "Ronda BASAL": "basal",
             "Ronda ENTRENAMIENTO": "entrenamiento",
+            "Ronda BASALPREIMAGINADA": "basalpreimaginada",
             "Ronda EJECUTADA": "ejecutada",
             "Ronda IMAGINADA": "imaginada"
         }

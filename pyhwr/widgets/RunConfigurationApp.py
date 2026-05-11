@@ -40,6 +40,17 @@ class RunConfigurationApp(QMainWindow):
                 "rest_tmax_random": 1.,
                 "randomize_rest_duration": False,
             },
+            "basalpreimaginada": {
+                "n_runs": 1,
+                "cue_base_duration": 60.,
+                "cue_tmin_random": 0.,
+                "cue_tmax_random": 0.,
+                "randomize_cue_duration": False,
+                "rest_base_duration": 10.,
+                "rest_tmin_random": 0.1,
+                "rest_tmax_random": 1.,
+                "randomize_rest_duration": False,
+            },
             "emg": {
                 "n_runs": 8,
                 "cue_base_duration": 2.,
@@ -211,7 +222,7 @@ class RunConfigurationApp(QMainWindow):
 
         tipo_experimento = self.comboBox_task.currentText()
         match tipo_experimento:
-            case "basal" | "emg" | "eog":
+            case "basal" | "emg" | "eog" | "basalpreimaginada":
                 self.lanzar_preexperiment()
             case "entrenamiento":
                 self.lanzar_experimento_completo()
