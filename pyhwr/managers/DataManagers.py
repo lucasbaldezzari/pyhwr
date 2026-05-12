@@ -1,3 +1,4 @@
+import logging
 import pyxdf
 import h5py
 import json
@@ -170,6 +171,8 @@ class GHiampDataManager():
         for marker_id, new_name in new_names.items():
             if marker_id in self.markers_info:
                 self.markers_info[new_name] = self.markers_info.pop(marker_id)
+            else:
+                logging.warning(f"Al parecer no hay marcador con id {marker_id}. No se puede establecer {new_name}")
 
     def _get_datetime(self):
         """
@@ -397,7 +400,7 @@ class LSLDataManager():
         Función para obtener las coordenadas de un trial específico.
         Retorna un numpy array.
         """
-        #chequeo que el trialID exista en coordinates_info. Sino retorno None
+        #chequeo que el trialID exista en coordinates_info. Sino retorno Nones
         if trialID in self.coordinates_info:
             return np.array(self.coordinates_info[trialID]["coordinates"])
         return None
