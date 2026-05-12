@@ -8,7 +8,15 @@ Este repositorio contiene los script en Python para generar, gestionar y almacen
 
 La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
 
-#### Versión 2.0.2
+## Autor MSc. BALDEZZARI LUCAS
+
+💻 Github: [lucasbaldezzari](https://github.com/lucasbaldezzari)
+
+📄 CVUY: [CV Lucas Baldezzari](https://exportcvuy.anii.org.uy/cv/?ce2da83661958a08b41a1469b83e1d91)
+
+🟦 Linkedin: [Lucas Baldezzari](https://www.linkedin.com/in/lucasbaldezzari)
+
+## Versión 2.0.2
 
 Se implementa:
 
