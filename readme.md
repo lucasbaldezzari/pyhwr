@@ -1,6 +1,6 @@
 # ✍️ Handwriting Project (Python) ✍️
 
-<img align="right" src="neuroialogo.png" alt="Neuro-IA Lab" width="210">
+<img align="right" src="figuras/neuroialogo.png" alt="Neuro-IA Lab" width="210">
 
 Proyecto para estudiar la factibilidad de decodificación del trazo continuo de letras del alfabeto español a partir del electroencefalograma.
 
@@ -8,7 +8,7 @@ Este repositorio contiene los script en Python para generar, gestionar y almacen
 
 La aplicación de la tablet puede encontrarse en [Handwriting Project - Android app](https://github.com/lucasbaldezzari/handwritingrecording)
 
-#### Versión 2.0.1
+#### Versión 2.0.2
 
 Se implementa:
 
@@ -50,3 +50,33 @@ En este proyeco, para poder conectar la PC o Laptop a la tablet es necesario con
 Para instalar *adb* se debe ingresar a la página oficial de Android Developers y descargar la versión adecuada desde [acá](https://developer.android.com/tools/releases/platform-tools). Una vez descargado, descomprimir y agregar la carpeta a las Variables de Entorno de Windows, de esta manera, se podrá ejecutar *adb* desde consola.
 
 NOTA: Podes encontrar la versión utilizada en este proyecto dentro de la carpeta [adb](https://github.com/lucasbaldezzari/pyhwr/tree/main/adb) de este repositorio.
+
+## Demostración aplicación tablet
+
+El gif de abajo muestra la aplicación de la tablet en funcionamiento (más info [acá](https://github.com/neuroialaborg/handwritingrecording)). Los trazos son dibujados por una persona voluntaria y la tablet registra toda la información necesaria para el posterior análisis.
+
+<p align="center">
+  <a href="figuras/demo_gif.gif">
+    <img src="figuras/demo_gif.gif" width="640">
+  </a>
+</p>
+
+### Trazos registrados
+
+Debajo pueden verse los trazos registrados para una de las rondas de experimento sobre una persona voluntaria.
+
+Trazo de una sóla letra:
+
+<p align="center">
+  <a href="figuras/a.png">
+    <img src="figuras/a.png" width="640">
+  </a>
+</p>
+
+Trazos de todas las letras para una ronda ejecutada.
+
+<p align="center">
+  <a href="figuras/all_traces.png">
+    <img src="figuras/all_traces.png" width="640">
+  </a>
+</p>
