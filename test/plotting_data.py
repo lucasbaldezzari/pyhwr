@@ -3,9 +3,9 @@ import numpy as np
 from pyhwr.managers import GHiampDataManager, LSLDataManager
 import mne
 
-path = "D:\\repos\\pyhwr\\test\\data\\pruebas_piloto\\emgeog"
-gtec_filename = "sub-emgeogtrazos_ses-01_task-ejecutada_run-03_emgeog.hdf5"
-lsl_filename = "sub-emgeogtrazos_ses-01_task-ejecutada_run-03_emgeog.xdf"
+path = "D:\\dataset\\s1"
+gtec_filename = "sub-01_ses-01_task-ejecutada_run-01_eeg.hdf5"
+lsl_filename = "sub-01_ses-01_task-ejecutada_run-01_eeg.xdf"
 
 gmanager = GHiampDataManager(os.path.join(path, gtec_filename), normalize_time=True)
 lsl_manager = LSLDataManager(os.path.join(path, lsl_filename))
@@ -55,4 +55,4 @@ raw_signal.set_channel_types(channels_types)
 raw_signal.get_channel_types()
 raw_signal.filter(l_freq=5.0, h_freq=30, fir_design='firwin')
 raw_signal.notch_filter([50])
-raw_signal.plot(scalings=200, duration = 50, start = 242)
+raw_signal.plot(scalings=30, duration = 50, start = 242)

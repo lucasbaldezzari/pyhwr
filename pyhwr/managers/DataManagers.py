@@ -261,11 +261,13 @@ class LSLDataManager():
     """
     Clase para gestionar los datos registrados desde LSL.
     """
-    def __init__(self, filename):
+    def __init__(self, filename, tablet_name = "Tablet_Markers", laptop_name = "Laptop_Markers"):
         """
         filename: str.  Ruta al archivo .xdf con los datos."""
         ##agregar chequeos de que hay al menos un trial con datos por streamer sino arrojar error.
         self.filename = filename
+        self.tab_name = tablet_name
+        self.lap_name = laptop_name
         self.raw_data, self.header = self._read_data(self.filename)
         self.streamers_names = self._get_streamers_names()
         self.streamers_keys = self._get_streamers_keys()
@@ -315,14 +317,24 @@ class LSLDataManager():
     
     def _get_streamers_keys(self):
         """
-        Función para obtener las keys de los streams registrados.
+        Obtiene las keys registradas en cada streamer.
         """
         streamers_keys = {}
+
         for data in self.raw_data:
             streamer_name = data["info"]["name"][0]
+
+            if len(data["time_series"]) == 0:
+                streamers_keys[streamer_name] = []
+                continue
+
             time_series_temp = data["time_series"][0][0]
-            data = self._parse_trial_message(time_series_temp).keys()
-            streamers_keys[streamer_name] = list(data)
+            parsed = self._parse_trial_message(time_series_temp)
+
+            if isinstance(parsed, dict):
+                streamers_keys[streamer_name] = list(parsed.keys())
+            else:
+                streamers_keys[streamer_name] = []
 
         return streamers_keys
     
@@ -367,16 +379,54 @@ class LSLDataManager():
 
         return trials_time_dic
 
+    def has_stream(self, streamer_name: str) -> bool:
+        """
+        Indica si un streamer existe en el archivo XDF.
+        """
+        return streamer_name in self.time_series
+    
+    @property
+    def has_tablet_stream(self) -> bool:
+        """
+        Indica si existe el streamer de la tablet.
+        """
+        return self.has_stream(self.tab_name)
+
+
+    @property
+    def has_laptop_stream(self) -> bool:
+        """
+        Indica si existe el streamer de la laptop.
+        """
+        return self.has_stream(self.lap_name)
+
+
+    def _get_trials_from_streamer(self, streamer_name: str) -> dict:
+        """
+        Retorna los trials de un streamer si existen.
+        Si el streamer no existe, retorna un diccionario vacío.
+        """
+        return self.trials_info.get(streamer_name, {})
+
     def get_coordinates_info(self):
         """
         Función para obtener las coordenadas de los trazos registrados. Se retorna un diccionario
         donde cada key es el trialID y los valores son otro diccionario con, letra, lista de ternas (x,y,t) donde t
         es el tiempo relativo al inicio del trazo (primer timestamp de la primera coordenada).
         """
-        ##creo el dataframe con las columnas letra, x, y, t
+
         coordinates_info = {}
+        
+        if not self.has_tablet_stream:
+            logging.warning(
+                f"No se encontró el streamer '{self.tab_name}'. "
+                "No se computará información de coordenadas."
+            )
+            return coordinates_info
+        
         ##recorro cada trial registrado en el streamer Tablet_Markers de self.time_series
-        for trial in self.time_series["Tablet_Markers"]:
+
+        for trial in self.time_series[self.tab_name]:
             coordinates_trial = np.array(trial["coordinates"])
             letter_trial = trial["letter"]
             if len(coordinates_trial) > 0:
@@ -394,16 +444,31 @@ class LSLDataManager():
                     }
 
         return coordinates_info
-    
+
     def getTrialCoordinates(self, trialID):
         """
-        Función para obtener las coordenadas de un trial específico.
-        Retorna un numpy array.
+        Obtiene las coordenadas de un trial específico.
+
+        Retorna
+        -------
+        np.ndarray | None
+            Retorna un array si hay coordenadas.
+            Retorna None si no hay tablet, no existe el trial o no hay coordenadas.
         """
-        #chequeo que el trialID exista en coordinates_info. Sino retorno Nones
-        if trialID in self.coordinates_info:
-            return np.array(self.coordinates_info[trialID]["coordinates"])
-        return None
+        if not self.coordinates_info:
+            return None
+
+        trial_info = self.coordinates_info.get(trialID, None)
+
+        if trial_info is None:
+            return None
+
+        coordinates = trial_info.get("coordinates", None)
+
+        if coordinates is None:
+            return None
+
+        return np.array(coordinates)
 
     def _get_datetime(self):
         """
@@ -432,12 +497,21 @@ class LSLDataManager():
     
     def _get_first_run_timestamp(self):
         """
-        Función para obtener el timestamp del inicio de la primera ronda registrada en el archivo xdf.
-        Se asume que el primer trial registrado en Tablet_Markers es el inicio de la primera ronda.
+        Obtiene el timestamp de inicio de la primera ronda para cada streamer.
+        Si un streamer no tiene trials válidos, retorna None para ese streamer.
         """
         dic = {}
+
         for name in self.streamers_names:
-            dic[name] = self.trials_info[name][1]["sessionStartTime"]
+            trials = self.trials_info.get(name, {})
+
+            if not trials:
+                dic[name] = None
+                continue
+
+            first_key = list(trials.keys())[0]
+            dic[name] = trials[first_key].get("sessionStartTime", None)
+
         return dic
 
     def _get_trials_info(self):
@@ -460,18 +534,12 @@ class LSLDataManager():
             
         return trials_info
     
-    def describe_trials(self):
+    def _describe_one_streamer(self, streamer_name: str) -> dict:
         """
-        Función para obtener:
-        - Cantidad de trials
-        - Tiempo total de la ronda
-        - Tiempo promedio entre trials + desvío
-        - Tiempo promedio entre cues + desvío
-        - Letras mostradas a la persona
-        - Tiempo promedio desde el inicio del cue al primer pendown registrado + desvío
+        Calcula estadísticas básicas para un streamer.
+        Si el streamer no existe o no tiene trials, retorna valores None.
         """
-        ## Describe los trials registrados en el archivo LSL, incluyendo tiempos, letras mostradas, etc.
-        tablet_dict = {
+        empty_dict = {
             "duration": None,
             "trials": None,
             "trials_avg_time": None,
@@ -481,69 +549,80 @@ class LSLDataManager():
             "letters": None,
         }
 
-        laptop_dict = {
-            "duration": None,
-            "trials": None,
-            "trials_avg_time": None,
-            "trials_time_std": None,
-            "cues_avg_time": None,
-            "cues_time_std": None,
-            "letters": None
+        trials_info = self._get_trials_from_streamer(streamer_name)
+
+        if not trials_info:
+            return empty_dict
+
+        keys = list(trials_info.keys())
+        first_key = keys[0]
+        last_key = keys[-1]
+
+        first_trial = trials_info[first_key]
+        last_trial = trials_info[last_key]
+
+        session_start = first_trial.get("sessionStartTime", None)
+        session_final = last_trial.get("sessionFinalTime", None)
+
+        out = empty_dict.copy()
+
+        if session_start is not None and session_final is not None:
+            out["duration"] = round(float((session_final - session_start) / 1000), 2)
+
+        out["trials"] = len(trials_info)
+
+        trial_times = [
+            trial.get("trialStartTime", None)
+            for trial in trials_info.values()
+            if trial.get("trialStartTime", None) is not None
+        ]
+
+        if len(trial_times) >= 2:
+            trial_times_diff = np.abs(np.diff(trial_times))
+            out["trials_avg_time"] = round(float(np.mean(trial_times_diff) / 1000), 2)
+            out["trials_time_std"] = round(float(np.std(trial_times_diff) / 1000), 2)
+
+        cue_times = []
+        rest_times = []
+
+        for trial in trials_info.values():
+            cue = trial.get("trialCueTime", None)
+            rest = trial.get("trialRestTime", None)
+
+            if cue is not None and rest is not None:
+                cue_times.append(cue)
+                rest_times.append(rest)
+
+        if len(cue_times) > 0:
+            cue_durations = np.abs(np.array(rest_times) - np.array(cue_times))
+            out["cues_avg_time"] = round(float(np.mean(cue_durations) / 1000), 2)
+            out["cues_time_std"] = round(float(np.std(cue_durations) / 1000), 2)
+
+        letters = [
+            trial.get("letter", None)
+            for trial in trials_info.values()
+            if trial.get("letter", None) is not None
+        ]
+
+        if letters:
+            out["letters"] = sorted(list(set(letters)))
+
+        return out
+    
+    def describe_trials(self):
+        """
+        Describe los trials registrados en los streamers disponibles.
+
+        Si no existe Tablet_Markers, sus valores quedan en None.
+        Si no existe Laptop_Markers, sus valores quedan en None.
+        """
+        final_dict = {
+            self.tab_name: self._describe_one_streamer(self.tab_name),
+            self.lap_name: self._describe_one_streamer(self.lap_name)
         }
 
-        trials_info = self._get_trials_info()
-
-        tablet_trials_info = trials_info["Tablet_Markers"]
-        laptop_trials_info = trials_info["Laptop_Markers"]
-
-        fkt = list(tablet_trials_info.keys())[0] #first key tablet
-        fkl = list(laptop_trials_info.keys())[0] #first key laptop
-        lkt = list(tablet_trials_info.keys())[-1] #last key tablet
-        lkl = list(laptop_trials_info.keys())[-1] #last key laptop
-
-        ##duraciones de ronda por cada dispositivo
-        tablet_duration = tablet_trials_info[lkt]["sessionFinalTime"] - tablet_trials_info[fkt]["sessionStartTime"]
-        laptop_duration = laptop_trials_info[lkl]["sessionFinalTime"] - laptop_trials_info[fkl]["sessionStartTime"]
-        tablet_dict["duration"] = round(float(tablet_duration/1000),2) #paso a segundos
-        laptop_dict["duration"] = round(float(laptop_duration/1000),2) #paso a segundos
-
-        #cantidad de trials
-        tablet_dict["trials"] = len(tablet_trials_info)
-        laptop_dict["trials"] = len(laptop_trials_info)
-
-        ##tiempos entre trials
-        tablet_trial_times = [trial["trialStartTime"] for trial in tablet_trials_info.values()]
-        laptop_trial_times = [trial["trialStartTime"] for trial in laptop_trials_info.values()]
-        tablet_trial_times_diff = np.abs(np.diff(tablet_trial_times))
-        laptop_trial_times_diff = np.abs(np.diff(laptop_trial_times))
-        tablet_dict["trials_avg_time"] = round(float(np.mean(tablet_trial_times_diff) / 1000), 2)
-        tablet_dict["trials_time_std"] = round(float(np.std(tablet_trial_times_diff) / 1000), 2)
-        laptop_dict["trials_avg_time"] = round(float(np.mean(laptop_trial_times_diff) / 1000), 2)
-        laptop_dict["trials_time_std"] = round(float(np.std(laptop_trial_times_diff) / 1000), 2)
-
-        ##tiempos entre cues. Es la diferencia entre trialRestTime y trialCueTime
-        tablet_cue_times = [trial["trialCueTime"] for trial in tablet_trials_info.values()]
-        laptop_cue_times = [trial["trialCueTime"] for trial in laptop_trials_info.values()]
-        tablet_resttime = [trial["trialRestTime"] for trial in tablet_trials_info.values()]
-        laptop_resttime = [trial["trialRestTime"] for trial in laptop_trials_info.values()]
-        #calculo las diferencias entre trialRestTime y trialCueTime para cada trial
-        tablet_cue_durations = np.abs(np.array(tablet_resttime) - np.array(tablet_cue_times))
-        laptop_cue_durations = np.abs(np.array(laptop_resttime) - np.array(laptop_cue_times))
-        tablet_dict["cues_avg_time"] = round(float(np.mean(tablet_cue_durations) / 1000), 2)
-        tablet_dict["cues_time_std"] = round(float(np.std(tablet_cue_durations) / 1000), 2)
-        laptop_dict["cues_avg_time"] = round(float(np.mean(laptop_cue_durations) / 1000), 2)
-        laptop_dict["cues_time_std"] = round(float(np.std(laptop_cue_durations) / 1000), 2)
-
-        ##letras mostradas
-        tablet_dict["letters"] = list(set([trial["letter"] for trial in tablet_trials_info.values()]))
-        tablet_dict["letters"].sort()
-        laptop_dict["letters"] = list(set([trial["letter"] for trial in laptop_trials_info.values()]))
-        laptop_dict["letters"].sort()       
-
-        final_dict = {"Tablet_Markers":tablet_dict, "Laptop_Markers":laptop_dict}
-        #convierto a DataFrame para mostrarlo mejor en el reporte. Cada fila es un dispositivo.
         return pd.DataFrame(final_dict)
-    
+        
     def get_pendownDelays(self):
         """
         Retorna un diccionario con los keys seindo los trialID y cada valor es otro diccionario con
@@ -553,7 +632,17 @@ class LSLDataManager():
         Si no hay penDown registrado para un trial, se aigna un valor de None para ese trialID.
         """
         delays = {}
-        for trial in self.trials_info["Tablet_Markers"].values():
+
+        tablet_trials = self._get_trials_from_streamer(self.tab_name)
+
+        if not tablet_trials:
+            logging.warning(
+                f"No hay trials para '{self.tab_name}'. "
+                "No se computarán delays de penDown."
+            )
+            return delays
+
+        for trial in tablet_trials.values():
             pendownmarker = trial["penDownMarkers"]
             if len(pendownmarker) > 0: #hubo un evento de penDown registrado
                 penDownTime = pendownmarker[0] #tiempo del primer penDown registrado
@@ -575,16 +664,26 @@ class LSLDataManager():
     
     def penDown_delays_resume(self):
         """
-        Retorna un dataframe con datos estadísticos del delay de trazos
+        Retorna un dataframe con estadísticos del delay de penDown.
+        Si no hay datos de tablet, retorna un DataFrame vacío.
         """
+        columns = ["letter", "mean", "std", "max", "min", "count"]
+
+        if not self.pendown_delays:
+            return pd.DataFrame(columns=columns)
+
         df = pd.DataFrame.from_dict(self.pendown_delays, orient="index")
+
+        if df.empty or "letter" not in df.columns or "delay" not in df.columns:
+            return pd.DataFrame(columns=columns)
+
         stats_df = (
             df.groupby("letter")["delay"].agg(
-                mean = "mean",
-                std = "std",
-                max = "max",
-                min = "min",
-                count = "count"
+                mean="mean",
+                std="std",
+                max="max",
+                min="min",
+                count="count"
             ).reset_index().sort_values("letter")
         )
 
@@ -598,7 +697,17 @@ class LSLDataManager():
         tablet.
         """
         durations = {}
-        for trial in self.trials_info["Tablet_Markers"].values():
+
+        tablet_trials = self._get_trials_from_streamer(self.tab_name)
+
+        if not tablet_trials:
+            logging.warning(
+                f"No hay trials para '{self.tab_name}'. "
+                "No se computarán duraciones de trazos."
+            )
+            return durations
+        
+        for trial in tablet_trials.values():
             traces = np.array(trial["coordinates"])
             if len(traces) > 0: #se registró al menos un punto de trazado
                 first_point = traces[0,2] #tiempo del último penDown registrado
@@ -618,73 +727,125 @@ class LSLDataManager():
         return durations
     
     def tracesDuration_resume(self):
-            """
-            Retorna un dataframe con estadísticos de la duración de los trazos
-            """
-            df = pd.DataFrame.from_dict(self.traces_duration, orient="index")
-            stats_df = (
-                df.groupby("letter")["duration"].agg(
-                    mean = "mean",
-                    std = "std",
-                    max = "max",
-                    min = "min",
-                    count = "count"
-                ).reset_index().sort_values("letter")
-            )
-            
-            return stats_df
+        """
+        Retorna un dataframe con estadísticos de duración de trazos.
+        Si no hay datos de tablet, retorna un DataFrame vacío.
+        """
+        columns = ["letter", "mean", "std", "max", "min", "count"]
+
+        if not self.traces_duration:
+            return pd.DataFrame(columns=columns)
+
+        df = pd.DataFrame.from_dict(self.traces_duration, orient="index")
+
+        if df.empty or "letter" not in df.columns or "duration" not in df.columns:
+            return pd.DataFrame(columns=columns)
+
+        stats_df = (
+            df.groupby("letter")["duration"].agg(
+                mean="mean",
+                std="std",
+                max="max",
+                min="min",
+                count="count"
+            ).reset_index().sort_values("letter")
+        )
+
+        return stats_df
     
     def infoTrial(self, trialID):
         """
-        Función para obtener toda la información de un trial específico a partir de su ID.
-        Retorna un diccionario con la información del trial (sólo se considera la info dentro de la tablet).
+        Obtiene la información de un trial específico usando datos de la tablet.
+
+        Retorna
+        -------
+        dict | None
+            Retorna un diccionario si existe información de tablet para ese trial.
+            Retorna None si no hay tablet o si el trial no existe.
         """
+        if not self.has_tablet_stream:
+            return None
+
+        tablet_trials = self._get_trials_from_streamer(self.tab_name)
+        info_trial = tablet_trials.get(trialID, None)
+
+        if info_trial is None:
+            return None
+
+        first_timestamp = self.first_timestamp.get(self.tab_name, None)
+
         info_dict = {
-            "letter": None,
+            "letter": info_trial.get("letter", None),
             "trialStartTime": None,
             "trialCueTime": None,
             "trialRestTime": None,
             "pendowns": None,
             "penups": None,
-            "writting_duration": None,
+            "writing_duration": None,
             "pendown_delay": None
         }
-        info_trial = self.trials_info["Tablet_Markers"].get(trialID, None)
-        if info_trial is not None:
-            info_dict["letter"] = info_trial.get("letter", None)
-            info_dict["trialStartTime"] = (info_trial.get("trialStartTime", None) - self.first_timestamp["Tablet_Markers"])/1000
-            info_dict["trialCueTime"] = (info_trial.get("trialCueTime", None) - self.first_timestamp["Tablet_Markers"])/1000
-            info_dict["trialRestTime"] = (info_trial.get("trialRestTime", None) - self.first_timestamp["Tablet_Markers"])/1000
-            info_dict["pendowns"] = [(t - self.first_timestamp["Tablet_Markers"])/1000 for t in info_trial.get("penDownMarkers", [])]
-            info_dict["penups"] = [(t - self.first_timestamp["Tablet_Markers"])/1000 for t in info_trial.get("penUpMarkers", [])]
-            info_dict["writing_duration"] = self.getTrialCoordinates(trialID)[-1,2]/1000
 
-            # if info_dict["pendowns"] and info_dict["penups"]:
-            #     # Calculo duración de escritura como la diferencia entre el primer penUp y el primer penDown
-            #     writing_duration = (info_dict["penups"][0] - info_dict["pendowns"][0]) / 1000  # en segundos
+        if first_timestamp is not None:
+            trial_start = info_trial.get("trialStartTime", None)
+            trial_cue = info_trial.get("trialCueTime", None)
+            trial_rest = info_trial.get("trialRestTime", None)
 
-            coordinates = self.getTrialCoordinates(trialID)
-            if coordinates is not None and len(coordinates) > 0:
-                # Calculo duración de escritura como la diferencia entre el último y el primer timestamp de las coordenadas
-                writing_duration = coordinates[-1, 2] / 1000  # en segundos
-            info_dict["writing_duration"] = round(float(writing_duration), 3) if writing_duration is not None else None
+            if trial_start is not None:
+                info_dict["trialStartTime"] = (trial_start - first_timestamp) / 1000
 
-            info_dict["pendown_delay"] = self.pendown_delays.get(trialID, {}).get("delay", None)
+            if trial_cue is not None:
+                info_dict["trialCueTime"] = (trial_cue - first_timestamp) / 1000
 
-            return info_dict
+            if trial_rest is not None:
+                info_dict["trialRestTime"] = (trial_rest - first_timestamp) / 1000
 
-        return None
+            info_dict["pendowns"] = [
+                (t - first_timestamp) / 1000
+                for t in info_trial.get("penDownMarkers", [])
+            ]
+
+            info_dict["penups"] = [
+                (t - first_timestamp) / 1000
+                for t in info_trial.get("penUpMarkers", [])
+            ]
+
+        coordinates = self.getTrialCoordinates(trialID)
+
+        if coordinates is not None and len(coordinates) > 0:
+            writing_duration = coordinates[-1, 2] / 1000
+            info_dict["writing_duration"] = round(float(writing_duration), 3)
+
+        info_dict["pendown_delay"] = self.pendown_delays.get(
+            trialID, {}
+        ).get("delay", None)
+
+        return info_dict
     
     def lettersTrials(self, letter):
-        """Retorna una lista con los trialID correspondiente a la letra solicitada."""
+        """
+        Retorna los trialID asociados a una letra para laptop y tablet.
+
+        Retorna
+        -------
+        tuple[list, list]
+            (trials_ids_laptop, trials_ids_tablet)
+
+            Si no hay tablet, trials_ids_tablet será [].
+        """
         trial_ids_tablet = []
         trials_ids_laptop = []
-        for trialID, info in self.trials_info["Laptop_Markers"].items():
-            if info["letter"] == letter:
+
+        laptop_trials = self._get_trials_from_streamer(self.lap_name)
+        tablet_trials = self._get_trials_from_streamer(self.tab_name)
+
+        for trialID, info in laptop_trials.items():
+            if info.get("letter", None) == letter:
                 trials_ids_laptop.append(trialID)
-        for trialID, info in self.trials_info["Tablet_Markers"].items():
-            if info["letter"] == letter:
+
+        for trialID, info in tablet_trials.items():
+            if info.get("letter", None) == letter:
                 trial_ids_tablet.append(trialID)
+
         return trials_ids_laptop, trial_ids_tablet
     
     def is_none_like(self, coordinates):
@@ -762,6 +923,13 @@ class LSLDataManager():
         Se organiza en una grilla donde las columnas son las letras y las filas son los trials de cada letra.
         Si no se especifica el tamaño de la grilla, se calcula automáticamente en función de la cantidad de letras y trials.
         """
+        if not self.coordinates_info:
+            logging.warning(
+                f"No hay coordenadas disponibles para graficar. "
+                f"Probablemente no existe el streamer '{self.tab_name}'."
+            )
+            return None, None
+        
         trials_by_letter = defaultdict(list)
         for trialID in self.coordinates_info.keys():
             letra = self.coordinates_info[trialID]["letter"]

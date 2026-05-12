@@ -28,7 +28,7 @@ lsl_manager.infoTrial(20)
 fig, axes = lsl_manager.plot_traces(80,line_color = "#12259d", show=False)
 fig.show()
 # del fig, axes
-fig, axes = lsl_manager.plot_all_traces(figsize=(25, 10),
+fig, axes = lsl_manager.plot_all_traces(figsize=(25, 10),                                        
                                         line_color = "#12259d", point_color="#ffffff", point_size=5,
                                         hide_title=True, hide_axes=True, hide_ticks=True,
                                         hide_labels=True, hide_spines=True, show=False)
