@@ -88,3 +88,9 @@ Trazos de todas las letras para una ronda ejecutada.
     <img src="figuras/all_traces.png" width="640">
   </a>
 </p>
+
+## Instalación en formato editable
+
+Clonar el repositorio, luego ejecutar
+
+> pip install -e . --config-settings editable_mode=compat
