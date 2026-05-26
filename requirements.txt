@@ -1,7 +1,9 @@
-numpy
-matplotlib
-pandas
-pylsl
-PyQt5
-pyxdf
-keyboard
+numpy>=1.24
+matplotlib>=3.7
+pandas>=2.0
+pylsl>=1.16
+PyQt5>=5.15
+keyboard>=0.13
+pyxdf>=1.17.0
+h5py>=3.10
+jinja2>=3.1

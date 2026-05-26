@@ -16,7 +16,7 @@ La aplicación de la tablet puede encontrarse en [Handwriting Project - Android 
 
 🟦 Linkedin: [Lucas Baldezzari](https://www.linkedin.com/in/lucasbaldezzari)
 
-## Versión 2.0.2
+## Versión 2.1.0
 
 Se implementa:
 
