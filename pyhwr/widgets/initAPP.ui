@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -184,120 +184,105 @@ Proyecto Handwritting</string>
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter">
+      <item>
        <widget class="QLineEdit" name="input_sub">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>20</height>
-         </size>
         </property>
         <property name="font">
          <font>
           <pointsize>11</pointsize>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter</set>
         </property>
         <property name="placeholderText">
          <string>Número de sujeto (sub)</string>
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter">
+      <item>
        <widget class="QLineEdit" name="input_ses">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>20</height>
-         </size>
         </property>
         <property name="font">
          <font>
           <pointsize>11</pointsize>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter</set>
         </property>
         <property name="placeholderText">
          <string>Número de sesión (ses)</string>
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter">
+      <item>
        <widget class="QLineEdit" name="input_task">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>20</height>
-         </size>
         </property>
         <property name="font">
          <font>
           <pointsize>11</pointsize>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter</set>
         </property>
         <property name="placeholderText">
          <string>Tarea (task)</string>
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter">
+      <item>
        <widget class="QLineEdit" name="input_run">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>20</height>
-         </size>
         </property>
         <property name="font">
          <font>
           <pointsize>11</pointsize>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter</set>
         </property>
         <property name="placeholderText">
          <string>Número de Ronda (run)</string>
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter">
+      <item>
        <widget class="QLineEdit" name="input_suffix">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>20</height>
-         </size>
         </property>
         <property name="font">
          <font>
           <pointsize>11</pointsize>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter</set>
         </property>
         <property name="placeholderText">
          <string>Tipo de señal (suffix)</string>
@@ -345,7 +330,7 @@ Proyecto Handwritting</string>
         <item>
          <widget class="QLabel" name="root_folder_label">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -367,16 +352,10 @@ Proyecto Handwritting</string>
         <item>
          <widget class="QLineEdit" name="input_rootfolder">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>350</width>
-            <height>20</height>
-           </size>
           </property>
           <property name="font">
            <font>
@@ -413,7 +392,7 @@ Proyecto Handwritting</string>
         <item>
          <widget class="QCheckBox" name="crearBIDSCheck">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -457,7 +436,7 @@ Proyecto Handwritting</string>
         <item>
          <widget class="QPushButton" name="btn_continue">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -488,7 +467,7 @@ Proyecto Handwritting</string>
         <item>
          <widget class="QPushButton" name="btn_reset">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>

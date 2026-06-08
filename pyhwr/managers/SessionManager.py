@@ -15,7 +15,7 @@ class SessionManager(QWidget):
     PHASES = {
         "first_jump": {"next": "start", "duration": 5.},
         "start": {"next": "precue", "duration": 2.0},
-        "precue": {"next": "cue", "duration": 1.0},
+        "precue": {"next": "cue", "duration": 1.5},
         "cue": {"next": "rest", "duration": 5.0},
         "fadeoff": {"next": "rest", "duration": 1.0},
         "rest": {"next": "trialInfo", "duration": 1.},
@@ -30,6 +30,11 @@ class SessionManager(QWidget):
                  letters=None,
                  randomize_per_run=True,
                  seed=None,
+                 start_base_duration=2.0,
+                 start_tmin_random=0.5,
+                 start_tmax_random=1.0,
+                 randomize_start_duration=False,
+                 precue_base_duration=1.5,
                  cue_base_duration=4.5,
                  cue_tmin_random=1.0,
                  cue_tmax_random=2.0,
@@ -38,6 +43,9 @@ class SessionManager(QWidget):
                  rest_tmax_random = 1.0,
                  randomize_cue_duration=True,
                  randomize_rest_duration=True,
+                 precue_tmin_random=0.1,
+                 precue_tmax_random=0.5,
+                 randomize_precue_duration=False,
                  tabletID = "R52Y50AG4FF"):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
@@ -84,6 +92,7 @@ class SessionManager(QWidget):
         self.rng = np.random.default_rng(seed) # para reproducibilidad
         self.run_orders = [self._make_run_order() for _ in range(self.n_runs)]
 
+        self.precue_base_duration = precue_base_duration
         self.cue_base_duration = cue_base_duration
         self.cue_tmin_random = cue_tmin_random
         self.cue_tmax_random = cue_tmax_random
@@ -91,6 +100,25 @@ class SessionManager(QWidget):
         self.rest_tmin_random = rest_tmin_random
         self.rest_tmax_random = rest_tmax_random
         self.randomize_cue_duration = randomize_cue_duration
+
+        self.start_base_duration = start_base_duration
+        self.start_tmin_random = start_tmin_random
+        self.start_tmax_random = start_tmax_random
+        self.randomize_start_duration = randomize_start_duration
+
+        if self.randomize_start_duration:
+            self._set_random_start_duration()
+        else:
+            self.phases["start"]["duration"] = self.start_base_duration
+
+        self.precue_tmin_random = precue_tmin_random
+        self.precue_tmax_random = precue_tmax_random
+        self.randomize_precue_duration = randomize_precue_duration
+
+        if self.randomize_precue_duration:
+            self._set_random_precue_duration()
+        else:
+            self.phases["precue"]["duration"] = self.precue_base_duration
 
         if self.randomize_cue_duration:
             self._set_random_cue_duration()
@@ -193,6 +221,22 @@ class SessionManager(QWidget):
         self.current_letter = self.run_orders[self.current_run][self.current_trial]
         return True
     
+    def _set_random_start_duration(self):
+        """Asigna una duración aleatoria entre un tmin y tmax segundos al start."""
+        if self.start_tmin_random < 0 or self.start_tmax_random < 0 or self.start_tmin_random >= self.start_tmax_random:
+            raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del start.")
+        extra = self.rng.uniform(self.start_tmin_random, self.start_tmax_random)
+        self.phases["start"]["duration"] = self.start_base_duration + extra
+        logging.info(f"Nueva duración del START: {self.phases['start']['duration']:.2f} s")
+
+    def _set_random_precue_duration(self):
+        """Asigna una duración aleatoria entre un tmin y tmax segundos al precue."""
+        if self.precue_tmin_random < 0 or self.precue_tmax_random < 0 or self.precue_tmin_random >= self.precue_tmax_random:
+            raise ValueError("Parámetros tmin y tmax inválidos para duración aleatoria del precue.")
+        extra = self.rng.uniform(self.precue_tmin_random, self.precue_tmax_random)
+        self.phases["precue"]["duration"] = self.precue_base_duration + extra
+        logging.info(f"Nueva duración del PRECUE: {self.phases['precue']['duration']:.2f} s")
+
     def _set_random_cue_duration(self):
         """Asigna una duración aleatoria entre un tmin y tmax segundos al cue."""
         #chequeo que tmin y tmax sean válidos
@@ -244,6 +288,10 @@ class SessionManager(QWidget):
         if self.session_finished:
             return
         logging.info(f"Fase actual: {self.in_phase}")
+        if self.randomize_start_duration and self.in_phase == "start":
+            self._set_random_start_duration()
+        if self.randomize_precue_duration and self.in_phase == "precue":
+            self._set_random_precue_duration()
         if self.randomize_cue_duration and self.in_phase == "cue":
             self._set_random_cue_duration()
         if self.randomize_rest_duration and self.in_phase == "rest":

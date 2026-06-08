@@ -3,7 +3,7 @@ from pyhwr.managers import LSLDataManager
 import numpy as np
 
 path = "D:\\dataset\\s1"
-lsl_filename = "sub-01_ses-01_task-ejecutada_run-01_eeg.xdf"
+lsl_filename = "sub-01_ses-01_task-ejecutada_run-05_eeg.xdf"
 
 lsl_manager = LSLDataManager(os.path.join(path, lsl_filename))
 

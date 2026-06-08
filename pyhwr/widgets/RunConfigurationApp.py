@@ -31,6 +31,14 @@ class RunConfigurationApp(QMainWindow):
         self.experimento_defaults = {
             "basal": {
                 "n_runs": 1,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 60.,
                 "cue_tmin_random": 0.,
                 "cue_tmax_random": 0.,
@@ -42,6 +50,14 @@ class RunConfigurationApp(QMainWindow):
             },
             "basalpreimaginada": {
                 "n_runs": 1,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 60.,
                 "cue_tmin_random": 0.,
                 "cue_tmax_random": 0.,
@@ -53,6 +69,14 @@ class RunConfigurationApp(QMainWindow):
             },
             "emg": {
                 "n_runs": 8,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 2.,
                 "cue_tmin_random": 0.1,
                 "cue_tmax_random": 0.5,
@@ -65,6 +89,14 @@ class RunConfigurationApp(QMainWindow):
             },
             "eog": {
                 "n_runs": 10,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 1.,
                 "cue_tmin_random": 0.1,
                 "cue_tmax_random": 0.5,
@@ -77,8 +109,16 @@ class RunConfigurationApp(QMainWindow):
             },
             "entrenamiento": {
                 "n_runs": 1,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 3.5,
-                "cue_tmin_random": 1.3,
+                "cue_tmin_random": 1.5,
                 "cue_tmax_random": 1.8,
                 "randomize_cue_duration": True,
                 "rest_base_duration": 1.,
@@ -89,8 +129,16 @@ class RunConfigurationApp(QMainWindow):
             },
             "ejecutada": {
                 "n_runs": 8,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 3.5,
-                "cue_tmin_random": 1.3,
+                "cue_tmin_random": 1.5,
                 "cue_tmax_random": 1.8,
                 "randomize_cue_duration": True,
                 "rest_base_duration": 1.,
@@ -101,6 +149,14 @@ class RunConfigurationApp(QMainWindow):
             },
             "imaginada": {
                 "n_runs": 8,
+                "start_base_duration": 2.0,
+                "start_tmin_random": 0.5,
+                "start_tmax_random": 1.0,
+                "randomize_start_duration": False,
+                "precue_base_duration":1.5,
+                "precue_tmin_random": 0.1,
+                "precue_tmax_random": 0.5,
+                "randomize_precue_duration": False,
                 "cue_base_duration": 3.5,
                 "cue_tmin_random": 1.3,
                 "cue_tmax_random": 1.8,
@@ -120,12 +176,16 @@ class RunConfigurationApp(QMainWindow):
     
         # Conexiones checkbox → lógica de habilitación
         self.forzar_ronda_box.stateChanged.connect(self.toggle_task_combo)
+        self.randomize_start_duration.stateChanged.connect(self.toggle_start_random)
+        self.randomize_precue_duration.stateChanged.connect(self.toggle_precue_random)
         self.randomize_cue_duration.stateChanged.connect(self.toggle_cue_random)
         self.randomize_rest_duration.stateChanged.connect(self.toggle_rest_random)
         self.semilla_box.stateChanged.connect(self.toggle_semilla)
 
         # Inicializar estados al arrancar
         self.toggle_task_combo()
+        self.toggle_start_random()
+        self.toggle_precue_random()
         self.toggle_cue_random()
         self.toggle_rest_random()
         self.toggle_semilla()
@@ -156,6 +216,16 @@ class RunConfigurationApp(QMainWindow):
         if enabled:
             self.update_tipo_ronda_label()
         self.comboBox_task.setEnabled(enabled)
+
+    def toggle_start_random(self):
+        enabled = self.randomize_start_duration.isChecked()
+        self.in_start_tmin_random.setEnabled(enabled)
+        self.in_start_tmax_random.setEnabled(enabled)
+
+    def toggle_precue_random(self):
+        enabled = self.randomize_precue_duration.isChecked()
+        self.in_precue_tmin_random.setEnabled(enabled)
+        self.in_precue_tmax_random.setEnabled(enabled)
 
     def toggle_cue_random(self):
         enabled = self.randomize_cue_duration.isChecked()
@@ -204,6 +274,14 @@ class RunConfigurationApp(QMainWindow):
         experimento = self.tipo_ronda_label.text().lower()
         defaults = self.experimento_defaults.get(experimento, {})
         self.in_nruns.setText(str(defaults["n_runs"]))
+        self.in_start_base_duration.setText(str(defaults["start_base_duration"]))
+        self.randomize_start_duration.setChecked(defaults["randomize_start_duration"])
+        self.in_start_tmin_random.setText(str(defaults["start_tmin_random"]))
+        self.in_start_tmax_random.setText(str(defaults["start_tmax_random"]))
+        self.in_precue_base_duration.setText(str(defaults["precue_base_duration"]))
+        self.randomize_precue_duration.setChecked(defaults["randomize_precue_duration"])
+        self.in_precue_tmin_random.setText(str(defaults["precue_tmin_random"]))
+        self.in_precue_tmax_random.setText(str(defaults["precue_tmax_random"]))
         self.in_cue_base_duration.setText(str(defaults["cue_base_duration"]))
         self.randomize_cue_duration.setChecked(defaults["randomize_cue_duration"])
         self.in_cue_tmin_random.setText(str(defaults["cue_tmin_random"]))
@@ -272,6 +350,14 @@ class RunConfigurationApp(QMainWindow):
         ## ***********************************************************
 
         n_runs= int(self.in_nruns.text())
+        start_base_duration = float(self.in_start_base_duration.text())
+        randomize_start = self.randomize_start_duration.isChecked()
+        start_tmin = float(self.in_start_tmin_random.text())
+        start_tmax = float(self.in_start_tmax_random.text())
+        precue_base_duration = float(self.in_precue_base_duration.text())
+        randomize_precue = self.randomize_precue_duration.isChecked()
+        precue_tmin = float(self.in_precue_tmin_random.text())
+        precue_tmax = float(self.in_precue_tmax_random.text())
         cue_base_duration = float(self.in_cue_base_duration.text())
         randomize_cue = self.randomize_cue_duration.isChecked()
         cue_tmin = float(self.in_cue_tmin_random.text())
@@ -297,6 +383,14 @@ class RunConfigurationApp(QMainWindow):
             letters = letters,
             randomize_per_run= self.randomize_per_run_box.isChecked(),
             seed=self.get_semilla(),
+            start_base_duration=start_base_duration,
+            start_tmin_random=start_tmin,
+            start_tmax_random=start_tmax,
+            randomize_start_duration=randomize_start,
+            precue_base_duration=precue_base_duration,
+            precue_tmin_random=precue_tmin,
+            precue_tmax_random=precue_tmax,
+            randomize_precue_duration=randomize_precue,
             cue_base_duration=cue_base_duration,
             cue_tmin_random=cue_tmin,
             cue_tmax_random=cue_tmax,
