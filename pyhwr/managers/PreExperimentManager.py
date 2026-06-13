@@ -2,7 +2,7 @@ import time
 import numpy as np
 import logging
 import json
-# from pyhwr.managers.TabletMessenger import TabletMessenger
+
 from pyhwr.managers.MarkerManager import MarkerManager
 from pyhwr.widgets import SquareWidget, StimuliWindow
 from pyhwr.widgets import LauncherApp
@@ -13,9 +13,9 @@ import sys
 class PreExperimentManager(QObject):
 
     PHASES = {
-        "first_jump": {"next": "start", "duration": 5.},
-        "start": {"next": "precue", "duration": 1.0},
-        "precue": {"next": "cue", "duration": 0.1},
+        "first_jump": {"next": "start", "duration": 10.},
+        "start": {"next": "precue", "duration": 2.0},
+        "precue": {"next": "cue", "duration": 1.5},
         "cue": {"next": "rest", "duration": 5.0},
         "rest": {"next": "trialInfo", "duration": 4.0},
         "trialInfo": {"next": "sendMarkers", "duration": 0.1},

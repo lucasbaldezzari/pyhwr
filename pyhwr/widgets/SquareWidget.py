@@ -43,7 +43,7 @@ class SquareWidget(QWidget):
 
         # --- Configuración visual ---
         self.setGeometry(x, y, self.width, self.height)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.SubWindow)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         if show_on_init:
             self.show()

@@ -13,7 +13,7 @@ class StimuliWindow(QMainWindow):
     """
     def __init__(self, textoInicial = "Preparando experimento..."):
         super().__init__()
-        self.setWindowFlags(Qt.Window)
+        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         ui_path = os.path.join(os.path.dirname(__file__), 'StimuliWindow.ui')
         uic.loadUi(ui_path, self)
 

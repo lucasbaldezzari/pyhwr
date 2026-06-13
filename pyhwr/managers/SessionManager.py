@@ -13,7 +13,7 @@ import sys
 class SessionManager(QWidget):
 
     PHASES = {
-        "first_jump": {"next": "start", "duration": 5.},
+        "first_jump": {"next": "start", "duration": 10.},
         "start": {"next": "precue", "duration": 2.0},
         "precue": {"next": "cue", "duration": 1.5},
         "cue": {"next": "rest", "duration": 5.0},

@@ -1,6 +1,6 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 import sys
 import os
 
@@ -14,6 +14,7 @@ class LauncherApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         base_dir = os.path.dirname(__file__)
         ui_path = os.path.join(base_dir, 'launcherApp.ui')
         uic.loadUi(ui_path, self)
