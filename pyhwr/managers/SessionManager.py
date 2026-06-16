@@ -1,4 +1,5 @@
 import time
+import threading
 import numpy as np
 import logging
 import json
@@ -92,6 +93,10 @@ class SessionManager(QWidget):
         self.rng = np.random.default_rng(seed) # para reproducibilidad
         self.run_orders = [self._make_run_order() for _ in range(self.n_runs)]
 
+        self._trial_start_time = None    # timestamp de inicio del trial actual
+        self._last_trial_duration = None # duración del último trial completo (segundos)
+        self._tablet_connected = False   # flag cacheado, actualizado en background
+
         self.precue_base_duration = precue_base_duration
         self.cue_base_duration = cue_base_duration
         self.cue_tmin_random = cue_tmin_random
@@ -144,8 +149,13 @@ class SessionManager(QWidget):
 
         # Timer para actualizar interfaz de usuario
         self.uiTimer = QTimer(self)
-        self.uiTimer.setInterval(50)  # 100ms
+        self.uiTimer.setInterval(50)
         self.uiTimer.timeout.connect(self._update_information_label)
+
+        # Timer para chequear estado de tablet en un thread de fondo (cada 5s)
+        self.tabletCheckTimer = QTimer(self)
+        self.tabletCheckTimer.setInterval(5000)
+        self.tabletCheckTimer.timeout.connect(self._check_tablet_async)
 
         # ----------------------------------------------------------
         # Atributos temporales
@@ -297,6 +307,10 @@ class SessionManager(QWidget):
         if self.randomize_rest_duration and self.in_phase == "rest":
             self._set_random_rest_duration()
 
+        # --- Capturar inicio del trial ---
+        if self.in_phase == "start":
+            self._trial_start_time = time.time()
+
         # --- Enviar mensaje a tablet ---
         mensaje = self.tabmanager.make_message(
             "on",
@@ -349,43 +363,77 @@ class SessionManager(QWidget):
             extra_action()
 
     def _update_information_label(self):
-        """Actualiza continuamente el tiempo de sesión mostrado (cada 100 ms)."""
+        """Actualiza continuamente el tiempo de sesión mostrado (cada 50 ms)."""
         if not self.creation_time:
             return  # aún no comenzó la sesión
 
-        # {self.in_phase}: {self.phases[self.in_phase]['duration']} seg")
-        if self.in_phase == "cue":
-            cue_duration = self.phases[self.in_phase]['duration']
-        else:
-            cue_duration = 0.00
+        cue_duration = self.phases["cue"]["duration"]
+        rest_duration = self.phases["rest"]["duration"]
+        remaining = max(0.0, self.next_transition - time.time())
+
+        tablet_str = "✓ Conectada" if self._tablet_connected else "✗ Desconectada"
+        tablet_color = "#007700" if self._tablet_connected else "#cc0000"
+
+        last_trial_str = (
+            f"{self._last_trial_duration:.1f}s"
+            if self._last_trial_duration is not None else "-"
+        )
+
         texto = (
-                f"<div style='font-size:30px; text-align:center;'>"
-                f"<span style='color:#de0000; font-size:34px; font-style:italic; text-decoration:underline;'>"
-                f"Información del Bloque"
-                f"</span><br><br>"
+            f"<div style='font-size:26px; text-align:center;'>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Run:</span> "
-                f"{self.current_run+1} de {self.n_runs}<br>"
+            f"<span style='color:#de0000; font-size:30px; font-style:italic; text-decoration:underline;'>"
+            f"Información del Bloque"
+            f"</span><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
-                f"{self.trials_acummulated+1} de {self.total_trials}<br>"
+            f"<span style='color:#555555; font-size:22px;'>"
+            f"Sujeto: <b>{self.sessioninfo.subject_id}</b> &nbsp;|&nbsp; "
+            f"Sesión: <b>{self.sessioninfo.ses}</b> &nbsp;|&nbsp; "
+            f"Tarea: <b>{self.experimento}</b>"
+            f"</span><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Letra actual:</span> "
-                f"{self.current_letter or '-'}<br><br>"
+            f"<span style='color:{tablet_color}; font-size:22px;'>"
+            f"Tableta: <b>{tablet_str}</b>"
+            f"</span><br><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Duración fase (cue): </span> "
-                f"{cue_duration:.2f}s<br><br>"
+            f"<span style='color:#2200ff; font-style:italic;'>Run:</span> "
+            f"{self.current_run+1} de {self.n_runs} &nbsp;&nbsp; "
+            f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
+            f"{self.trials_acummulated+1} de {self.total_trials}<br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Tiempo transcurrido:</span> "
-                f"{self.get_elapsed_time()/1000:.1f}s"
-                f"</div>"
-            )
+            f"<span style='color:#2200ff; font-style:italic;'>Trial en run:</span> "
+            f"{self.current_trial+1} de {self.trials_per_run}<br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Letra actual:</span> "
+            f"<b>{self.current_letter or '-'}</b><br><br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Fase:</span> "
+            f"<b>{self.in_phase}</b> &nbsp;&nbsp; "
+            f"<span style='color:#2200ff; font-style:italic;'>Tiempo en fase:</span> "
+            f"{remaining:.1f}s restantes<br><br>"
+
+            f"<span style='color:#555555; font-size:22px;'>"
+            f"Dur. cue: {cue_duration:.2f}s &nbsp;|&nbsp; Dur. rest: {rest_duration:.2f}s"
+            f"</span><br><br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Último trial:</span> "
+            f"{last_trial_str}<br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Tiempo transcurrido:</span> "
+            f"{self.get_elapsed_time()/1000:.1f}s"
+
+            f"</div>"
+        )
 
         self.information_label.change_text(texto)
 
     def _send_markers_phase(self):
         """Maneja la fase 'sendMarkers': envía marcadores a tablet y laptop."""
         logging.debug("Fase sendMarkers")
+
+        # --- Guardar duración del trial recién completado ---
+        if self._trial_start_time is not None:
+            self._last_trial_duration = time.time() - self._trial_start_time
 
         # --- Leer datos del trial desde la tablet ---
         try:
@@ -453,7 +501,7 @@ class SessionManager(QWidget):
                 f"</div>"
             )
 
-        self.information_label = SquareWidget(x=200, y=200, width=650, height=400, color="#ebebeb",
+        self.information_label = SquareWidget(x=200, y=200, width=700, height=680, color="#ebebeb",
                                               text = text)
         
         text = (
@@ -505,6 +553,14 @@ class SessionManager(QWidget):
 
         self.mainTimer.start()
         self.uiTimer.start()
+        self._check_tablet_async()   # chequeo inicial inmediato
+        self.tabletCheckTimer.start()
+
+    def _check_tablet_async(self):
+        """Lanza un thread de fondo para verificar la conexión ADB sin bloquear el event loop."""
+        def check():
+            self._tablet_connected = self.tabmanager.is_device_connected()
+        threading.Thread(target=check, daemon=True).start()
 
     def _finish_session(self):
         """
@@ -548,17 +604,20 @@ class SessionManager(QWidget):
         self.session_finished = True
         self.mainTimer.stop()
         self.uiTimer.stop()
+        self.tabletCheckTimer.stop()
 
     def quitSession(self):
         logging.info("Saliendo de la sesión...")
         self.mainTimer.stop()
         self.uiTimer.stop()
+        self.tabletCheckTimer.stop()
         self.launcher.close()
         QApplication.quit()
 
     def stop(self):
         self.mainTimer.stop()
         self.uiTimer.stop()
+        self.tabletCheckTimer.stop()
         logging.info("Ronda finalizada")
         self.show_final_message()
         self.close()

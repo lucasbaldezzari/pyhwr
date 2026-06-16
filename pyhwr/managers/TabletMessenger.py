@@ -7,6 +7,10 @@ import logging
 import time
 
 class TabletMessenger:
+
+    _device_cache: dict = {}  # {serial: (connected: bool, timestamp: float)}
+    _CACHE_TTL = 5.0          # segundos entre chequeos de ADB
+
     def __init__(self, max_messages=200, serial="R52W70ATD1W"):
         """Constructor de la clase"""
         self.buffer = None
@@ -135,6 +139,22 @@ class TabletMessenger:
                 if num.isdigit():
                     ids.append(int(num))
         return sorted(ids)
+
+    def is_device_connected(self) -> bool:
+        """Devuelve True si el dispositivo ADB está conectado. Resultado cacheado 5 segundos."""
+        now = time.time()
+        cached = self.__class__._device_cache.get(self.serial)
+        if cached and now - cached[1] < self._CACHE_TTL:
+            return cached[0]
+        try:
+            result = subprocess.run(
+                ["adb", "devices"], capture_output=True, text=True, timeout=2
+            )
+            connected = self.serial in result.stdout
+        except Exception:
+            connected = False
+        self.__class__._device_cache[self.serial] = (connected, now)
+        return connected
 
     def enable_logging(self, enabled = True):
         """Habilita o deshabilita el logging de mensajes."""

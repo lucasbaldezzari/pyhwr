@@ -96,6 +96,9 @@ class PreExperimentManager(QObject):
         self.rng = np.random.default_rng(seed) # para reproducibilidad
         self.run_orders = [self._make_run_order() for _ in range(self.n_runs)]
 
+        self._trial_start_time = None    # timestamp de inicio del trial actual
+        self._last_trial_duration = None # duración del último trial completo (segundos)
+
         self.cue_base_duration = cue_base_duration
         self.cue_tmin_random = cue_tmin_random
         self.cue_tmax_random = cue_tmax_random
@@ -255,6 +258,10 @@ class PreExperimentManager(QObject):
             "letter": self.current_action
         })
 
+        # --- Capturar inicio del trial ---
+        if self.in_phase == "start":
+            self._trial_start_time = time.time()
+
         # --- Acciones por fase ---
         phase_actions = {
             "first_jump": self._on_first_jump,
@@ -367,33 +374,53 @@ class PreExperimentManager(QObject):
         if not self.creation_time:
             return  # aún no comenzó la sesión
 
-        # {self.in_phase}: {self.phases[self.in_phase]['duration']} seg")
-        if self.in_phase == "cue":
-            cue_duration = self.phases[self.in_phase]['duration']
-        else:
-            cue_duration = 0.00
+        cue_duration = self.phases["cue"]["duration"]
+        rest_duration = self.phases["rest"]["duration"]
+        remaining = max(0.0, self.next_transition - time.time())
+
+        last_trial_str = (
+            f"{self._last_trial_duration:.1f}s"
+            if self._last_trial_duration is not None else "-"
+        )
+
         texto = (
-                f"<div style='font-size:30px; text-align:center;'>"
-                f"<span style='color:#de0000; font-size:34px; font-style:italic; text-decoration:underline;'>"
-                f"Información de la ronda"
-                f"</span><br><br>"
+            f"<div style='font-size:26px; text-align:center;'>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Ronda:</span> "
-                f"{self.current_run+1} de {self.n_runs}<br>"
+            f"<span style='color:#de0000; font-size:30px; font-style:italic; text-decoration:underline;'>"
+            f"Información de la ronda"
+            f"</span><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
-                f"{self.current_trial+1} de {self.trials_per_run}<br>"
+            f"<span style='color:#555555; font-size:22px;'>"
+            f"Sujeto: <b>{self.sessioninfo.subject_id}</b> &nbsp;|&nbsp; "
+            f"Sesión: <b>{self.sessioninfo.ses}</b> &nbsp;|&nbsp; "
+            f"Tarea: <b>{self.pre_experiment}</b>"
+            f"</span><br><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Acción actual:</span> "
-                f"{self.current_action or '-'}<br><br>"
+            f"<span style='color:#2200ff; font-style:italic;'>Ronda:</span> "
+            f"{self.current_run+1} de {self.n_runs} &nbsp;&nbsp; "
+            f"<span style='color:#2200ff; font-style:italic;'>Trial:</span> "
+            f"{self.current_trial+1} de {self.trials_per_run}<br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Duración fase (cue): </span> "
-                f"{cue_duration:.2f}s<br><br>"
+            f"<span style='color:#2200ff; font-style:italic;'>Acción actual:</span> "
+            f"<b>{self.current_action or '-'}</b><br><br>"
 
-                f"<span style='color:#2200ff; font-style:italic;'>Tiempo transcurrido:</span> "
-                f"{self.get_elapsed_time()/1000:.1f}s"
-                f"</div>"
-            )
+            f"<span style='color:#2200ff; font-style:italic;'>Fase:</span> "
+            f"<b>{self.in_phase}</b> &nbsp;&nbsp; "
+            f"<span style='color:#2200ff; font-style:italic;'>Tiempo en fase:</span> "
+            f"{remaining:.1f}s restantes<br><br>"
+
+            f"<span style='color:#555555; font-size:22px;'>"
+            f"Dur. cue: {cue_duration:.2f}s &nbsp;|&nbsp; Dur. rest: {rest_duration:.2f}s"
+            f"</span><br><br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Último trial:</span> "
+            f"{last_trial_str}<br>"
+
+            f"<span style='color:#2200ff; font-style:italic;'>Tiempo transcurrido:</span> "
+            f"{self.get_elapsed_time()/1000:.1f}s"
+
+            f"</div>"
+        )
 
         self.information_label.change_text(texto)
 
@@ -415,6 +442,10 @@ class PreExperimentManager(QObject):
     def _send_markers_phase(self):
         """Maneja la fase 'sendMarkers': envía marcadores a tablet y laptop."""
         logging.debug("Fase sendMarkers")
+
+        # --- Guardar duración del trial recién completado ---
+        if self._trial_start_time is not None:
+            self._last_trial_duration = time.time() - self._trial_start_time
 
         # --- Enviar marcadores de laptop ---
         try:
@@ -468,9 +499,9 @@ class PreExperimentManager(QObject):
                 f"</div>"
             )
 
-        self.information_label = SquareWidget(x=200, y=200, width=650, height=400, color="#ebebeb",
+        self.information_label = SquareWidget(x=200, y=200, width=700, height=620, color="#ebebeb",
                                               text = text)
-        
+
         text = (
                 f"<div style='font-size:24px; text-align:center;'>"
                     f"<b><span style='color:#ffffff;'>INICIO RONDA</span></b><br>"
