@@ -199,8 +199,14 @@ class GHiampDataManager():
             date_str = target_str.split(start_tag)[1].split(end_tag)[0]
 
             # 3. Parsear el string de fecha
-            # Cortamos a 6 decimales porque datetime soporta hasta microsegundos
-            dt_utc = datetime.strptime(date_str[:26] + "Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+            # Normalizamos a microsegundos: los HDF5 pueden traer Z final y 7+ decimales.
+            date_str = date_str.rstrip("Z")
+            if "." in date_str:
+                base, frac = date_str.split(".", 1)
+                date_str = f"{base}.{frac[:6].ljust(6, '0')}"
+                dt_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
+            else:
+                dt_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
             dt_utc = dt_utc.replace(tzinfo=timezone.utc)
 
             # 4. Convertir a zona horaria UTC-3
