@@ -924,6 +924,9 @@ Proyecto Handwritting</string>
               <pointsize>12</pointsize>
              </font>
             </property>
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
             <item>
              <property name="text">
               <string>INFO</string>
