@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfTypeInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <TypeInfo>
+    <AssemblyName>gRecorder.exe</AssemblyName>
+    <ClassName>DAQ.ApplicationConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>GFeatureViewer.dll</AssemblyName>
+    <ClassName>GFeatureViewer.ViewerConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>gRecorder.exe</AssemblyName>
+    <ClassName>DAQ.KeyboardMarkerConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>RawDataScope.dll</AssemblyName>
+    <ClassName>RawDataScope.RawDataScopeConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>GHiAmpComponent.dll</AssemblyName>
+    <ClassName>GHiAmpComponent.GHiAmpComponentConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>EPScope.dll</AssemblyName>
+    <ClassName>EPScope.EPScopeConfiguration</ClassName>
+  </TypeInfo>
+  <TypeInfo>
+    <AssemblyName>IoGComponent.dll</AssemblyName>
+    <ClassName>IoHdf5GComponent.IoConfiguration</ClassName>
+  </TypeInfo>
+</ArrayOfTypeInfo>

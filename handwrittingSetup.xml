@@ -18,7 +18,9 @@
       <Major>1</Major>
     </FileVersion>
     <IsFullScreen>true</IsFullScreen>
-    <RecentlyUsedFiles />
+    <RecentlyUsedFiles>
+      <string>D:\dataset\sub-02\ses-02\sub-02_ses-02_task-basal_run-01_eeg.hdf5</string>
+    </RecentlyUsedFiles>
     <VideoMode>Off</VideoMode>
     <MainFormSize>
       <Width>2582</Width>
@@ -32,7 +34,7 @@
     <AutoZoom>false</AutoZoom>
     <ZoomValue>100</ZoomValue>
     <ZoomIncrement>0</ZoomIncrement>
-    <XAxisScaling>30</XAxisScaling>
+    <XAxisScaling>20</XAxisScaling>
     <Viewers>
       <DaqViewerConfiguration>
         <IsMinimized>false</IsMinimized>
@@ -80,10 +82,10 @@
         <Name>VideoMFGComponent</Name>
       </DaqViewerConfiguration>
     </Viewers>
-    <CurrentRecordingFileName>sub-emgtrazos_ses-01_task-ejecutada_run-01_emg.hdf52026.04.07_15.35.49.hdf5</CurrentRecordingFileName>
-    <CurrentSettingsFileName>MygRecorderSettings</CurrentSettingsFileName>
-    <CurrentRecordingDirectoryName>D:\</CurrentRecordingDirectoryName>
-    <CurrentSettingsDirectoryName>C:\Users\corre\AppData\Roaming\gtec\gRecorder</CurrentSettingsDirectoryName>
+    <CurrentRecordingFileName>sub-02_ses-02_task-basal_run-01_eeg.hdf5</CurrentRecordingFileName>
+    <CurrentSettingsFileName>handwrittingSetup.xml</CurrentSettingsFileName>
+    <CurrentRecordingDirectoryName>D:\dataset\sub-02\ses-02</CurrentRecordingDirectoryName>
+    <CurrentSettingsDirectoryName>C:\Users\corre\OneDrive\Desktop</CurrentSettingsDirectoryName>
     <ConfiguredBoard>
       <DeviceNames>
         <string>HA-2023.06.06</string>
@@ -93,7 +95,7 @@
       <NiceName>g.HIamp</NiceName>
       <CategoryName>GHiAmpComponent</CategoryName>
     </ConfiguredBoard>
-    <ChannelsToDisplay>20</ChannelsToDisplay>
+    <ChannelsToDisplay>13</ChannelsToDisplay>
   </ConfigurationDataBase>
   <ConfigurationDataBase xsi:type="ViewerConfiguration">
     <Name>GFeatureViewer</Name>
@@ -164,36 +166,15 @@
       <int>62</int>
       <int>63</int>
       <int>64</int>
-      <int>66</int>
-      <int>68</int>
-      <int>70</int>
+      <int>65</int>
+      <int>67</int>
+      <int>69</int>
     </AvailableChannelNumbers>
   </ConfigurationDataBase>
-  <ConfigurationDataBase xsi:type="IoConfiguration">
-    <Name>IoHdf5GComponent</Name>
-    <MandatoryFieldsConfiguration>
-      <SessionMandatory>false</SessionMandatory>
-      <DayOfBirthMandatory>false</DayOfBirthMandatory>
-      <FirstNameMandatory>false</FirstNameMandatory>
-      <LastNameMandatory>false</LastNameMandatory>
-    </MandatoryFieldsConfiguration>
-    <ReplaySpeed>1</ReplaySpeed>
-    <SessionDescription>
-      <Run />
-      <Comment />
-    </SessionDescription>
-    <SubjectDescription>
-      <Comment />
-      <DayOfBirth>2026-04-24T12:49:10.6830993Z</DayOfBirth>
-      <FirstName />
-      <LastName />
-    </SubjectDescription>
-    <DefaultFileName>sub-02_ses-01_task-imaginada_run-03_eeg.hdf5</DefaultFileName>
-    <DefaultPath>D:\</DefaultPath>
-    <MaxRecordingTime>3660</MaxRecordingTime>
-    <LimitRecording>false</LimitRecording>
-    <SaveFeatureData>true</SaveFeatureData>
-    <SaveRawData>true</SaveRawData>
+  <ConfigurationDataBase xsi:type="KeyboardMarkerConfiguration">
+    <Name>KeyboardMarker</Name>
+    <Port>1000</Port>
+    <AsynchronSignalDescriptionList />
   </ConfigurationDataBase>
   <ConfigurationDataBase xsi:type="RawDataScopeConfiguration">
     <Name>RawDataScope</Name>
@@ -1700,7 +1681,7 @@
                       <max>10</max>
                       <min>-10</min>
                     </Scaling>
-                    <DataColor>#024c7c</DataColor>
+                    <DataColor>#ff0000</DataColor>
                   </Channel>
                   <Channel>
                     <Visible>true</Visible>
@@ -1714,7 +1695,7 @@
                       <max>10</max>
                       <min>-10</min>
                     </Scaling>
-                    <DataColor>#024c7c</DataColor>
+                    <DataColor>#009100</DataColor>
                   </Channel>
                   <Channel>
                     <Visible>true</Visible>
@@ -1728,7 +1709,7 @@
                       <max>10</max>
                       <min>-10</min>
                     </Scaling>
-                    <DataColor>#024c7c</DataColor>
+                    <DataColor>#008600</DataColor>
                   </Channel>
                 </ChannelConfigurations>
               </ScopeConfiguration>
@@ -1741,8 +1722,8 @@
                   <ColorBackground>false</ColorBackground>
                 </ChannelStateConfig>
                 <SubScopes />
-                <NrDisplayedChannels>20</NrDisplayedChannels>
-                <DisplayedChannelsStartIdx>47</DisplayedChannelsStartIdx>
+                <NrDisplayedChannels>13</NrDisplayedChannels>
+                <DisplayedChannelsStartIdx>54</DisplayedChannelsStartIdx>
                 <FontSize>15</FontSize>
                 <Precision>1</Precision>
                 <AllowScientific>false</AllowScientific>
@@ -2693,12 +2674,12 @@
                 </ChannelDisplayOrder>
               </ScopeConfiguration>
             </SubScopes>
-            <DisplayedTime>30</DisplayedTime>
+            <DisplayedTime>20</DisplayedTime>
             <OverlappingMode>true</OverlappingMode>
             <QuickFFT>false</QuickFFT>
             <NumericDisplay>false</NumericDisplay>
-            <NrDisplayedChannels>20</NrDisplayedChannels>
-            <DisplayedChannelsStartIdx>47</DisplayedChannelsStartIdx>
+            <NrDisplayedChannels>13</NrDisplayedChannels>
+            <DisplayedChannelsStartIdx>54</DisplayedChannelsStartIdx>
             <ShowAbsoluteTime>true</ShowAbsoluteTime>
             <ShowGrid>true</ShowGrid>
             <ShowHorizontalGrid>true</ShowHorizontalGrid>
@@ -3199,8 +3180,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>26.9799</max>
-                  <min>-42.4652</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3223,8 +3204,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>27.4325</max>
-                  <min>-40.751</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3247,8 +3228,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>26.4479</max>
-                  <min>-18.9003</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3271,8 +3252,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>22.0614</max>
-                  <min>-38.192</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3295,8 +3276,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>14.0036</max>
-                  <min>-12.1408</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3319,8 +3300,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>15.4479</max>
-                  <min>-22.5485</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3343,8 +3324,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>25.3732</max>
-                  <min>-19.4344</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3367,8 +3348,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>23.7939</max>
-                  <min>-33.5941</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3391,8 +3372,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>24.0733</max>
-                  <min>-34.2544</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3415,8 +3396,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>13.7233</max>
-                  <min>-14.6106</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3439,8 +3420,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>31.8066</max>
-                  <min>-26.7086</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3463,8 +3444,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>13.1902</max>
-                  <min>-12.4739</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3487,8 +3468,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>16.0333</max>
-                  <min>-17.0244</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3511,8 +3492,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>110.682</max>
-                  <min>-105.001</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3535,8 +3516,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>38.5681</max>
-                  <min>-29.881</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3559,8 +3540,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>1.32446</max>
-                  <min>-1.28608</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3583,8 +3564,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>30.0308</max>
-                  <min>-28.3974</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3607,8 +3588,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>27.0088</max>
-                  <min>-34.3682</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3631,8 +3612,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>27.9952</max>
-                  <min>-28.8312</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3655,8 +3636,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>30.9016</max>
-                  <min>-29.9202</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3679,8 +3660,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>25.1367</max>
-                  <min>-21.0462</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3703,8 +3684,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>27.5094</max>
-                  <min>-25.6992</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3727,8 +3708,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>35.8893</max>
-                  <min>-46.5645</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3751,8 +3732,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.6749</max>
-                  <min>-29.4424</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3775,8 +3756,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>38.5412</max>
-                  <min>-35.8818</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3799,8 +3780,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>45.3416</max>
-                  <min>-33.3056</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3823,8 +3804,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>29.4666</max>
-                  <min>-32.5573</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3847,8 +3828,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>30.0129</max>
-                  <min>-27.5692</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3871,8 +3852,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>31.7492</max>
-                  <min>-30.0707</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3895,8 +3876,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>32.63</max>
-                  <min>-29.8138</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3919,8 +3900,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>30.5522</max>
-                  <min>-28.2411</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3943,8 +3924,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>32.4132</max>
-                  <min>-29.3408</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3967,8 +3948,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>35.4064</max>
-                  <min>-30.2069</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -3991,8 +3972,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.8641</max>
-                  <min>-29.8426</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4015,8 +3996,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>42.5315</max>
-                  <min>-35.0781</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4039,8 +4020,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.7023</max>
-                  <min>-30.0237</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4063,8 +4044,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.6697</max>
-                  <min>-31.2765</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4087,8 +4068,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>32.5341</max>
-                  <min>-30.9593</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4111,8 +4092,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>32.7742</max>
-                  <min>-32.017</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4135,8 +4116,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>38.5566</max>
-                  <min>-36.9522</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4159,8 +4140,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>36.5456</max>
-                  <min>-31.8139</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4183,8 +4164,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>41.1513</max>
-                  <min>-35.342</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4207,8 +4188,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>42.796</max>
-                  <min>-34.981</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4231,8 +4212,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>37.1479</max>
-                  <min>-28.5933</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4255,8 +4236,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>35.0739</max>
-                  <min>-32.3438</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4279,8 +4260,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.0274</max>
-                  <min>-32.2296</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4303,8 +4284,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.6759</max>
-                  <min>-32.238</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4327,8 +4308,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>35.3162</max>
-                  <min>-37.2756</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4351,8 +4332,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>39.4227</max>
-                  <min>-37.2825</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4375,8 +4356,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>39.0124</max>
-                  <min>-37.3341</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4399,8 +4380,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>40.3954</max>
-                  <min>-39.8581</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4423,8 +4404,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>39.3946</max>
-                  <min>-39.9994</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4447,8 +4428,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.9373</max>
-                  <min>-33.5738</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4471,8 +4452,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.8908</max>
-                  <min>-34.0396</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4495,8 +4476,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>34.8398</max>
-                  <min>-33.5205</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4519,8 +4500,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>40.1786</max>
-                  <min>-39.7321</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4543,8 +4524,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>42.2242</max>
-                  <min>-47.5519</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4567,8 +4548,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>37.1564</max>
-                  <min>-39.2913</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4591,8 +4572,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>40.9961</max>
-                  <min>-44.1884</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4615,8 +4596,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>42.6444</max>
-                  <min>-52.7323</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4639,8 +4620,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>37.0486</max>
-                  <min>-29.9201</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4663,8 +4644,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>32.612</max>
-                  <min>-34.5198</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4687,8 +4668,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>45.6475</max>
-                  <min>-38.9432</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4711,8 +4692,8 @@
                 </Names>
                 <Type>1</Type>
                 <Scaling>
-                  <max>48.6098</max>
-                  <min>-41.2612</min>
+                  <max>50</max>
+                  <min>-50</min>
                 </Scaling>
                 <PenColor>#024c7c</PenColor>
                 <ZoomFactor>1</ZoomFactor>
@@ -4727,18 +4708,18 @@
                 <Active>true</Active>
                 <ShowData>true</ShowData>
                 <Names>
-                  <Name>1 - 66</Name>
-                  <Name>66</Name>
+                  <Name>1 - 65</Name>
+                  <Name>65</Name>
                   <Name>
                   </Name>
-                  <Name>66 - 65</Name>
+                  <Name>65 - 66</Name>
                 </Names>
                 <Type>4</Type>
                 <Scaling>
-                  <max>24.6668</max>
-                  <min>-20.4398</min>
+                  <max>200</max>
+                  <min>-200</min>
                 </Scaling>
-                <PenColor>#024c7c</PenColor>
+                <PenColor>#ff0000</PenColor>
                 <ZoomFactor>1</ZoomFactor>
                 <FFTActive>false</FFTActive>
                 <Threshold>
@@ -4751,18 +4732,18 @@
                 <Active>true</Active>
                 <ShowData>true</ShowData>
                 <Names>
-                  <Name>1 - 68</Name>
-                  <Name>68</Name>
+                  <Name>1 - 67</Name>
+                  <Name>67</Name>
                   <Name>
                   </Name>
-                  <Name>68 - 67</Name>
+                  <Name>67 - 68</Name>
                 </Names>
                 <Type>3</Type>
                 <Scaling>
-                  <max>31.3219</max>
-                  <min>-23.2412</min>
+                  <max>500</max>
+                  <min>-500</min>
                 </Scaling>
-                <PenColor>#024c7c</PenColor>
+                <PenColor>#009100</PenColor>
                 <ZoomFactor>1</ZoomFactor>
                 <FFTActive>false</FFTActive>
                 <Threshold>
@@ -4775,18 +4756,18 @@
                 <Active>true</Active>
                 <ShowData>true</ShowData>
                 <Names>
-                  <Name>1 - 70</Name>
-                  <Name>70</Name>
+                  <Name>1 - 69</Name>
+                  <Name>69</Name>
                   <Name>
                   </Name>
-                  <Name>70 - 69</Name>
+                  <Name>69 - 70</Name>
                 </Names>
                 <Type>3</Type>
                 <Scaling>
-                  <max>116.768</max>
-                  <min>-152.416</min>
+                  <max>500</max>
+                  <min>-500</min>
                 </Scaling>
-                <PenColor>#024c7c</PenColor>
+                <PenColor>#008600</PenColor>
                 <ZoomFactor>1</ZoomFactor>
                 <FFTActive>false</FFTActive>
                 <Threshold>
@@ -4872,7 +4853,7 @@
     <SensorCalibration />
     <VisualizationFilters>
       <Item>
-        <Key>66</Key>
+        <Key>69</Key>
         <Value>
           <Highpass>
             <CutoffFrequency2>0</CutoffFrequency2>
@@ -4891,7 +4872,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -4901,7 +4882,7 @@
         </Value>
       </Item>
       <Item>
-        <Key>68</Key>
+        <Key>67</Key>
         <Value>
           <Highpass>
             <CutoffFrequency2>0</CutoffFrequency2>
@@ -4920,7 +4901,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -4930,7 +4911,7 @@
         </Value>
       </Item>
       <Item>
-        <Key>70</Key>
+        <Key>65</Key>
         <Value>
           <Highpass>
             <CutoffFrequency2>0</CutoffFrequency2>
@@ -4949,7 +4930,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -4978,7 +4959,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5007,7 +4988,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5036,7 +5017,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5065,7 +5046,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5094,7 +5075,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5123,7 +5104,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5152,7 +5133,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5181,7 +5162,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5210,7 +5191,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5239,7 +5220,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5268,7 +5249,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5297,7 +5278,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5326,7 +5307,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5355,7 +5336,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5384,7 +5365,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5413,7 +5394,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5442,7 +5423,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5471,7 +5452,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5500,7 +5481,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5529,7 +5510,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5558,7 +5539,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5587,7 +5568,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5616,7 +5597,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5645,7 +5626,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5674,7 +5655,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5703,7 +5684,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5732,7 +5713,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5761,7 +5742,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5790,7 +5771,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5819,7 +5800,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5848,7 +5829,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5877,7 +5858,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5906,7 +5887,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5935,7 +5916,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5964,7 +5945,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -5993,7 +5974,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6022,7 +6003,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6051,7 +6032,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6080,7 +6061,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6109,7 +6090,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6138,7 +6119,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6167,7 +6148,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6196,7 +6177,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6225,7 +6206,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6254,7 +6235,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6283,7 +6264,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6312,7 +6293,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6341,7 +6322,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6370,7 +6351,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6399,7 +6380,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6428,7 +6409,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6457,7 +6438,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6486,7 +6467,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6515,7 +6496,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6544,7 +6525,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6573,7 +6554,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6602,7 +6583,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6631,7 +6612,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6660,7 +6641,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6689,7 +6670,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6718,7 +6699,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6747,7 +6728,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6776,7 +6757,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6805,7 +6786,7 @@
           <Notch>
             <CutoffFrequency2>52</CutoffFrequency2>
             <CutoffFrequency1>48</CutoffFrequency1>
-            <Order>4</Order>
+            <Order>2</Order>
             <Characteristic>Butterworth</Characteristic>
             <Type>Notch</Type>
           </Notch>
@@ -6815,35 +6796,6 @@
         </Value>
       </Item>
     </VisualizationFilters>
-  </ConfigurationDataBase>
-  <ConfigurationDataBase xsi:type="EPScopeConfiguration">
-    <Name>EPScope</Name>
-    <PreTriggerWindowMilliseconds>100</PreTriggerWindowMilliseconds>
-    <PostTriggerWindowMilliseconds>700</PostTriggerWindowMilliseconds>
-    <PostTriggerOffsetMilliseconds>0</PostTriggerOffsetMilliseconds>
-    <Highpass>
-      <CutoffFrequency2>0</CutoffFrequency2>
-      <CutoffFrequency1>0</CutoffFrequency1>
-      <Order>0</Order>
-      <Characteristic>Butterworth</Characteristic>
-      <Type>None</Type>
-    </Highpass>
-    <Lowpass>
-      <CutoffFrequency2>0</CutoffFrequency2>
-      <CutoffFrequency1>0</CutoffFrequency1>
-      <Order>0</Order>
-      <Characteristic>Butterworth</Characteristic>
-      <Type>None</Type>
-    </Lowpass>
-    <Notch>
-      <CutoffFrequency2>0</CutoffFrequency2>
-      <CutoffFrequency1>0</CutoffFrequency1>
-      <Order>0</Order>
-      <Characteristic>Butterworth</Characteristic>
-      <Type>None</Type>
-    </Notch>
-    <BaselineCorrection>true</BaselineCorrection>
-    <Views />
   </ConfigurationDataBase>
   <ConfigurationDataBase xsi:type="GHiAmpComponentConfiguration">
     <Name>GHiAmpComponent</Name>
@@ -8413,7 +8365,7 @@
               <Key>65</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>false</Acquire>
+                <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -8430,14 +8382,14 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>65</BipolarChannel>
+                <BipolarChannel>66</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>66</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>true</Acquire>
+                <Acquire>false</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -8454,14 +8406,14 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>65</BipolarChannel>
+                <BipolarChannel>0</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>67</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>false</Acquire>
+                <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -8478,13 +8430,37 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>67</BipolarChannel>
+                <BipolarChannel>68</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>68</Key>
               <Value>
                 <Available>true</Available>
+                <Acquire>false</Acquire>
+                <BandpassFilter>
+                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
+                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
+                  <SampleRate>0</SampleRate>
+                  <Type>Chebychev</Type>
+                  <Order>0</Order>
+                  <Index>-1</Index>
+                </BandpassFilter>
+                <NotchFilter>
+                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
+                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
+                  <SampleRate>0</SampleRate>
+                  <Type>Chebychev</Type>
+                  <Order>0</Order>
+                  <Index>-1</Index>
+                </NotchFilter>
+                <BipolarChannel>0</BipolarChannel>
+              </Value>
+            </Item>
+            <Item>
+              <Key>69</Key>
+              <Value>
+                <Available>true</Available>
                 <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
@@ -8502,11 +8478,11 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>67</BipolarChannel>
+                <BipolarChannel>70</BipolarChannel>
               </Value>
             </Item>
             <Item>
-              <Key>69</Key>
+              <Key>70</Key>
               <Value>
                 <Available>true</Available>
                 <Acquire>false</Acquire>
@@ -8526,31 +8502,7 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>69</BipolarChannel>
-              </Value>
-            </Item>
-            <Item>
-              <Key>70</Key>
-              <Value>
-                <Available>true</Available>
-                <Acquire>true</Acquire>
-                <BandpassFilter>
-                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
-                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
-                  <SampleRate>0</SampleRate>
-                  <Type>Chebychev</Type>
-                  <Order>0</Order>
-                  <Index>-1</Index>
-                </BandpassFilter>
-                <NotchFilter>
-                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
-                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
-                  <SampleRate>0</SampleRate>
-                  <Type>Chebychev</Type>
-                  <Order>0</Order>
-                  <Index>-1</Index>
-                </NotchFilter>
-                <BipolarChannel>69</BipolarChannel>
+                <BipolarChannel>0</BipolarChannel>
               </Value>
             </Item>
             <Item>
@@ -13032,11 +12984,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>0</ID>
+            <ID>12</ID>
             <Edge>RaisingEdge</Edge>
-            <Description>startSession</Description>
+            <Description>startRun</Description>
             <Direction>In</Direction>
-            <Color>-8323328</Color>
+            <Color>-65408</Color>
             <ChannelNumber>1</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -13049,7 +13001,7 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>1</ID>
+            <ID>13</ID>
             <Edge>RaisingEdge</Edge>
             <Description>trialTablet</Description>
             <Direction>In</Direction>
@@ -13066,11 +13018,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>2</ID>
+            <ID>14</ID>
             <Edge>RaisingEdge</Edge>
             <Description>penDown</Description>
             <Direction>In</Direction>
-            <Color>-16776961</Color>
+            <Color>-65408</Color>
             <ChannelNumber>3</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -13083,11 +13035,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>3</ID>
+            <ID>15</ID>
             <Edge>RaisingEdge</Edge>
             <Description>trialLaptop</Description>
             <Direction>In</Direction>
-            <Color>-65408</Color>
+            <Color>-16776961</Color>
             <ChannelNumber>4</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -14884,7 +14836,7 @@
               <Key>65</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>false</Acquire>
+                <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -14901,14 +14853,14 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>65</BipolarChannel>
+                <BipolarChannel>66</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>66</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>true</Acquire>
+                <Acquire>false</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -14925,14 +14877,14 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>65</BipolarChannel>
+                <BipolarChannel>0</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>67</Key>
               <Value>
                 <Available>true</Available>
-                <Acquire>false</Acquire>
+                <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
                   <UpperCutoffFrequency>0</UpperCutoffFrequency>
@@ -14949,13 +14901,37 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>67</BipolarChannel>
+                <BipolarChannel>68</BipolarChannel>
               </Value>
             </Item>
             <Item>
               <Key>68</Key>
               <Value>
                 <Available>true</Available>
+                <Acquire>false</Acquire>
+                <BandpassFilter>
+                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
+                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
+                  <SampleRate>0</SampleRate>
+                  <Type>Chebychev</Type>
+                  <Order>0</Order>
+                  <Index>-1</Index>
+                </BandpassFilter>
+                <NotchFilter>
+                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
+                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
+                  <SampleRate>0</SampleRate>
+                  <Type>Chebychev</Type>
+                  <Order>0</Order>
+                  <Index>-1</Index>
+                </NotchFilter>
+                <BipolarChannel>0</BipolarChannel>
+              </Value>
+            </Item>
+            <Item>
+              <Key>69</Key>
+              <Value>
+                <Available>true</Available>
                 <Acquire>true</Acquire>
                 <BandpassFilter>
                   <LowerCutoffFrequency>0</LowerCutoffFrequency>
@@ -14973,11 +14949,11 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>67</BipolarChannel>
+                <BipolarChannel>70</BipolarChannel>
               </Value>
             </Item>
             <Item>
-              <Key>69</Key>
+              <Key>70</Key>
               <Value>
                 <Available>true</Available>
                 <Acquire>false</Acquire>
@@ -14997,31 +14973,7 @@
                   <Order>0</Order>
                   <Index>-1</Index>
                 </NotchFilter>
-                <BipolarChannel>69</BipolarChannel>
-              </Value>
-            </Item>
-            <Item>
-              <Key>70</Key>
-              <Value>
-                <Available>true</Available>
-                <Acquire>true</Acquire>
-                <BandpassFilter>
-                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
-                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
-                  <SampleRate>0</SampleRate>
-                  <Type>Chebychev</Type>
-                  <Order>0</Order>
-                  <Index>-1</Index>
-                </BandpassFilter>
-                <NotchFilter>
-                  <LowerCutoffFrequency>0</LowerCutoffFrequency>
-                  <UpperCutoffFrequency>0</UpperCutoffFrequency>
-                  <SampleRate>0</SampleRate>
-                  <Type>Chebychev</Type>
-                  <Order>0</Order>
-                  <Index>-1</Index>
-                </NotchFilter>
-                <BipolarChannel>69</BipolarChannel>
+                <BipolarChannel>0</BipolarChannel>
               </Value>
             </Item>
             <Item>
@@ -19503,11 +19455,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>0</ID>
+            <ID>12</ID>
             <Edge>RaisingEdge</Edge>
-            <Description>startSession</Description>
+            <Description>startRun</Description>
             <Direction>In</Direction>
-            <Color>-8323328</Color>
+            <Color>-65408</Color>
             <ChannelNumber>1</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -19520,7 +19472,7 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>1</ID>
+            <ID>13</ID>
             <Edge>RaisingEdge</Edge>
             <Description>trialTablet</Description>
             <Direction>In</Direction>
@@ -19537,11 +19489,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>2</ID>
+            <ID>14</ID>
             <Edge>RaisingEdge</Edge>
             <Description>penDown</Description>
             <Direction>In</Direction>
-            <Color>-16776961</Color>
+            <Color>-65408</Color>
             <ChannelNumber>3</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -19554,11 +19506,11 @@
             <IsToggleSignal>false</IsToggleSignal>
             <IsTrigger>true</IsTrigger>
             <IsEnabled>true</IsEnabled>
-            <ID>3</ID>
+            <ID>15</ID>
             <Edge>RaisingEdge</Edge>
             <Description>trialLaptop</Description>
             <Direction>In</Direction>
-            <Color>-65408</Color>
+            <Color>-16776961</Color>
             <ChannelNumber>4</ChannelNumber>
             <SourceDevice>
               <DeviceSerial>HA-2023.06.06</DeviceSerial>
@@ -19790,9 +19742,59 @@
       </GHiAmpComponentDeviceConfiguration>
     </DeviceConfigurationBackup>
   </ConfigurationDataBase>
-  <ConfigurationDataBase xsi:type="KeyboardMarkerConfiguration">
-    <Name>KeyboardMarker</Name>
-    <Port>1000</Port>
-    <AsynchronSignalDescriptionList />
+  <ConfigurationDataBase xsi:type="EPScopeConfiguration">
+    <Name>EPScope</Name>
+    <PreTriggerWindowMilliseconds>100</PreTriggerWindowMilliseconds>
+    <PostTriggerWindowMilliseconds>700</PostTriggerWindowMilliseconds>
+    <PostTriggerOffsetMilliseconds>0</PostTriggerOffsetMilliseconds>
+    <Highpass>
+      <CutoffFrequency2>0</CutoffFrequency2>
+      <CutoffFrequency1>0</CutoffFrequency1>
+      <Order>0</Order>
+      <Characteristic>Butterworth</Characteristic>
+      <Type>None</Type>
+    </Highpass>
+    <Lowpass>
+      <CutoffFrequency2>0</CutoffFrequency2>
+      <CutoffFrequency1>0</CutoffFrequency1>
+      <Order>0</Order>
+      <Characteristic>Butterworth</Characteristic>
+      <Type>None</Type>
+    </Lowpass>
+    <Notch>
+      <CutoffFrequency2>0</CutoffFrequency2>
+      <CutoffFrequency1>0</CutoffFrequency1>
+      <Order>0</Order>
+      <Characteristic>Butterworth</Characteristic>
+      <Type>None</Type>
+    </Notch>
+    <BaselineCorrection>true</BaselineCorrection>
+    <Views />
+  </ConfigurationDataBase>
+  <ConfigurationDataBase xsi:type="IoConfiguration">
+    <Name>IoHdf5GComponent</Name>
+    <MandatoryFieldsConfiguration>
+      <SessionMandatory>false</SessionMandatory>
+      <DayOfBirthMandatory>false</DayOfBirthMandatory>
+      <FirstNameMandatory>false</FirstNameMandatory>
+      <LastNameMandatory>false</LastNameMandatory>
+    </MandatoryFieldsConfiguration>
+    <ReplaySpeed>1</ReplaySpeed>
+    <SessionDescription>
+      <Run />
+      <Comment />
+    </SessionDescription>
+    <SubjectDescription>
+      <Comment />
+      <DayOfBirth>2026-07-22T16:20:15.815164Z</DayOfBirth>
+      <FirstName />
+      <LastName />
+    </SubjectDescription>
+    <DefaultFileName>sub-01_ses-01_task-emg_run-02_eeg.hdf5</DefaultFileName>
+    <DefaultPath>D:\</DefaultPath>
+    <MaxRecordingTime>3660</MaxRecordingTime>
+    <LimitRecording>false</LimitRecording>
+    <SaveFeatureData>true</SaveFeatureData>
+    <SaveRawData>true</SaveRawData>
   </ConfigurationDataBase>
 </ArrayOfConfigurationDataBase>

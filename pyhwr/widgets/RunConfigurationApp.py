@@ -68,12 +68,12 @@ class RunConfigurationApp(QMainWindow):
                 "randomize_rest_duration": False,
             },
             "emg": {
-                "n_runs": 8,
+                "n_runs": 6,
                 "start_base_duration": 2.0,
                 "start_tmin_random": 0.5,
                 "start_tmax_random": 1.0,
                 "randomize_start_duration": False,
-                "precue_base_duration":1.0,
+                "precue_base_duration":2.0,
                 "precue_tmin_random": 0.1,
                 "precue_tmax_random": 0.5,
                 "randomize_precue_duration": False,
@@ -88,7 +88,7 @@ class RunConfigurationApp(QMainWindow):
                 "randomize_per_run": False,
             },
             "eog": {
-                "n_runs": 10,
+                "n_runs": 6,
                 "start_base_duration": 2.0,
                 "start_tmin_random": 0.5,
                 "start_tmax_random": 1.0,
