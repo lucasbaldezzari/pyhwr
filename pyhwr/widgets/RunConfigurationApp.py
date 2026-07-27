@@ -43,7 +43,7 @@ class RunConfigurationApp(QMainWindow):
                 "cue_tmin_random": 0.,
                 "cue_tmax_random": 0.,
                 "randomize_cue_duration": False,
-                "rest_base_duration": 10.,
+                "rest_base_duration": 1.,
                 "rest_tmin_random": 0.1,
                 "rest_tmax_random": 1.,
                 "randomize_rest_duration": False,
