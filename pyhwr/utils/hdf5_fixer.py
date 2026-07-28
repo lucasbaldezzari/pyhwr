@@ -69,5 +69,5 @@ def fix_hdf5_filenames(folder, recursive=False, dry_run=False):
 
 
 if __name__ == "__main__":
-    fix_hdf5_filenames("D:\\dataset\\sub-01\\ses-02")
+    fix_hdf5_filenames("D:\\dataset\\DataBase\\sub-06\\ses-01")
     pass
