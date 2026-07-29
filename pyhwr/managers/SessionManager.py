@@ -47,10 +47,11 @@ class SessionManager(QWidget):
                  precue_tmin_random=0.1,
                  precue_tmax_random=0.5,
                  randomize_precue_duration=False,
-                 tabletID = "R52Y50AG4FF"):
+                 tabletID = "R52Y50AG4FF",
+                 finish_delay_seconds=5.0):
         """
         Gestor de sesión para controlar fases, runs, trials y comunicación con tablet.
-        
+
         Parámetros:
         - sessioninfo: Objeto SessionInfo con detalles de la sesión.
         - mainTimerDuration: Intervalo del timer principal en ms.
@@ -64,6 +65,8 @@ class SessionManager(QWidget):
         - cue_tmin: Duración mínima del cue en segundos. Se suma a cue_base_duration.
         - cue_tmax: Duración máxima del cue en segundos. Se suma a cue_base_duration.
         - randomize_cue_duration: Si es True, se randomiza la duración del cue entre cue_tmin y cue_tmax.
+        - finish_delay_seconds: Segundos de espera antes de finalizar la sesión (envío de
+          mensaje final a la tablet), tras completarse el último trial.
         """
         super().__init__()
 
@@ -140,6 +143,7 @@ class SessionManager(QWidget):
         # Objeto para enviar mensajes a la tablet
         self.tabmanager = TabletMessenger(serial=tabletID)
         self.tabid = tabid
+        self.finish_delay_seconds = finish_delay_seconds
 
         # ----------------------------------------------------------
         # Atributos para control del main
@@ -270,6 +274,8 @@ class SessionManager(QWidget):
         Método para avanzar de fase solamente cuando se superen los tiempos de cada una.
         """
         now = time.time()#()
+        if self.session_finished:
+            return False
         if now > self.next_transition:
             self._advance_phase()
             self.handle_phase_transition()
@@ -461,7 +467,7 @@ class SessionManager(QWidget):
         # --- Preparar el siguiente trial ---
         has_next = self._prepare_next_trial()
         if not has_next:
-            self._finish_session()
+            self._schedule_finish_session()
             return
 
     def get_elapsed_time(self):
@@ -530,7 +536,7 @@ class SessionManager(QWidget):
         self.laptop_marker_dict["sessionStartTime"] = t0_abs
         logging.info("Sesión iniciada")
         if not self._prepare_next_trial():
-            self._finish_session()
+            self._schedule_finish_session()
             return
         ##envío mensaje a la tablet para avisar el inicio de la sesión
 
@@ -561,6 +567,14 @@ class SessionManager(QWidget):
         def check():
             self._tablet_connected = self.tabmanager.is_device_connected()
         threading.Thread(target=check, daemon=True).start()
+
+    def _schedule_finish_session(self):
+        """Espera finish_delay_seconds antes de finalizar la sesión, sin bloquear el event loop."""
+        delay_ms = max(0, int(self.finish_delay_seconds * 1000))
+        if delay_ms > 0:
+            QTimer.singleShot(delay_ms, self._finish_session)
+        else:
+            self._finish_session()
 
     def _finish_session(self):
         """
