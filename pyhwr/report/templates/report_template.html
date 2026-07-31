@@ -139,6 +139,129 @@
         </section>
     </div>
 
+    <!-- CALIDAD DE CANALES -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Calidad de canales</h2>
+
+            {% if channels_quality_intro %}
+            <div class="block">
+                <p>{{ channels_quality_intro }}</p>
+            </div>
+            {% endif %}
+
+            {% if channels_quality_summary %}
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">Canales evaluados</div>
+                    <div class="value">{{ channels_quality_summary.total_channels | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Buenos</div>
+                    <div class="value">{{ channels_quality_summary.good_channels | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">A revisar</div>
+                    <div class="value">{{ channels_quality_summary.review_channels | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Problemáticos</div>
+                    <div class="value">{{ channels_quality_summary.problematic_channels | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Malos</div>
+                    <div class="value">{{ channels_quality_summary.bad_channels | default("Sin dato") }}</div>
+                </div>
+            </div>
+
+            {% if channels_quality_table %}
+            <div class="block" style="margin-top: 24px;">
+                <h3 class="table-section-title">Estado por canal</h3>
+                <div class="table-wrapper">
+                    {{ channels_quality_table | safe }}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="block">
+                <p class="muted">No se evaluó la calidad de canales para esta ronda.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- CALIDAD DE TRIALS -->
+    <div class="page page-break">
+        <section class="section">
+            <h2>Calidad de trials</h2>
+
+            {% if quality_intro %}
+            <div class="block">
+                <p>{{ quality_intro }}</p>
+            </div>
+            {% endif %}
+
+            {% if quality_summary %}
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">Trials evaluados</div>
+                    <div class="value">{{ quality_summary.total_trials | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Trials rechazados</div>
+                    <div class="value">{{ quality_summary.rejected_trials | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">% rechazados</div>
+                    <div class="value">{{ quality_summary.rejected_pct | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Umbral pico a pico (EEG)</div>
+                    <div class="value">{{ quality_summary.reject_threshold | default("Sin dato") }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="label">Duración de época analizada</div>
+                    <div class="value">{{ quality_summary.common_duration_s | default("Sin dato") }}</div>
+                </div>
+            </div>
+
+            {% if quality_rejected_table %}
+            <div class="block" style="margin-top: 24px;">
+                <h3 class="table-section-title">Trials rechazados y canales responsables</h3>
+                <div class="table-wrapper">
+                    {{ quality_rejected_table | safe }}
+                </div>
+            </div>
+            {% else %}
+            <div class="block" style="margin-top: 24px;">
+                <p class="muted">No hubo trials rechazados por amplitud pico a pico.</p>
+            </div>
+            {% endif %}
+
+            {% if quality_channel_offenders_table %}
+            <div class="block" style="margin-top: 24px;">
+                <h3 class="table-section-title">Canales responsables de rechazo (resumen)</h3>
+                <div class="table-wrapper">
+                    {{ quality_channel_offenders_table | safe }}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="block">
+                <p class="muted">No se evaluó la calidad de trials para esta ronda.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
     <!-- TRAZOS REALIZADOS -->
     <div class="page page-break">
         <section class="section">
